@@ -1,0 +1,459 @@
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { createRoot } from "react-dom/client";
+import "./styles.css";
+
+const navItems = [
+  { path: "/", label: "Acceso" },
+  { path: "/dashboard", label: "Dashboard" },
+  { path: "/learn", label: "Aprender" },
+  { path: "/practice", label: "Práctica" }
+];
+
+const modules = [
+  { id: 1, title: "El Alfabeto", desc: "Aprende las 29 letras del abecedario en LSM", signs: 29, status: "completed" },
+  { id: 2, title: "Números", desc: "Los números del 0 al 100 en señas", signs: 25, status: "completed" },
+  { id: 3, title: "Saludos", desc: "Buenos días, hola, adiós y más", signs: 18, status: "completed" },
+  { id: 4, title: "Familia", desc: "Nombres de familiares y relaciones", signs: 22, status: "current" },
+  { id: 5, title: "Comida", desc: "Alimentos, bebidas y restaurante", signs: 30, status: "locked" },
+  { id: 6, title: "Emociones", desc: "Expresar sentimientos y estados", signs: 20, status: "locked" },
+  { id: 7, title: "Trabajo", desc: "Vocabulario laboral y profesional", signs: 28, status: "locked" },
+  { id: 8, title: "Conversación", desc: "Fluidez y frases completas", signs: 35, status: "locked" }
+];
+
+const signsQueue = [
+  { name: "Hola", difficulty: "Fácil" },
+  { name: "Gracias", difficulty: "Fácil" },
+  { name: "Por favor", difficulty: "Media" },
+  { name: "Buenos días", difficulty: "Media" },
+  { name: "¿Cómo estás?", difficulty: "Difícil" }
+];
+
+const LOGO_SRC = "/logo-senas-a-voces.png";
+
+function cx(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function useRoute() {
+  const [path, setPath] = useState(() => window.location.pathname);
+
+  useEffect(() => {
+    const onPop = () => setPath(window.location.pathname);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const navigate = useCallback((to) => {
+    window.history.pushState({}, "", to);
+    setPath(to);
+  }, []);
+
+  return [path, navigate];
+}
+
+function Icon({ name, className = "h-5 w-5" }) {
+  const common = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", className };
+  const filled = { viewBox: "0 0 20 20", fill: "currentColor", className };
+  const icons = {
+    moon: <svg {...filled}><path d="M17.293 13.293A8 8 0 0 1 6.707 2.707a8 8 0 1 0 10.586 10.586z" /></svg>,
+    sun: <svg {...filled}><path fillRule="evenodd" d="M10 2a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm7 5a1 1 0 1 0 0-2h-1a1 1 0 1 0 0 2h1ZM4 11a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2h1Zm10.95-4.536a1 1 0 0 0 1.414-1.414l-.707-.707a1 1 0 0 0-1.414 1.414l.707.707ZM5.757 15.657a1 1 0 0 0 0-1.414 1 1 0 0 0-1.414 0l-.707.707a1 1 0 0 0 1.414 1.414l.707-.707Z" clipRule="evenodd" /></svg>,
+    mail: <svg {...filled}><path d="M3 4a2 2 0 0 0-2 2v1.16l8.44 4.22a1.25 1.25 0 0 0 1.12 0L19 7.16V6a2 2 0 0 0-2-2H3Z" /><path d="m19 8.84-7.77 3.88a2.75 2.75 0 0 1-2.46 0L1 8.84V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.84Z" /></svg>,
+    lock: <svg {...filled}><path fillRule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clipRule="evenodd" /></svg>,
+    user: <svg {...filled}><path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493A7.002 7.002 0 0 1 16.54 14.49c.196.507.022 1.077-.408 1.41A9.957 9.957 0 0 1 10 18a9.957 9.957 0 0 1-6.125-2.095 1.23 1.23 0 0 1-.41-1.412Z" /></svg>,
+    eye: <svg {...filled}><path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" /><path fillRule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clipRule="evenodd" /></svg>,
+    play: <svg {...common}><polygon points="5 3 19 12 5 21 5 3" /></svg>,
+    camera: <svg {...common}><path d="m23 7-7 5 7 5V7Z" /><rect x="1" y="5" width="15" height="14" rx="2" /></svg>,
+    book: <svg {...common}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" /><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" /></svg>,
+    refresh: <svg {...common}><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>,
+    check: <svg {...common}><polyline points="20 6 9 17 4 12" /></svg>,
+    arrow: <svg {...filled}><path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 1 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z" /></svg>,
+    x: <svg {...filled}><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z" /></svg>
+  };
+  return icons[name] || icons.play;
+}
+
+function Logo({ isDark, compact = false }) {
+  return (
+    <img
+      src={LOGO_SRC}
+      alt="Señas a Voces Academy"
+      className={cx("h-auto object-contain", compact ? "w-32 sm:w-36" : "w-44 sm:w-52", isDark && "logo-on-dark")}
+    />
+  );
+}
+
+function ThemeToggle({ isDark, setIsDark }) {
+  return (
+    <button onClick={() => setIsDark(!isDark)} className={cx("btn-press rounded-xl p-2", isDark ? "text-brand-orange hover:bg-brand-card" : "text-brand-teal hover:bg-white")} aria-label="Cambiar tema">
+      <Icon name={isDark ? "sun" : "moon"} />
+    </button>
+  );
+}
+
+function AppHeader({ isDark, setIsDark, navigate, path }) {
+  return (
+    <header className={cx("sticky top-0 z-40 border-b backdrop-blur-xl transition-colors", isDark ? "border-brand-line bg-brand-deep/85" : "border-brand-mist bg-brand-cream/85")}>
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <button onClick={() => navigate("/dashboard")} className="btn-press"><Logo isDark={isDark} compact /></button>
+        <nav className="hidden items-center gap-1 md:flex">
+          {navItems.slice(1).map((item) => (
+            <button key={item.path} onClick={() => navigate(item.path)} className={cx("rounded-2xl px-3 py-2 text-xs font-bold transition", path === item.path ? (isDark ? "bg-brand-card text-white" : "bg-white text-brand-teal shadow-sm") : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-brand-muted hover:bg-white"))}>
+              {item.label}
+            </button>
+          ))}
+        </nav>
+        <div className="flex items-center gap-3">
+          <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
+          <div className={cx("flex h-9 w-9 items-center justify-center rounded-2xl text-sm font-bold", isDark ? "bg-brand-teal text-brand-cyan" : "bg-brand-teal text-white")}>MA</div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function WaveBackground({ isDark }) {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <svg className={cx("animate-wave-drift absolute -left-20 -top-20 h-[400px] w-[600px]", isDark ? "text-brand-card" : "text-brand-teal")} viewBox="0 0 600 400" fill="currentColor" opacity="0.06">
+        <path d="M0 200C100 100 200 300 300 200C400 100 500 300 600 200V0H0V200Z" />
+      </svg>
+      <svg className={cx("animate-wave-drift absolute -bottom-16 -right-16 h-[350px] w-[500px]", isDark ? "text-brand-cyan" : "text-brand-orange")} viewBox="0 0 500 350" fill="currentColor" opacity="0.05" style={{ animationDelay: "2s" }}>
+        <path d="M0 150C80 50 160 250 240 150C320 50 400 250 500 150V350H0V150Z" />
+      </svg>
+    </div>
+  );
+}
+
+function AuthPage({ mode, isDark, setIsDark, navigate }) {
+  const isSignup = mode === "signup";
+  const [showPassword, setShowPassword] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const submit = (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setTimeout(() => navigate("/dashboard"), 700);
+  };
+
+  return (
+    <div className={cx("relative min-h-screen overflow-hidden transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+      <WaveBackground isDark={isDark} />
+      <button onClick={() => setIsDark(!isDark)} className={cx("btn-press fixed right-6 top-6 z-50 rounded-xl p-2.5", isDark ? "bg-brand-card text-brand-orange" : "bg-white text-brand-teal shadow-sm")} aria-label="Cambiar tema">
+        <Icon name={isDark ? "sun" : "moon"} />
+      </button>
+      <div className="relative z-10 flex min-h-screen flex-col lg:flex-row">
+        <section className="hidden w-[55%] items-center justify-center p-12 lg:flex">
+          <div className="relative max-w-lg">
+            <Logo isDark={isDark} />
+            <h1 className={cx("mt-8 text-4xl font-extrabold leading-tight", isDark ? "text-white" : "text-brand-ink")}>
+              {isSignup ? "Únete a la" : "Aprende LSM"}<br />
+              <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{isSignup ? "comunidad LSM" : "a tu ritmo"}</span>
+            </h1>
+            <p className={cx("mt-4 text-lg leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>
+              {isSignup ? "Crea tu cuenta gratuita y comienza con práctica inmersiva y retroalimentación inteligente." : "Únete a miles de personas que ya aprenden Lengua de Señas Mexicana con práctica inmersiva."}
+            </p>
+            <div className="mt-10 flex gap-8">
+              {(isSignup ? [
+                ["Gratis", "Para siempre"],
+                ["5 min", "Por día"],
+                ["IA", "Retroalimentación"]
+              ] : [
+                ["2,400+", "Señas enseñadas"],
+                ["15K+", "Estudiantes activos"],
+                ["98%", "Satisfacción"]
+              ]).map(([num, label]) => (
+                <div key={label}>
+                  <div className={cx("text-2xl font-extrabold", isDark ? "text-brand-cyan" : "text-brand-teal")}>{num}</div>
+                  <div className={cx("mt-1 text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+        <section className="flex flex-1 items-center justify-center p-6 lg:p-12">
+          <div className={cx("animate-float-in w-full max-w-md rounded-3xl p-8 lg:p-10", isDark ? "border border-brand-line bg-brand-card/80 backdrop-blur-xl" : "border border-gray-100 bg-white/90 shadow-2xl shadow-gray-200/50 backdrop-blur-xl")}>
+            <div className="mb-8 flex justify-center lg:hidden"><Logo isDark={isDark} /></div>
+            <h2 className={cx("text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{isSignup ? "Crea tu cuenta" : "Bienvenido de nuevo"}</h2>
+            <p className={cx("mb-8 mt-1 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>{isSignup ? "Empieza a aprender LSM hoy mismo" : "Inicia sesión para continuar tu aprendizaje"}</p>
+            <form onSubmit={submit} className="space-y-5">
+              {isSignup && <Field icon="user" label="Nombre completo" placeholder="Tu nombre" isDark={isDark} />}
+              <Field icon="mail" label="Correo electrónico" type="email" placeholder="tu@correo.com" isDark={isDark} />
+              <Field icon="lock" label="Contraseña" type={showPassword ? "text" : "password"} placeholder={isSignup ? "Mínimo 8 caracteres" : "••••••••"} isDark={isDark} action={<button type="button" onClick={() => setShowPassword(!showPassword)} className={cx("rounded-lg p-1", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}><Icon name="eye" className="h-4 w-4" /></button>} />
+              {isSignup && <Field icon="lock" label="Confirmar contraseña" type="password" placeholder="Repite tu contraseña" isDark={isDark} />}
+              {isSignup ? (
+                <label className="flex cursor-pointer items-start gap-2.5">
+                  <input checked={agreed} onChange={(e) => setAgreed(e.target.checked)} type="checkbox" className="mt-0.5 h-4 w-4 accent-brand-teal" />
+                  <span className={cx("text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>Acepto los términos de servicio y la política de privacidad.</span>
+                </label>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <label className={cx("flex cursor-pointer items-center gap-2 text-xs font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}><input type="checkbox" className="h-4 w-4 accent-brand-teal" />Recordarme</label>
+                  <button type="button" className={cx("text-xs font-semibold", isDark ? "text-brand-cyan" : "text-brand-teal")}>¿Olvidaste tu contraseña?</button>
+                </div>
+              )}
+              <button disabled={loading || (isSignup && !agreed)} className={cx("btn-press w-full rounded-lg py-3.5 text-sm font-bold transition", isSignup ? "bg-brand-orange text-white hover:bg-[#E08A50]" : "bg-brand-teal text-white hover:bg-[#0A4D5D]", (loading || (isSignup && !agreed)) && "cursor-not-allowed opacity-55")}>
+                {loading ? "Procesando..." : isSignup ? "Crear cuenta gratis" : "Iniciar sesión"}
+              </button>
+            </form>
+            <p className={cx("mt-8 text-center text-sm", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>
+              {isSignup ? "¿Ya tienes cuenta? " : "¿No tienes cuenta? "}
+              <button onClick={() => navigate(isSignup ? "/" : "/signup")} className={cx("font-bold", isDark ? "text-brand-cyan" : "text-brand-teal")}>{isSignup ? "Inicia sesión" : "Regístrate gratis"}</button>
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function Field({ icon, label, action, isDark, ...props }) {
+  return (
+    <label className="block">
+      <span className={cx("mb-2 block text-xs font-semibold uppercase tracking-wide", isDark ? "text-brand-soft" : "text-brand-muted")}>{label}</span>
+      <span className="relative block">
+        <span className={cx("absolute left-3.5 top-1/2 -translate-y-1/2", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}><Icon name={icon} className="h-4 w-4" /></span>
+        <input {...props} className={cx("input-focus-ring w-full rounded-lg border py-3.5 pl-11 pr-12 text-sm font-medium transition", isDark ? "border-brand-line bg-brand-deep text-white placeholder:text-[#5A8A94]" : "border-brand-mist bg-brand-cream text-brand-ink placeholder:text-[#8AA8B0]")} />
+        {action && <span className="absolute right-3.5 top-1/2 -translate-y-1/2">{action}</span>}
+      </span>
+    </label>
+  );
+}
+
+function Card({ isDark, className = "", children }) {
+  return <div className={cx("rounded-2xl p-6", isDark ? "border border-brand-line bg-brand-card" : "border border-gray-100 bg-white shadow-sm", className)}>{children}</div>;
+}
+
+function Dashboard({ isDark, navigate }) {
+  const activity = useMemo(() => Array.from({ length: 16 }, (_, week) => Array.from({ length: 7 }, (_, day) => (week * 3 + day * 5) % 5)), []);
+  const levels = isDark ? ["#0C4A57", "#0E5F6E", "#14889A", "#1FAAB8", "#2AABB8"] : ["#E8EEEF", "#A8CDD6", "#5AADBE", "#1D7F94", "#0D5C6F"];
+  return (
+    <main className="mx-auto max-w-6xl px-6 py-8">
+      <PageTitle isDark={isDark} title="Buenas tardes, María" accent="María" subtitle="Tu progreso de la semana va excelente" />
+      <div className={cx("animate-fade mb-6 flex items-center gap-4 rounded-xl border p-4", isDark ? "border-brand-line bg-gradient-to-r from-brand-teal/30 to-brand-orange/10" : "border-brand-mist bg-gradient-to-r from-brand-teal/10 to-brand-orange/10")}>
+        <div className="relative text-3xl font-extrabold text-brand-orange">12<span className="absolute -right-2 -top-1 h-3 w-3 rounded-full bg-brand-orange animate-ping" /></div>
+        <div><div className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>¡Racha de 12 días!</div><div className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>Sigue practicando para mantener tu racha activa</div></div>
+      </div>
+      <div className="grid gap-6 lg:grid-cols-5">
+        <div className="space-y-6 lg:col-span-3">
+          <Card isDark={isDark}>
+            <div className="mb-4 flex items-center justify-between"><SectionLabel isDark={isDark}>Actividad reciente</SectionLabel><span className={cx("text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>Últimas 16 semanas</span></div>
+            <div className="overflow-x-auto">
+              <div className="flex w-max gap-1.5">
+                {activity.map((week, wi) => <div key={wi} className="flex flex-col gap-[3px]">{week.map((level, di) => <div key={di} className="heatmap-cell h-[14px] w-[14px] rounded-[3px]" style={{ backgroundColor: levels[level] }} />)}</div>)}
+              </div>
+            </div>
+          </Card>
+          <ProgressCard isDark={isDark} />
+        </div>
+        <div className="space-y-6 lg:col-span-2">
+          <Card isDark={isDark}>
+            <SectionLabel isDark={isDark}>Tu semana</SectionLabel>
+            <div className="mt-4 space-y-3">{[45, 30, 60, 25, 0, 0, 0].map((min, i) => <BarRow key={i} label={["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"][i]} value={min} isDark={isDark} />)}</div>
+          </Card>
+          <div>
+            <SectionLabel isDark={isDark}>Acciones rápidas</SectionLabel>
+            <div className="mt-3 space-y-3">
+              <QuickAction isDark={isDark} icon="play" title="Comenzar lección" desc="Lección 7: Saludos" onClick={() => navigate("/learn")} />
+              <QuickAction isDark={isDark} icon="camera" title="Práctica inmersiva" desc="Feedback con IA" onClick={() => navigate("/practice")} accent />
+              <QuickAction isDark={isDark} icon="refresh" title="Repaso diario" desc="12 señas pendientes" onClick={() => navigate("/learn")} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function PageTitle({ isDark, title, accent, subtitle }) {
+  const parts = title.split(accent);
+  return (
+    <div className="animate-fade mb-8">
+      <h1 className={cx("text-2xl font-extrabold md:text-3xl", isDark ? "text-white" : "text-brand-ink")}>{parts[0]}<span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{accent}</span>{parts[1]}</h1>
+      <p className={cx("mt-1 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>{subtitle}</p>
+    </div>
+  );
+}
+
+function SectionLabel({ isDark, children }) {
+  return <h3 className={cx("text-sm font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>{children}</h3>;
+}
+
+function ProgressCard({ isDark }) {
+  return (
+    <Card isDark={isDark}>
+      <div className="mb-4 flex items-center justify-between"><SectionLabel isDark={isDark}>Progreso actual</SectionLabel><span className={cx("rounded-full px-3 py-1 text-xs font-semibold", isDark ? "bg-brand-cyan/15 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>Nivel 3</span></div>
+      <h3 className={cx("text-3xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>Lección 7:</h3>
+      <p className={cx("text-sm font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}>Saludos y presentaciones</p>
+      <div className={cx("mt-5 h-2.5 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}><div className="h-full w-[68%] rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" /></div>
+      <div className="mt-5 grid grid-cols-3 gap-3 border-t border-dashed pt-5" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>{[["12", "Señas hoy"], ["45 min", "Tiempo total"], ["89%", "Precisión"]].map(([v, l]) => <div key={l} className="text-center"><div className={cx("text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{v}</div><div className={cx("mt-0.5 text-[10px] font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{l}</div></div>)}</div>
+    </Card>
+  );
+}
+
+function BarRow({ label, value, isDark }) {
+  return <div className="flex items-center gap-3"><span className={cx("w-8 text-xs font-semibold", isDark ? "text-brand-soft" : "text-brand-muted")}>{label}</span><div className={cx("h-2 flex-1 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}><div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" style={{ width: `${Math.min(100, (value / 60) * 100)}%` }} /></div><span className={cx("w-10 text-right text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{value ? `${value}m` : "-"}</span></div>;
+}
+
+function QuickAction({ isDark, icon, title, desc, onClick, accent }) {
+  return (
+    <button onClick={onClick} className={cx("btn-press group flex w-full items-center gap-4 rounded-xl border p-4 text-left transition", isDark ? "border-brand-line bg-brand-card hover:border-brand-cyan/30" : "border-gray-100 bg-white shadow-sm hover:shadow-md")}>
+      <span className={cx("flex h-11 w-11 items-center justify-center rounded-lg", accent ? "bg-brand-orange/15 text-brand-orange" : isDark ? "bg-brand-teal/20 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}><Icon name={icon} /></span>
+      <span className="min-w-0 flex-1"><span className={cx("block text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{title}</span><span className={cx("block text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{desc}</span></span>
+      <Icon name="arrow" className={cx("h-4 w-4 transition group-hover:translate-x-1", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")} />
+    </button>
+  );
+}
+
+function LearnPage({ isDark }) {
+  const [selected, setSelected] = useState(modules[3]);
+  const completedSigns = modules.filter((m) => m.status === "completed").reduce((sum, m) => sum + m.signs, 0);
+  const totalSigns = modules.reduce((sum, m) => sum + m.signs, 0);
+  const progress = Math.round((completedSigns / totalSigns) * 100);
+  return (
+    <main className="mx-auto max-w-6xl px-6 py-8">
+      <PageTitle isDark={isDark} title="Tu ruta de aprendizaje" accent="aprendizaje" subtitle="Completa módulos para desbloquear nuevas lecciones" />
+      <div className="grid gap-6 lg:grid-cols-12">
+        <section className="space-y-0 lg:col-span-5">
+          {modules.map((module, index) => <SkillNode key={module.id} module={module} index={index} isDark={isDark} selected={selected?.id === module.id} onClick={() => module.status !== "locked" && setSelected(module)} />)}
+        </section>
+        <section className="space-y-5 lg:col-span-7">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Card isDark={isDark}><SectionLabel isDark={isDark}>Tu racha</SectionLabel><div className="mt-4 text-center"><div className="text-4xl font-extrabold text-brand-orange">12</div><div className={cx("mt-1 text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>días consecutivos</div></div></Card>
+            <Card isDark={isDark}><SectionLabel isDark={isDark}>Progreso general</SectionLabel><div className={cx("mt-3 text-3xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{progress}%</div><div className={cx("mt-3 h-2 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}><div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" style={{ width: `${progress}%` }} /></div><p className={cx("mt-2 text-[10px]", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{completedSigns} de {totalSigns} señas</p></Card>
+          </div>
+          <ModuleDetail module={selected} isDark={isDark} />
+        </section>
+      </div>
+    </main>
+  );
+}
+
+function SkillNode({ module, index, isDark, selected, onClick }) {
+  const completed = module.status === "completed";
+  const current = module.status === "current";
+  const locked = module.status === "locked";
+  return (
+    <div>
+      <button onClick={onClick} className={cx("animate-fade flex w-full items-center gap-4 text-left", locked && "cursor-default opacity-60")} style={{ animationDelay: `${index * 60}ms` }}>
+        <span className={cx("flex h-14 w-14 shrink-0 items-center justify-center rounded-xl transition", completed ? "bg-brand-teal text-white" : current ? "node-glow bg-brand-orange text-white" : isDark ? "border border-brand-line bg-brand-card text-[#5A8A94]" : "border border-brand-mist bg-[#E8EEEF] text-[#8AA8B0]")}>{completed ? <Icon name="check" /> : current ? <Icon name="play" /> : <Icon name="lock" />}</span>
+        <span className={cx("flex-1 rounded-xl p-4 transition", selected ? (isDark ? "border border-brand-cyan/30 bg-brand-card" : "border border-brand-teal/20 bg-white shadow-sm") : (isDark ? "hover:bg-brand-card/50" : "hover:bg-white/50"))}>
+          <span className={cx("block text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{module.title}</span>
+          <span className={cx("block text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{module.desc}</span>
+        </span>
+      </button>
+      {index < modules.length - 1 && <div className="flex justify-center py-1"><div className={cx("h-10 w-px rounded-full", isDark ? "bg-brand-line" : "bg-brand-mist")} /></div>}
+    </div>
+  );
+}
+
+function ModuleDetail({ module, isDark }) {
+  const lessons = ["Seña de Mamá", "Seña de Papá", "Seña de Hermano/a", "Seña de Abuelo/a", "Seña de Primo/a", "Seña de Tío/a"];
+  return (
+    <Card isDark={isDark}>
+      <div className="mb-5 flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-orange/15 text-brand-orange"><Icon name="book" /></span><div><h3 className={cx("text-base font-bold", isDark ? "text-white" : "text-brand-ink")}>{module.title}</h3><p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{module.desc}</p></div></div>
+      <div className="space-y-2">{lessons.map((lesson, i) => <div key={lesson} className={cx("flex items-center gap-3 rounded-xl p-3", isDark ? "bg-brand-deep/40" : "bg-brand-cream")}><span className={cx("flex h-6 w-6 items-center justify-center rounded-lg", i < 3 ? "bg-brand-teal text-white" : isDark ? "border border-brand-line bg-brand-card" : "border border-brand-mist bg-white")}><Icon name={i < 3 ? "check" : "arrow"} className="h-3 w-3" /></span><span className={cx("text-xs font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}>{lesson}</span></div>)}</div>
+      {module.status === "current" && <button className={cx("btn-press mt-5 w-full rounded-lg py-3 text-sm font-bold", isDark ? "bg-brand-orange text-brand-deep" : "bg-brand-orange text-white")}>Continuar lección</button>}
+    </Card>
+  );
+}
+
+function PracticePage({ isDark, setIsDark }) {
+  const [recording, setRecording] = useState(false);
+  const [index, setIndex] = useState(0);
+  const [correct, setCorrect] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [toasts, setToasts] = useState([{ id: 1, type: "info", message: 'Muestra la seña "Hola" frente a la cámara' }]);
+  const idRef = useRef(2);
+  const addToast = (type, message) => setToasts((prev) => [...prev.slice(-2), { id: idRef.current++, type, message }]);
+
+  const toggleRecording = () => {
+    if (!recording) {
+      setRecording(true);
+      addToast("info", `Muestra la seña "${signsQueue[index].name}"`);
+      return;
+    }
+    setRecording(false);
+    const success = (index + total) % 3 !== 1;
+    setTotal((v) => v + 1);
+    if (success) {
+      setCorrect((v) => v + 1);
+      addToast("success", "¡Perfecto! Seña reconocida");
+      setIndex((v) => Math.min(v + 1, signsQueue.length - 1));
+    } else {
+      addToast("warning", "Intenta de nuevo, acércate a la cámara");
+    }
+  };
+
+  return (
+    <div className={cx("flex h-screen flex-col transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+      <header className={cx("flex items-center justify-between border-b px-6 py-3 backdrop-blur-xl", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}>
+        <div className="flex items-center gap-3"><Logo isDark={isDark} compact /><div className={cx("h-5 w-px", isDark ? "bg-brand-line" : "bg-brand-mist")} /><span className={cx("text-xs font-semibold", isDark ? "text-brand-soft" : "text-brand-muted")}>Práctica Inmersiva</span></div>
+        <div className="flex items-center gap-3"><span className={cx("rounded-xl px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-white text-brand-teal shadow-sm")}>{correct}/{total}</span><ThemeToggle isDark={isDark} setIsDark={setIsDark} /></div>
+      </header>
+      <div className="flex min-h-0 flex-1">
+        <main className="relative flex-1 p-4">
+          <div className={cx("camera-grain relative h-full overflow-hidden rounded-xl", isDark ? "bg-gradient-to-br from-brand-deep via-brand-card to-[#061E24]" : "bg-gradient-to-br from-brand-ink via-[#2A4A52] to-[#0D2A32]")}>
+            <div className="absolute inset-0 flex items-center justify-center"><HandGuide isDark={isDark} /></div>
+            <div className="absolute inset-8 pointer-events-none">{["top-0 left-0 border-l-2 border-t-2", "top-0 right-0 border-r-2 border-t-2", "bottom-0 left-0 border-b-2 border-l-2", "bottom-0 right-0 border-b-2 border-r-2"].map((pos) => <div key={pos} className={cx("absolute h-8 w-8 rounded-lg", pos, isDark ? "border-brand-cyan/40" : "border-brand-teal/40")} />)}</div>
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-xl border bg-white/90 px-5 py-2.5 text-center shadow-lg backdrop-blur-md dark:border-brand-line dark:bg-brand-deep/90"><div className="text-[10px] font-bold uppercase tracking-widest text-[#8AA8B0] dark:text-[#5A8A94]">Seña actual</div><div className="text-lg font-extrabold text-brand-ink dark:text-white">{signsQueue[index].name}</div></div>
+            <div className="absolute left-1/2 top-6 flex w-full max-w-md -translate-x-1/2 flex-col gap-2 px-4">{toasts.map((toast) => <Toast key={toast.id} toast={toast} isDark={isDark} />)}</div>
+            {recording && <div className="absolute right-6 top-6 rounded-full bg-[#D96B6B]/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">Grabando</div>}
+          </div>
+        </main>
+        <aside className={cx("hidden w-64 flex-col border-l md:flex", isDark ? "border-brand-line bg-brand-deep" : "border-brand-mist bg-brand-cream")}>
+          <div className="flex-1 space-y-4 overflow-y-auto p-4"><SignQueue current={index} isDark={isDark} /><Card isDark={isDark} className="p-4"><SectionLabel isDark={isDark}>Esta sesión</SectionLabel><div className="mt-3 grid grid-cols-2 gap-3 text-center"><Stat value={correct} label="Correctas" isDark={isDark} /><Stat value={total - correct} label="Mejorar" isDark={isDark} /></div></Card></div>
+          <SessionControls isDark={isDark} recording={recording} onToggle={toggleRecording} />
+        </aside>
+      </div>
+      <div className="md:hidden"><SessionControls isDark={isDark} recording={recording} onToggle={toggleRecording} /></div>
+    </div>
+  );
+}
+
+function HandGuide({ isDark }) {
+  return <svg width="180" height="200" viewBox="0 0 180 200" fill="none" className="animate-hand-pulse opacity-20"><path d="M90 20C60 20 40 50 40 80V140C40 160 55 180 90 180C125 180 140 160 140 140V80C140 50 120 20 90 20Z" stroke={isDark ? "#2AABB8" : "#0D5C6F"} strokeWidth="2" strokeDasharray="8 4" /><path d="M70 80C70 70 75 60 80 55M90 75V48M110 80C110 70 105 60 100 55M125 90C128 82 130 75 128 70" stroke={isDark ? "#2AABB8" : "#0D5C6F"} strokeWidth="1.5" strokeLinecap="round" /></svg>;
+}
+
+function Toast({ toast, isDark }) {
+  const styles = {
+    info: isDark ? "bg-brand-line text-[#D4EEF4]" : "bg-[#A8CDD6] text-[#1A3A42]",
+    success: isDark ? "bg-[#1A6B4A] text-[#D4F5E4]" : "bg-brand-mint text-[#1A4A32]",
+    warning: isDark ? "bg-[#8B5A2B] text-[#FDE8D4]" : "bg-brand-orange text-[#5A3A1A]"
+  };
+  return <div className={cx("animate-toast-in rounded-xl px-4 py-3 text-sm font-semibold shadow-lg backdrop-blur-sm", styles[toast.type])}>{toast.message}</div>;
+}
+
+function SignQueue({ current, isDark }) {
+  return <Card isDark={isDark} className="p-4"><SectionLabel isDark={isDark}>Cola de señas</SectionLabel><div className="mt-3 space-y-2">{signsQueue.map((sign, i) => <div key={sign.name} className={cx("flex items-center gap-3 rounded-xl p-2.5", i === current ? (isDark ? "border border-brand-cyan/30 bg-brand-teal/30" : "border border-brand-teal/20 bg-brand-teal/10") : isDark ? "bg-brand-deep/40" : "bg-brand-cream/60")}><span className={cx("flex h-6 w-6 items-center justify-center rounded-lg text-[10px] font-bold", i < current ? "bg-brand-teal text-white" : i === current ? "bg-brand-orange text-white" : isDark ? "bg-brand-deep text-[#5A8A94]" : "bg-[#E8EEEF] text-[#8AA8B0]")}>{i < current ? "✓" : i + 1}</span><span className="min-w-0"><span className={cx("block text-xs font-semibold", isDark ? "text-white" : "text-brand-ink")}>{sign.name}</span><span className={cx("block text-[10px]", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{sign.difficulty}</span></span></div>)}</div></Card>;
+}
+
+function SessionControls({ isDark, recording, onToggle }) {
+  return <div className={cx("flex items-center justify-center gap-4 border-t px-6 py-4 backdrop-blur-xl", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}><button className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-soft" : "bg-white text-brand-muted shadow-sm")}><Icon name="x" className="h-4 w-4" />Terminar</button><button onClick={onToggle} className={cx("btn-press relative flex h-16 w-16 items-center justify-center rounded-full", recording ? "bg-[#D96B6B]" : isDark ? "bg-brand-cyan" : "bg-brand-teal")}><span className="h-5 w-5 rounded-sm bg-white" /></button><button className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>Siguiente<Icon name="arrow" className="h-4 w-4" /></button></div>;
+}
+
+function Stat({ value, label, isDark }) {
+  return <div><div className={cx("text-xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{value}</div><div className={cx("text-[10px] font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{label}</div></div>;
+}
+
+function App() {
+  const [isDark, setIsDark] = useState(false);
+  const [path, navigate] = useRoute();
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDark);
+  }, [isDark]);
+
+  if (path === "/" || path === "/login") return <AuthPage mode="login" isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;
+  if (path === "/signup") return <AuthPage mode="signup" isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;
+  if (path === "/practice") return <PracticePage isDark={isDark} setIsDark={setIsDark} />;
+
+  return (
+    <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+      <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} />
+      {path === "/learn" ? <LearnPage isDark={isDark} /> : <Dashboard isDark={isDark} navigate={navigate} />}
+    </div>
+  );
+}
+
+createRoot(document.getElementById("root")).render(<App />);
