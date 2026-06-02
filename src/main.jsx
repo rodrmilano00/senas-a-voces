@@ -28,7 +28,7 @@ const signsQueue = [
   { name: "¿Cómo estás?", difficulty: "Difícil" }
 ];
 
-const LOGO_SRC = "/logo-senas-a-voces.png";
+const LOGO_SRC = "/logo-senas-a-voces-crop.png";
 
 function cx(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -77,7 +77,7 @@ function Logo({ isDark, compact = false }) {
     <img
       src={LOGO_SRC}
       alt="Señas a Voces Academy"
-      className={cx("h-auto object-contain", compact ? "w-32 sm:w-36" : "w-44 sm:w-52", isDark && "logo-on-dark")}
+      className={cx("h-auto object-contain", compact ? "w-40 sm:w-48 md:w-56" : "w-56 sm:w-72", isDark && "logo-on-dark")}
     />
   );
 }
