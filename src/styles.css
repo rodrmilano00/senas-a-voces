@@ -144,7 +144,7 @@ body {
 }
 
 .logo-on-dark {
-  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.22));
+  filter: brightness(0) invert(1) drop-shadow(0 10px 24px rgba(0, 0, 0, 0.22));
 }
 
 .camera-grain::after {
