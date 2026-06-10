@@ -28,6 +28,25 @@ const signsQueue = [
   { name: "¿Cómo estás?", difficulty: "Difícil" }
 ];
 
+const learningMoments = [
+  { label: "Memoria visual", value: "Alta", detail: "Reconoces patrones de mano con buena precision." },
+  { label: "Ritmo", value: "12 dias", detail: "Tu constancia desbloquea practica avanzada." },
+  { label: "Siguiente foco", value: "Familia", detail: "Practica parentescos antes de pasar a comida." }
+];
+
+const dailyQuest = [
+  { task: "Completa 3 senas de Familia", done: true },
+  { task: "Repite una sena dificil", done: true },
+  { task: "Graba una practica corta", done: false }
+];
+
+const accountActions = [
+  { label: "Mi perfil", helper: "Datos y preferencias", icon: "user", path: "/dashboard" },
+  { label: "Progreso", helper: "Racha y modulos", icon: "trophy", path: "/learn" },
+  { label: "Practica", helper: "Abrir camara", icon: "camera", path: "/practice" },
+  { label: "Cerrar sesion", helper: "Volver al acceso", icon: "lock", path: "/" }
+];
+
 const LOGO_SRC = "/logo-senas-a-voces-crop.png";
 
 function cx(...classes) {
@@ -56,7 +75,7 @@ function Icon({ name, className = "h-5 w-5" }) {
   const filled = { viewBox: "0 0 20 20", fill: "currentColor", className };
   const icons = {
     moon: <svg {...filled}><path d="M17.293 13.293A8 8 0 0 1 6.707 2.707a8 8 0 1 0 10.586 10.586z" /></svg>,
-    sun: <svg {...filled}><path fillRule="evenodd" d="M10 2a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm7 5a1 1 0 1 0 0-2h-1a1 1 0 1 0 0 2h1ZM4 11a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2h1Zm10.95-4.536a1 1 0 0 0 1.414-1.414l-.707-.707a1 1 0 0 0-1.414 1.414l.707.707ZM5.757 15.657a1 1 0 0 0 0-1.414 1 1 0 0 0-1.414 0l-.707.707a1 1 0 0 0 1.414 1.414l.707-.707Z" clipRule="evenodd" /></svg>,
+    sun: <svg {...common} viewBox="-2 -2 28 28"><circle cx="12" cy="12" r="4" /><path d="M12 1v3" /><path d="M12 20v3" /><path d="M4.22 4.22 6.34 6.34" /><path d="m17.66 17.66 2.12 2.12" /><path d="M1 12h3" /><path d="M20 12h3" /><path d="m4.22 19.78 2.12-2.12" /><path d="m17.66 6.34 2.12-2.12" /></svg>,
     mail: <svg {...filled}><path d="M3 4a2 2 0 0 0-2 2v1.16l8.44 4.22a1.25 1.25 0 0 0 1.12 0L19 7.16V6a2 2 0 0 0-2-2H3Z" /><path d="m19 8.84-7.77 3.88a2.75 2.75 0 0 1-2.46 0L1 8.84V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.84Z" /></svg>,
     lock: <svg {...filled}><path fillRule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clipRule="evenodd" /></svg>,
     user: <svg {...filled}><path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493A7.002 7.002 0 0 1 16.54 14.49c.196.507.022 1.077-.408 1.41A9.957 9.957 0 0 1 10 18a9.957 9.957 0 0 1-6.125-2.095 1.23 1.23 0 0 1-.41-1.412Z" /></svg>,
@@ -67,6 +86,9 @@ function Icon({ name, className = "h-5 w-5" }) {
     refresh: <svg {...common}><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>,
     check: <svg {...common}><polyline points="20 6 9 17 4 12" /></svg>,
     arrow: <svg {...filled}><path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 1 1-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z" /></svg>,
+    flame: <svg {...common}><path fill="currentColor" fillOpacity="0.26" d="M8.5 14.5A4.5 4.5 0 0 0 13 19a5 5 0 0 0 5-5c0-3.5-2.5-5.8-5.4-8.7-.5 2.9-2 4.3-4.1 5.7C7 12 6 13.2 6 15a5 5 0 0 0 10 0c0-1.2-.4-2.2-1.1-3.1-.2 2.2-1.4 3.6-3 3.6-1.2 0-2.3-.7-3.4-1Z" /><path d="M8.5 14.5A4.5 4.5 0 0 0 13 19a5 5 0 0 0 5-5c0-3.5-2.5-5.8-5.4-8.7-.5 2.9-2 4.3-4.1 5.7C7 12 6 13.2 6 15a5 5 0 0 0 10 0c0-1.2-.4-2.2-1.1-3.1-.2 2.2-1.4 3.6-3 3.6-1.2 0-2.3-.7-3.4-1Z" /></svg>,
+    sparkles: <svg {...common}><path d="m12 3 1.3 4.1L17 9l-3.7 1.9L12 15l-1.3-4.1L7 9l3.7-1.9L12 3Z" /><path d="m19 14 .7 2.1L22 17l-2.3.9L19 20l-.7-2.1L16 17l2.3-.9L19 14Z" /><path d="m5 13 .7 2.1L8 16l-2.3.9L5 19l-.7-2.1L2 16l2.3-.9L5 13Z" /></svg>,
+    trophy: <svg {...common}><path d="M8 21h8" /><path d="M12 17v4" /><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z" /><path d="M5 5H3v2a4 4 0 0 0 4 4" /><path d="M19 5h2v2a4 4 0 0 1-4 4" /></svg>,
     x: <svg {...filled}><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z" /></svg>
   };
   return icons[name] || icons.play;
@@ -91,8 +113,32 @@ function ThemeToggle({ isDark, setIsDark }) {
 }
 
 function AppHeader({ isDark, setIsDark, navigate, path }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const closeFromOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) setMenuOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", closeFromOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeFromOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [menuOpen]);
+
+  const selectAccountAction = (to) => {
+    navigate(to);
+    setMenuOpen(false);
+  };
+
   return (
-    <header className={cx("sticky top-0 z-40 border-b backdrop-blur-xl transition-colors", isDark ? "border-brand-line bg-brand-deep/85" : "border-brand-mist bg-brand-cream/85")}>
+    <header className={cx("app-header sticky top-0 z-40 border-b backdrop-blur-xl transition-colors", isDark ? "border-brand-line bg-brand-deep/85" : "border-brand-mist bg-brand-cream/85")}>
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <button onClick={() => navigate("/dashboard")} className="btn-press"><Logo isDark={isDark} compact /></button>
         <nav className="hidden items-center gap-1 md:flex">
@@ -104,7 +150,39 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
         </nav>
         <div className="flex items-center gap-3">
           <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
-          <div className={cx("flex h-9 w-9 items-center justify-center rounded-2xl text-sm font-bold", isDark ? "bg-brand-teal text-brand-cyan" : "bg-brand-teal text-white")}>MA</div>
+          <div ref={menuRef} className="relative">
+            <button
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((open) => !open)}
+              className={cx("profile-trigger btn-press flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal text-white")}
+            >
+              MA
+            </button>
+            {menuOpen && (
+              <div className={cx("account-menu", isDark ? "account-menu-dark" : "account-menu-light")} role="menu">
+                <div className="account-menu-head">
+                  <span className={cx("flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal text-white")}>MA</span>
+                  <span>
+                    <strong className={cx("block text-sm", isDark ? "text-white" : "text-brand-ink")}>Maria</strong>
+                    <small className={cx("block text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>maria@senasavoces.mx</small>
+                  </span>
+                </div>
+                <div className="mt-2">
+                  {accountActions.map((action) => (
+                    <button key={action.label} type="button" role="menuitem" className="account-menu-item text-left" onClick={() => selectAccountAction(action.path)}>
+                      <span className={cx("account-menu-icon", isDark ? "text-brand-cyan" : "text-brand-teal")}><Icon name={action.icon} className="h-4 w-4" /></span>
+                      <span>
+                        <strong className={cx("block text-xs", isDark ? "text-white" : "text-brand-ink")}>{action.label}</strong>
+                        <small className={cx("block text-[10px]", isDark ? "text-brand-soft" : "text-brand-muted")}>{action.helper}</small>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
@@ -221,7 +299,47 @@ function Field({ icon, label, action, isDark, ...props }) {
 }
 
 function Card({ isDark, className = "", children }) {
-  return <div className={cx("rounded-2xl p-6", isDark ? "border border-brand-line bg-brand-card" : "border border-gray-100 bg-white shadow-sm", className)}>{children}</div>;
+  return <div className={cx("surface-card rounded-2xl p-6", isDark ? "border border-brand-line bg-brand-card" : "border border-gray-100 bg-white shadow-sm", className)}>{children}</div>;
+}
+
+function LearningPulse({ isDark }) {
+  return (
+    <Card isDark={isDark} className="learning-pulse mb-6 p-8">
+      <div className="flex items-start justify-between gap-6">
+        <div>
+          <SectionLabel isDark={isDark}>Brujula de aprendizaje</SectionLabel>
+          <h2 className={cx("mt-4 text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>Hoy conviene practicar Familia</h2>
+          <p className={cx("mt-3 max-w-2xl text-sm leading-7", isDark ? "text-brand-soft" : "text-brand-muted")}>Tu ruta detecta buena memoria visual. Manten sesiones cortas y repite las senas que mezclan parentesco y saludo.</p>
+        </div>
+        <span className={cx("hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl sm:flex", isDark ? "bg-brand-cyan/10 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}><Icon name="sparkles" /></span>
+      </div>
+      <div className="mt-7 grid gap-3 md:grid-cols-3">
+        {learningMoments.map((item) => (
+          <div key={item.label} className={cx("rounded-xl border p-4", isDark ? "border-brand-line bg-brand-deep/20" : "border-brand-mist bg-white/35")}>
+            <span className={cx("text-xs font-bold", isDark ? "text-brand-soft" : "text-brand-muted")}>{item.label}</span>
+            <strong className={cx("mt-2 block text-xl", isDark ? "text-white" : "text-brand-ink")}>{item.value}</strong>
+            <p className={cx("mt-2 text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>{item.detail}</p>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function QuestList({ isDark }) {
+  return (
+    <Card isDark={isDark}>
+      <div className="mb-4 flex items-center justify-between"><SectionLabel isDark={isDark}>Reto de hoy</SectionLabel><span className={cx("rounded-full px-3 py-1 text-xs font-bold", isDark ? "bg-brand-orange/15 text-brand-orange" : "bg-brand-orange/20 text-brand-teal")}>2/3</span></div>
+      <div className="space-y-4">
+        {dailyQuest.map((quest) => (
+          <div key={quest.task} className={cx("flex items-center gap-3 rounded-xl p-2", !quest.done && (isDark ? "bg-brand-deep/35" : "bg-brand-cream/55"))}>
+            <span className={cx("flex h-7 w-7 items-center justify-center rounded-lg", quest.done ? "bg-brand-teal text-white" : isDark ? "border border-brand-line text-brand-soft" : "border border-brand-mist text-brand-muted")}><Icon name={quest.done ? "check" : "sparkles"} className="h-4 w-4" /></span>
+            <p className={cx("text-xs font-semibold", isDark ? "text-brand-soft" : "text-brand-muted")}>{quest.task}</p>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
 }
 
 function Dashboard({ isDark, navigate }) {
@@ -230,8 +348,9 @@ function Dashboard({ isDark, navigate }) {
   return (
     <main className="mx-auto max-w-6xl px-6 py-8">
       <PageTitle isDark={isDark} title="Buenas tardes, María" accent="María" subtitle="Tu progreso de la semana va excelente" />
-      <div className={cx("animate-fade mb-6 flex items-center gap-4 rounded-xl border p-4", isDark ? "border-brand-line bg-gradient-to-r from-brand-teal/30 to-brand-orange/10" : "border-brand-mist bg-gradient-to-r from-brand-teal/10 to-brand-orange/10")}>
-        <div className="relative text-3xl font-extrabold text-brand-orange">12<span className="absolute -right-2 -top-1 h-3 w-3 rounded-full bg-brand-orange animate-ping" /></div>
+      <LearningPulse isDark={isDark} />
+      <div className={cx("streak-banner animate-fade mb-6 flex items-center gap-4 rounded-xl border p-4", isDark ? "border-brand-line bg-brand-card/70" : "border-brand-mist bg-white/60")}>
+        <div className="flex items-center gap-2 text-brand-orange"><Icon name="flame" className="streak-fire h-7 w-7" /><strong className="text-3xl">12</strong></div>
         <div><div className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>¡Racha de 12 días!</div><div className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>Sigue practicando para mantener tu racha activa</div></div>
       </div>
       <div className="grid gap-6 lg:grid-cols-5">
@@ -247,6 +366,7 @@ function Dashboard({ isDark, navigate }) {
           <ProgressCard isDark={isDark} />
         </div>
         <div className="space-y-6 lg:col-span-2">
+          <QuestList isDark={isDark} />
           <Card isDark={isDark}>
             <SectionLabel isDark={isDark}>Tu semana</SectionLabel>
             <div className="mt-4 space-y-3">{[45, 30, 60, 25, 0, 0, 0].map((min, i) => <BarRow key={i} label={["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"][i]} value={min} isDark={isDark} />)}</div>
@@ -358,7 +478,7 @@ function ModuleDetail({ module, isDark }) {
   );
 }
 
-function PracticePage({ isDark, setIsDark }) {
+function PracticePage({ isDark, setIsDark, navigate }) {
   const [recording, setRecording] = useState(false);
   const [index, setIndex] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -403,10 +523,10 @@ function PracticePage({ isDark, setIsDark }) {
         </main>
         <aside className={cx("hidden w-64 flex-col border-l md:flex", isDark ? "border-brand-line bg-brand-deep" : "border-brand-mist bg-brand-cream")}>
           <div className="flex-1 space-y-4 overflow-y-auto p-4"><SignQueue current={index} isDark={isDark} /><Card isDark={isDark} className="p-4"><SectionLabel isDark={isDark}>Esta sesión</SectionLabel><div className="mt-3 grid grid-cols-2 gap-3 text-center"><Stat value={correct} label="Correctas" isDark={isDark} /><Stat value={total - correct} label="Mejorar" isDark={isDark} /></div></Card></div>
-          <SessionControls isDark={isDark} recording={recording} onToggle={toggleRecording} />
+          <SessionControls isDark={isDark} recording={recording} onToggle={toggleRecording} onEnd={() => navigate("/dashboard")} />
         </aside>
       </div>
-      <div className="md:hidden"><SessionControls isDark={isDark} recording={recording} onToggle={toggleRecording} /></div>
+      <div className="md:hidden"><SessionControls isDark={isDark} recording={recording} onToggle={toggleRecording} onEnd={() => navigate("/dashboard")} /></div>
     </div>
   );
 }
@@ -428,8 +548,8 @@ function SignQueue({ current, isDark }) {
   return <Card isDark={isDark} className="p-4"><SectionLabel isDark={isDark}>Cola de señas</SectionLabel><div className="mt-3 space-y-2">{signsQueue.map((sign, i) => <div key={sign.name} className={cx("flex items-center gap-3 rounded-xl p-2.5", i === current ? (isDark ? "border border-brand-cyan/30 bg-brand-teal/30" : "border border-brand-teal/20 bg-brand-teal/10") : isDark ? "bg-brand-deep/40" : "bg-brand-cream/60")}><span className={cx("flex h-6 w-6 items-center justify-center rounded-lg text-[10px] font-bold", i < current ? "bg-brand-teal text-white" : i === current ? "bg-brand-orange text-white" : isDark ? "bg-brand-deep text-[#5A8A94]" : "bg-[#E8EEEF] text-[#8AA8B0]")}>{i < current ? "✓" : i + 1}</span><span className="min-w-0"><span className={cx("block text-xs font-semibold", isDark ? "text-white" : "text-brand-ink")}>{sign.name}</span><span className={cx("block text-[10px]", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{sign.difficulty}</span></span></div>)}</div></Card>;
 }
 
-function SessionControls({ isDark, recording, onToggle }) {
-  return <div className={cx("flex items-center justify-center gap-4 border-t px-6 py-4 backdrop-blur-xl", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}><button className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-soft" : "bg-white text-brand-muted shadow-sm")}><Icon name="x" className="h-4 w-4" />Terminar</button><button onClick={onToggle} className={cx("btn-press relative flex h-16 w-16 items-center justify-center rounded-full", recording ? "bg-[#D96B6B]" : isDark ? "bg-brand-cyan" : "bg-brand-teal")}><span className="h-5 w-5 rounded-sm bg-white" /></button><button className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>Siguiente<Icon name="arrow" className="h-4 w-4" /></button></div>;
+function SessionControls({ isDark, recording, onToggle, onEnd }) {
+  return <div className={cx("flex items-center justify-center gap-4 border-t px-6 py-4 backdrop-blur-xl", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}><button type="button" onClick={onEnd} className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-soft" : "bg-white text-brand-muted shadow-sm")}><Icon name="x" className="h-4 w-4" />Terminar</button><button type="button" onClick={onToggle} className={cx("btn-press relative flex h-16 w-16 items-center justify-center rounded-full", recording ? "bg-[#D96B6B]" : isDark ? "bg-brand-cyan" : "bg-brand-teal")}><span className="h-5 w-5 rounded-sm bg-white" /></button><button type="button" onClick={onToggle} className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>Siguiente<Icon name="arrow" className="h-4 w-4" /></button></div>;
 }
 
 function Stat({ value, label, isDark }) {
@@ -437,7 +557,7 @@ function Stat({ value, label, isDark }) {
 }
 
 function App() {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const [path, navigate] = useRoute();
 
   useEffect(() => {
@@ -446,7 +566,7 @@ function App() {
 
   if (path === "/" || path === "/login") return <AuthPage mode="login" isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;
   if (path === "/signup") return <AuthPage mode="signup" isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;
-  if (path === "/practice") return <PracticePage isDark={isDark} setIsDark={setIsDark} />;
+  if (path === "/practice") return <PracticePage isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;
 
   return (
     <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
