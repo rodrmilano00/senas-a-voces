@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
+import { GLOSARIO_LESSONS } from "./lessons_glosario.js";
 
 const navItems = [
   { path: "/", label: "Acceso" },
@@ -9,23 +10,105 @@ const navItems = [
   { path: "/practice", label: "Práctica" }
 ];
 
-const modules = [
-  { id: 1, title: "El Alfabeto", desc: "Aprende las 29 letras del abecedario en LSM", signs: 29, status: "completed" },
-  { id: 2, title: "Números", desc: "Los números del 0 al 100 en señas", signs: 25, status: "completed" },
-  { id: 3, title: "Saludos", desc: "Buenos días, hola, adiós y más", signs: 18, status: "completed" },
-  { id: 4, title: "Familia", desc: "Nombres de familiares y relaciones", signs: 22, status: "current" },
-  { id: 5, title: "Comida", desc: "Alimentos, bebidas y restaurante", signs: 30, status: "locked" },
-  { id: 6, title: "Emociones", desc: "Expresar sentimientos y estados", signs: 20, status: "locked" },
-  { id: 7, title: "Trabajo", desc: "Vocabulario laboral y profesional", signs: 28, status: "locked" },
-  { id: 8, title: "Conversación", desc: "Fluidez y frases completas", signs: 35, status: "locked" }
-];
+const modules = GLOSARIO_LESSONS.map((lesson, i) => ({
+  id: lesson.id,
+  title: lesson.title,
+  desc: `${lesson.items.length} señas · Nivel ${lesson.level}`,
+  signs: lesson.items.length,
+  status: i === 0 ? "current" : i < 3 ? "completed" : "locked",
+  items: lesson.items,
+  level: lesson.level,
+}));
 
 const signsQueue = [
-  { name: "Hola", difficulty: "Fácil" },
-  { name: "Gracias", difficulty: "Fácil" },
-  { name: "Por favor", difficulty: "Media" },
-  { name: "Buenos días", difficulty: "Media" },
-  { name: "¿Cómo estás?", difficulty: "Difícil" }
+  // Nivel 1 — Números (G1)
+  { name: "1",          difficulty: "Fácil",   module: "Números" },
+  { name: "2",          difficulty: "Fácil",   module: "Números" },
+  { name: "3",          difficulty: "Fácil",   module: "Números" },
+  { name: "4",          difficulty: "Fácil",   module: "Números" },
+  { name: "5",          difficulty: "Fácil",   module: "Números" },
+  { name: "6",          difficulty: "Fácil",   module: "Números" },
+  { name: "7",          difficulty: "Fácil",   module: "Números" },
+  { name: "8",          difficulty: "Fácil",   module: "Números" },
+  { name: "9",          difficulty: "Fácil",   module: "Números" },
+  { name: "10",         difficulty: "Fácil",   module: "Números" },
+  { name: "20",         difficulty: "Media",   module: "Números" },
+  { name: "30",         difficulty: "Media",   module: "Números" },
+  { name: "100",        difficulty: "Media",   module: "Números" },
+  { name: "1,000",      difficulty: "Difícil", module: "Números" },
+  // Nivel 1 — Expresiones cotidianas (G2)
+  { name: "DISCULPA",         difficulty: "Fácil",   module: "Expresiones" },
+  { name: "POR FAVOR",        difficulty: "Fácil",   module: "Expresiones" },
+  { name: "¿CÓMO ESTÁS?",     difficulty: "Media",   module: "Expresiones" },
+  { name: "¿CÓMO TE LLAMAS?", difficulty: "Media",   module: "Expresiones" },
+  { name: "¡SORPRESA!",       difficulty: "Media",   module: "Expresiones" },
+  { name: "¡QUÉ MILAGRO!",    difficulty: "Difícil", module: "Expresiones" },
+  // Nivel 2 — Colores (G3)
+  { name: "ROJO",    difficulty: "Fácil",   module: "Colores" },
+  { name: "AZUL",    difficulty: "Fácil",   module: "Colores" },
+  { name: "VERDE",   difficulty: "Fácil",   module: "Colores" },
+  { name: "AMARILLO",difficulty: "Fácil",   module: "Colores" },
+  { name: "BLANCO",  difficulty: "Media",   module: "Colores" },
+  { name: "NEGRO",   difficulty: "Media",   module: "Colores" },
+  { name: "NARANJA", difficulty: "Media",   module: "Colores" },
+  { name: "MORADO",  difficulty: "Media",   module: "Colores" },
+  { name: "ROSA",    difficulty: "Difícil", module: "Colores" },
+  { name: "CAFÉ",    difficulty: "Difícil", module: "Colores" },
+  // Nivel 2 — Familia (G4)
+  { name: "MAMÁ",    difficulty: "Fácil",   module: "Familia" },
+  { name: "PAPÁ",    difficulty: "Fácil",   module: "Familia" },
+  { name: "HERMANO", difficulty: "Fácil",   module: "Familia" },
+  { name: "ABUELO",  difficulty: "Media",   module: "Familia" },
+  { name: "ABUELA",  difficulty: "Media",   module: "Familia" },
+  { name: "TÍO",     difficulty: "Media",   module: "Familia" },
+  { name: "ESPOSO",  difficulty: "Difícil", module: "Familia" },
+  { name: "YERNO",   difficulty: "Difícil", module: "Familia" },
+  // Nivel 3 — Salud (G5)
+  { name: "DOCTOR",      difficulty: "Media",   module: "Salud" },
+  { name: "HOSPITAL",    difficulty: "Media",   module: "Salud" },
+  { name: "MEDICINA",    difficulty: "Media",   module: "Salud" },
+  { name: "ENFERMEDAD",  difficulty: "Difícil", module: "Salud" },
+  { name: "EMERGENCIA",  difficulty: "Difícil", module: "Salud" },
+  // Nivel 3 — Educación (G6 — alfabeto completo LSM)
+  { name: "A",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "B",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "C",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "D",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "E",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "F",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "G",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "H",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "I",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "J",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "K",  difficulty: "Media",   module: "Alfabeto" },
+  { name: "L",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "M",  difficulty: "Media",   module: "Alfabeto" },
+  { name: "N",  difficulty: "Media",   module: "Alfabeto" },
+  { name: "Ñ",  difficulty: "Media",   module: "Alfabeto" },
+  { name: "O",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "P",  difficulty: "Media",   module: "Alfabeto" },
+  { name: "Q",  difficulty: "Media",   module: "Alfabeto" },
+  { name: "R",  difficulty: "Media",   module: "Alfabeto" },
+  { name: "RR", difficulty: "Difícil", module: "Alfabeto" },
+  { name: "S",  difficulty: "Media",   module: "Alfabeto" },
+  { name: "T",  difficulty: "Media",   module: "Alfabeto" },
+  { name: "U",  difficulty: "Fácil",   module: "Alfabeto" },
+  { name: "V",  difficulty: "Media",   module: "Alfabeto" },
+  { name: "W",  difficulty: "Media",   module: "Alfabeto" },
+  { name: "X",  difficulty: "Difícil", module: "Alfabeto" },
+  { name: "Y",  difficulty: "Media",   module: "Alfabeto" },
+  { name: "Z",  difficulty: "Difícil", module: "Alfabeto" },
+  { name: "CH", difficulty: "Difícil", module: "Alfabeto" },
+  { name: "LL", difficulty: "Difícil", module: "Alfabeto" },
+  { name: "ESCUELA",  difficulty: "Media",   module: "Educación" },
+  { name: "MAESTRO",  difficulty: "Media",   module: "Educación" },
+  { name: "LIBRO",    difficulty: "Difícil", module: "Educación" },
+  // Nivel 3 — Tecnología (G7)
+  { name: "INTERNET",   difficulty: "Media",   module: "Tecnología" },
+  { name: "TELÉFONO",   difficulty: "Media",   module: "Tecnología" },
+  { name: "COMPUTADORA",difficulty: "Media",   module: "Tecnología" },
+  { name: "INSTAGRAM",  difficulty: "Difícil", module: "Tecnología" },
+  { name: "YOUTUBE",    difficulty: "Difícil", module: "Tecnología" },
 ];
 
 const learningMoments = [
@@ -426,23 +509,60 @@ function QuickAction({ isDark, icon, title, desc, onClick, accent }) {
 }
 
 function LearnPage({ isDark }) {
-  const [selected, setSelected] = useState(modules[3]);
+  const [selected, setSelected] = useState(modules[0]);
+  const [activeSign, setActiveSign] = useState(null);
+  const [search, setSearch] = useState("");
   const completedSigns = modules.filter((m) => m.status === "completed").reduce((sum, m) => sum + m.signs, 0);
   const totalSigns = modules.reduce((sum, m) => sum + m.signs, 0);
   const progress = Math.round((completedSigns / totalSigns) * 100);
+  const filteredItems = useMemo(() => {
+    if (!selected) return [];
+    if (!search.trim()) return selected.items;
+    return selected.items.filter((item) =>
+      item.label.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [selected, search]);
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-8">
-      <PageTitle isDark={isDark} title="Tu ruta de aprendizaje" accent="aprendizaje" subtitle="Completa módulos para desbloquear nuevas lecciones" />
+      <PageTitle isDark={isDark} title="Tu ruta de aprendizaje" accent="aprendizaje" subtitle="Selecciona un módulo y toca cualquier seña para ver el video" />
       <div className="grid gap-6 lg:grid-cols-12">
-        <section className="space-y-0 lg:col-span-5">
-          {modules.map((module, index) => <SkillNode key={module.id} module={module} index={index} isDark={isDark} selected={selected?.id === module.id} onClick={() => module.status !== "locked" && setSelected(module)} />)}
+        <section className="space-y-0 lg:col-span-4 overflow-y-auto max-h-[80vh] pr-1">
+          {modules.map((module, index) => (
+            <SkillNode
+              key={module.id} module={module} index={index} isDark={isDark}
+              selected={selected?.id === module.id}
+              onClick={() => { setSelected(module); setActiveSign(null); setSearch(""); }}
+            />
+          ))}
         </section>
-        <section className="space-y-5 lg:col-span-7">
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Card isDark={isDark}><SectionLabel isDark={isDark}>Tu racha</SectionLabel><div className="mt-4 text-center"><div className="text-4xl font-extrabold text-brand-orange">12</div><div className={cx("mt-1 text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>días consecutivos</div></div></Card>
-            <Card isDark={isDark}><SectionLabel isDark={isDark}>Progreso general</SectionLabel><div className={cx("mt-3 text-3xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{progress}%</div><div className={cx("mt-3 h-2 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}><div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" style={{ width: `${progress}%` }} /></div><p className={cx("mt-2 text-[10px]", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{completedSigns} de {totalSigns} señas</p></Card>
+        <section className="space-y-4 lg:col-span-8">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Card isDark={isDark}>
+              <SectionLabel isDark={isDark}>Tu racha</SectionLabel>
+              <div className="mt-4 text-center">
+                <div className="text-4xl font-extrabold text-brand-orange">12</div>
+                <div className={cx("mt-1 text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>días consecutivos</div>
+              </div>
+            </Card>
+            <Card isDark={isDark}>
+              <SectionLabel isDark={isDark}>Progreso general</SectionLabel>
+              <div className={cx("mt-3 text-3xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{progress}%</div>
+              <div className={cx("mt-3 h-2 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}>
+                <div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" style={{ width: `${progress}%` }} />
+              </div>
+              <p className={cx("mt-2 text-[10px]", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{completedSigns} de {totalSigns} señas</p>
+            </Card>
           </div>
-          <ModuleDetail module={selected} isDark={isDark} />
+          {activeSign ? (
+            <SignVideoPanel sign={activeSign} isDark={isDark} onClose={() => setActiveSign(null)} />
+          ) : (
+            <ModuleDetail
+              module={selected} isDark={isDark}
+              items={filteredItems} search={search}
+              onSearch={setSearch} onSelect={setActiveSign}
+            />
+          )}
         </section>
       </div>
     </main>
@@ -467,66 +587,280 @@ function SkillNode({ module, index, isDark, selected, onClick }) {
   );
 }
 
-function ModuleDetail({ module, isDark }) {
-  const lessons = ["Seña de Mamá", "Seña de Papá", "Seña de Hermano/a", "Seña de Abuelo/a", "Seña de Primo/a", "Seña de Tío/a"];
+function ModuleDetail({ module, isDark, items, search, onSearch, onSelect }) {
+  if (!module) return null;
   return (
     <Card isDark={isDark}>
-      <div className="mb-5 flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-orange/15 text-brand-orange"><Icon name="book" /></span><div><h3 className={cx("text-base font-bold", isDark ? "text-white" : "text-brand-ink")}>{module.title}</h3><p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{module.desc}</p></div></div>
-      <div className="space-y-2">{lessons.map((lesson, i) => <div key={lesson} className={cx("flex items-center gap-3 rounded-xl p-3", isDark ? "bg-brand-deep/40" : "bg-brand-cream")}><span className={cx("flex h-6 w-6 items-center justify-center rounded-lg", i < 3 ? "bg-brand-teal text-white" : isDark ? "border border-brand-line bg-brand-card" : "border border-brand-mist bg-white")}><Icon name={i < 3 ? "check" : "arrow"} className="h-3 w-3" /></span><span className={cx("text-xs font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}>{lesson}</span></div>)}</div>
-      {module.status === "current" && <button className={cx("btn-press mt-5 w-full rounded-lg py-3 text-sm font-bold", isDark ? "bg-brand-orange text-brand-deep" : "bg-brand-orange text-white")}>Continuar lección</button>}
+      <div className="mb-4 flex items-center gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-orange/15 text-brand-orange"><Icon name="book" /></span>
+        <div className="flex-1 min-w-0">
+          <h3 className={cx("text-base font-bold truncate", isDark ? "text-white" : "text-brand-ink")}>{module.title}</h3>
+          <p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{module.signs} señas · Nivel {module.level}</p>
+        </div>
+        <span className={cx("rounded-full px-2 py-1 text-[10px] font-bold", isDark ? "bg-brand-teal/20 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>{items.length}</span>
+      </div>
+      <input
+        value={search} onChange={(e) => onSearch(e.target.value)}
+        placeholder="Buscar seña..."
+        className={cx("mb-4 w-full rounded-lg border px-3 py-2 text-sm", isDark ? "border-brand-line bg-brand-deep text-white placeholder:text-[#5A8A94]" : "border-brand-mist bg-brand-cream text-brand-ink placeholder:text-[#8AA8B0]")}
+      />
+      <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto sm:grid-cols-3">
+        {items.map((item) => (
+          <button
+            key={item.label} onClick={() => onSelect(item)}
+            className={cx("btn-press group flex flex-col items-center gap-2 rounded-xl border p-3 text-center transition",
+              isDark ? "border-brand-line bg-brand-deep/40 hover:border-brand-cyan/40 hover:bg-brand-card" : "border-brand-mist bg-brand-cream hover:border-brand-teal/30 hover:bg-white hover:shadow-sm"
+            )}
+          >
+            <img src={item.thumbnail} alt={item.label} className="h-14 w-full rounded-lg object-cover" loading="lazy" />
+            <span className={cx("text-[11px] font-semibold leading-tight", isDark ? "text-brand-soft" : "text-brand-muted")}>{item.label}</span>
+          </button>
+        ))}
+      </div>
     </Card>
   );
 }
 
-function PracticePage({ isDark, setIsDark, navigate }) {
-  const [recording, setRecording] = useState(false);
-  const [index, setIndex] = useState(0);
-  const [correct, setCorrect] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [toasts, setToasts] = useState([{ id: 1, type: "info", message: 'Muestra la seña "Hola" frente a la cámara' }]);
-  const idRef = useRef(2);
-  const addToast = (type, message) => setToasts((prev) => [...prev.slice(-2), { id: idRef.current++, type, message }]);
+function SignVideoPanel({ sign, isDark, onClose }) {
+  return (
+    <Card isDark={isDark}>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h3 className={cx("text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{sign.label}</h3>
+          <p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{sign.desc}</p>
+        </div>
+        <button onClick={onClose} className={cx("btn-press rounded-lg p-2", isDark ? "bg-brand-deep text-brand-soft hover:text-white" : "bg-brand-cream text-brand-muted hover:text-brand-ink")}>
+          <Icon name="x" className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="overflow-hidden rounded-xl" style={{ paddingBottom: "56.25%", position: "relative" }}>
+        <iframe
+          src={sign.video_ref}
+          title={sign.label}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="absolute inset-0 h-full w-full rounded-xl border-0"
+        />
+      </div>
+    </Card>
+  );
+}
 
-  const toggleRecording = () => {
-    if (!recording) {
-      setRecording(true);
-      addToast("info", `Muestra la seña "${signsQueue[index].name}"`);
+function useCameraMediaPipe({ onResults }) {
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const handsRef = useRef(null);
+  const cameraRef = useRef(null);
+  const [camReady, setCamReady] = useState(false);
+  const [camError, setCamError] = useState(null);
+
+  useEffect(() => {
+    const Hands = window.Hands;
+    const Camera = window.Camera;
+    if (!Hands || !Camera) {
+      setCamError("MediaPipe no cargó. Verifica tu conexión.");
       return;
     }
-    setRecording(false);
-    const success = (index + total) % 3 !== 1;
-    setTotal((v) => v + 1);
-    if (success) {
-      setCorrect((v) => v + 1);
-      addToast("success", "¡Perfecto! Seña reconocida");
-      setIndex((v) => Math.min(v + 1, signsQueue.length - 1));
+    const hands = new Hands({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
+    });
+    hands.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.7,
+      minTrackingConfidence: 0.6,
+    });
+    hands.onResults((results) => {
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      if (!canvas || !video) return;
+      const ctx = canvas.getContext("2d");
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      ctx.save();
+      ctx.scale(-1, 1);
+      ctx.translate(-canvas.width, 0);
+      ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+      ctx.restore();
+      if (results.multiHandLandmarks) {
+        for (const landmarks of results.multiHandLandmarks) {
+          if (window.drawConnectors && window.drawLandmarks && window.HAND_CONNECTIONS) {
+            const mirroredLms = landmarks.map((lm) => ({ ...lm, x: 1 - lm.x }));
+            window.drawConnectors(ctx, mirroredLms, window.HAND_CONNECTIONS, { color: "#2AABB8", lineWidth: 2 });
+            window.drawLandmarks(ctx, mirroredLms, { color: "#EC9960", lineWidth: 1, radius: 4 });
+          }
+        }
+      }
+      if (onResults) onResults(results);
+    });
+    handsRef.current = hands;
+
+    navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: "user" } })
+      .then((stream) => {
+        const video = videoRef.current;
+        if (!video) return;
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+          video.play();
+          setCamReady(true);
+          const camera = new Camera(video, {
+            onFrame: async () => { await hands.send({ image: video }); },
+            width: 640, height: 480,
+          });
+          camera.start();
+          cameraRef.current = camera;
+        };
+      })
+      .catch((err) => setCamError("Sin acceso a cámara: " + err.message));
+
+    return () => {
+      if (cameraRef.current) cameraRef.current.stop();
+      if (handsRef.current) handsRef.current.close();
+      if (videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
+
+  return { videoRef, canvasRef, camReady, camError };
+}
+
+function PracticePage({ isDark, setIsDark, navigate }) {
+  const [signIdx, setSignIdx] = useState(0);
+  const [correct, setCorrect] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [handDetected, setHandDetected] = useState(false);
+  const [toasts, setToasts] = useState([{ id: 1, type: "info", message: 'Coloca tu mano frente a la cámara' }]);
+  const idRef = useRef(2);
+  const detectionTimeout = useRef(null);
+
+  const addToast = (type, message) => setToasts((prev) => [...prev.slice(-2), { id: idRef.current++, type, message }]);
+
+  const handleResults = useCallback((results) => {
+    const hasHand = results.multiHandLandmarks && results.multiHandLandmarks.length > 0;
+    setHandDetected(hasHand);
+    if (hasHand) {
+      clearTimeout(detectionTimeout.current);
+      detectionTimeout.current = setTimeout(() => {
+        setCorrect((v) => v + 1);
+        setTotal((v) => v + 1);
+        addToast("success", `¡Seña detectada! → ${signsQueue[Math.min(signIdx + 1, signsQueue.length - 1)].name}`);
+        setSignIdx((v) => Math.min(v + 1, signsQueue.length - 1));
+      }, 2000);
     } else {
-      addToast("warning", "Intenta de nuevo, acércate a la cámara");
+      clearTimeout(detectionTimeout.current);
     }
+  }, [signIdx]);
+
+  const { videoRef, canvasRef, camReady, camError } = useCameraMediaPipe({ onResults: handleResults });
+
+  const skipSign = () => {
+    clearTimeout(detectionTimeout.current);
+    setTotal((v) => v + 1);
+    setSignIdx((v) => Math.min(v + 1, signsQueue.length - 1));
+    addToast("info", `Siguiente: ${signsQueue[Math.min(signIdx + 1, signsQueue.length - 1)].name}`);
   };
 
   return (
     <div className={cx("flex h-screen flex-col transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
       <header className={cx("flex items-center justify-between border-b px-6 py-3 backdrop-blur-xl", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}>
-        <div className="flex items-center gap-3"><Logo isDark={isDark} compact /><div className={cx("h-5 w-px", isDark ? "bg-brand-line" : "bg-brand-mist")} /><span className={cx("text-xs font-semibold", isDark ? "text-brand-soft" : "text-brand-muted")}>Práctica Inmersiva</span></div>
-        <div className="flex items-center gap-3"><span className={cx("rounded-xl px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-white text-brand-teal shadow-sm")}>{correct}/{total}</span><ThemeToggle isDark={isDark} setIsDark={setIsDark} /></div>
+        <div className="flex items-center gap-3">
+          <Logo isDark={isDark} compact />
+          <div className={cx("h-5 w-px", isDark ? "bg-brand-line" : "bg-brand-mist")} />
+          <span className={cx("text-xs font-semibold", isDark ? "text-brand-soft" : "text-brand-muted")}>Práctica Inmersiva · MediaPipe</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className={cx("rounded-xl px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-white text-brand-teal shadow-sm")}>{correct}/{total}</span>
+          <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
+        </div>
       </header>
+
       <div className="flex min-h-0 flex-1">
         <main className="relative flex-1 p-4">
-          <div className={cx("camera-grain relative h-full overflow-hidden rounded-xl", isDark ? "bg-gradient-to-br from-brand-deep via-brand-card to-[#061E24]" : "bg-gradient-to-br from-brand-ink via-[#2A4A52] to-[#0D2A32]")}>
-            <div className="absolute inset-0 flex items-center justify-center"><HandGuide isDark={isDark} /></div>
-            <div className="absolute inset-8 pointer-events-none">{["top-0 left-0 border-l-2 border-t-2", "top-0 right-0 border-r-2 border-t-2", "bottom-0 left-0 border-b-2 border-l-2", "bottom-0 right-0 border-b-2 border-r-2"].map((pos) => <div key={pos} className={cx("absolute h-8 w-8 rounded-lg", pos, isDark ? "border-brand-cyan/40" : "border-brand-teal/40")} />)}</div>
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-xl border bg-white/90 px-5 py-2.5 text-center shadow-lg backdrop-blur-md dark:border-brand-line dark:bg-brand-deep/90"><div className="text-[10px] font-bold uppercase tracking-widest text-[#8AA8B0] dark:text-[#5A8A94]">Seña actual</div><div className="text-lg font-extrabold text-brand-ink dark:text-white">{signsQueue[index].name}</div></div>
-            <div className="absolute left-1/2 top-6 flex w-full max-w-md -translate-x-1/2 flex-col gap-2 px-4">{toasts.map((toast) => <Toast key={toast.id} toast={toast} isDark={isDark} />)}</div>
-            {recording && <div className="absolute right-6 top-6 rounded-full bg-[#D96B6B]/90 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white">Grabando</div>}
+          <div className="relative h-full overflow-hidden rounded-xl bg-black">
+            {/* Video oculto — solo usado como fuente para MediaPipe */}
+            <video ref={videoRef} className="absolute opacity-0 pointer-events-none" playsInline muted />
+            {/* Canvas con video espejado + landmarks */}
+            <canvas ref={canvasRef} className="absolute inset-0 h-full w-full object-cover" />
+
+            {!camReady && !camError && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-teal border-t-transparent" />
+                <p className={cx("text-sm font-semibold", isDark ? "text-brand-soft" : "text-white")}>Iniciando cámara…</p>
+              </div>
+            )}
+            {camError && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-8 text-center">
+                <Icon name="camera" className="h-12 w-12 text-[#D96B6B]" />
+                <p className="text-sm font-semibold text-white">{camError}</p>
+                <p className="text-xs text-[#8AA8B0]">Permite el acceso a la cámara en tu navegador y recarga la página.</p>
+              </div>
+            )}
+
+            {/* Indicador de mano detectada */}
+            {camReady && (
+              <div className={cx("absolute left-4 top-4 flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-bold backdrop-blur-sm transition-colors",
+                handDetected ? "bg-[#1A6B4A]/90 text-[#D4F5E4]" : "bg-black/50 text-[#8AA8B0]"
+              )}>
+                <span className={cx("h-2 w-2 rounded-full", handDetected ? "bg-green-400 animate-pulse" : "bg-gray-500")} />
+                {handDetected ? "Mano detectada" : "Sin mano"}
+              </div>
+            )}
+
+            {/* Esquinas decorativas */}
+            <div className="absolute inset-8 pointer-events-none">
+              {["top-0 left-0 border-l-2 border-t-2", "top-0 right-0 border-r-2 border-t-2", "bottom-0 left-0 border-b-2 border-l-2", "bottom-0 right-0 border-b-2 border-r-2"].map((pos) => (
+                <div key={pos} className={cx("absolute h-8 w-8 rounded-lg", pos, handDetected ? "border-green-400/60" : "border-brand-cyan/40")} />
+              ))}
+            </div>
+
+            {/* Seña actual */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-xl border border-white/20 bg-black/60 px-5 py-2.5 text-center shadow-lg backdrop-blur-md">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-[#8AA8B0]">Seña actual</div>
+              <div className="text-lg font-extrabold text-white">{signsQueue[signIdx].name}</div>
+              <div className="text-[10px] text-[#5A8A94]">{signsQueue[signIdx].difficulty}</div>
+            </div>
+
+            {/* Toasts */}
+            <div className="absolute left-1/2 top-6 flex w-full max-w-md -translate-x-1/2 flex-col gap-2 px-4">
+              {toasts.map((toast) => <Toast key={toast.id} toast={toast} isDark={isDark} />)}
+            </div>
           </div>
         </main>
+
         <aside className={cx("hidden w-64 flex-col border-l md:flex", isDark ? "border-brand-line bg-brand-deep" : "border-brand-mist bg-brand-cream")}>
-          <div className="flex-1 space-y-4 overflow-y-auto p-4"><SignQueue current={index} isDark={isDark} /><Card isDark={isDark} className="p-4"><SectionLabel isDark={isDark}>Esta sesión</SectionLabel><div className="mt-3 grid grid-cols-2 gap-3 text-center"><Stat value={correct} label="Correctas" isDark={isDark} /><Stat value={total - correct} label="Mejorar" isDark={isDark} /></div></Card></div>
-          <SessionControls isDark={isDark} recording={recording} onToggle={toggleRecording} onEnd={() => navigate("/dashboard")} />
+          <div className="flex-1 space-y-4 overflow-y-auto p-4">
+            <SignQueue current={signIdx} isDark={isDark} />
+            <Card isDark={isDark} className="p-4">
+              <SectionLabel isDark={isDark}>Esta sesión</SectionLabel>
+              <div className="mt-3 grid grid-cols-2 gap-3 text-center">
+                <Stat value={correct} label="Detectadas" isDark={isDark} />
+                <Stat value={total - correct} label="Saltadas" isDark={isDark} />
+              </div>
+            </Card>
+          </div>
+          <div className={cx("flex items-center justify-center gap-4 border-t px-6 py-4", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}>
+            <button onClick={() => navigate("/dashboard")} className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-soft" : "bg-white text-brand-muted shadow-sm")}>
+              <Icon name="x" className="h-4 w-4" />Terminar
+            </button>
+            <button onClick={skipSign} className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>
+              Saltar<Icon name="arrow" className="h-4 w-4" />
+            </button>
+          </div>
         </aside>
       </div>
-      <div className="md:hidden"><SessionControls isDark={isDark} recording={recording} onToggle={toggleRecording} onEnd={() => navigate("/dashboard")} /></div>
+
+      {/* Controles móvil */}
+      <div className={cx("md:hidden flex items-center justify-between gap-3 border-t px-6 py-3", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}>
+        <button onClick={() => navigate("/dashboard")} className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-soft" : "bg-white text-brand-muted shadow-sm")}>
+          <Icon name="x" className="h-4 w-4" />Terminar
+        </button>
+        <div className="text-center">
+          <div className={cx("text-xs font-bold", isDark ? "text-white" : "text-brand-ink")}>{signsQueue[signIdx].name}</div>
+          <div className={cx("text-[10px]", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{correct}/{total} detectadas</div>
+        </div>
+        <button onClick={skipSign} className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>
+          Saltar<Icon name="arrow" className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
 }
@@ -544,8 +878,69 @@ function Toast({ toast, isDark }) {
   return <div className={cx("animate-toast-in rounded-xl px-4 py-3 text-sm font-semibold shadow-lg backdrop-blur-sm", styles[toast.type])}>{toast.message}</div>;
 }
 
+const DIFF_COLORS = {
+  "Fácil":   { bg: "bg-green-500/20",  text: "text-green-400" },
+  "Media":   { bg: "bg-brand-orange/20", text: "text-brand-orange" },
+  "Difícil": { bg: "bg-[#D96B6B]/20",  text: "text-[#D96B6B]" },
+};
+
 function SignQueue({ current, isDark }) {
-  return <Card isDark={isDark} className="p-4"><SectionLabel isDark={isDark}>Cola de señas</SectionLabel><div className="mt-3 space-y-2">{signsQueue.map((sign, i) => <div key={sign.name} className={cx("flex items-center gap-3 rounded-xl p-2.5", i === current ? (isDark ? "border border-brand-cyan/30 bg-brand-teal/30" : "border border-brand-teal/20 bg-brand-teal/10") : isDark ? "bg-brand-deep/40" : "bg-brand-cream/60")}><span className={cx("flex h-6 w-6 items-center justify-center rounded-lg text-[10px] font-bold", i < current ? "bg-brand-teal text-white" : i === current ? "bg-brand-orange text-white" : isDark ? "bg-brand-deep text-[#5A8A94]" : "bg-[#E8EEEF] text-[#8AA8B0]")}>{i < current ? "✓" : i + 1}</span><span className="min-w-0"><span className={cx("block text-xs font-semibold", isDark ? "text-white" : "text-brand-ink")}>{sign.name}</span><span className={cx("block text-[10px]", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{sign.difficulty}</span></span></div>)}</div></Card>;
+  const windowStart = Math.max(0, current - 1);
+  const windowEnd   = Math.min(signsQueue.length, current + 6);
+  const visible     = signsQueue.slice(windowStart, windowEnd);
+
+  return (
+    <Card isDark={isDark} className="p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <SectionLabel isDark={isDark}>Cola de práctica</SectionLabel>
+        <span className={cx("text-[10px] font-bold", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>
+          {current + 1}/{signsQueue.length}
+        </span>
+      </div>
+      <div className="space-y-1.5">
+        {visible.map((sign, vi) => {
+          const i = windowStart + vi;
+          const isCurrent = i === current;
+          const isDone    = i < current;
+          const diff      = DIFF_COLORS[sign.difficulty] || DIFF_COLORS["Media"];
+          return (
+            <div
+              key={`${sign.name}-${i}`}
+              className={cx(
+                "flex items-center gap-2.5 rounded-xl px-3 py-2 transition-all",
+                isCurrent
+                  ? isDark ? "border border-brand-cyan/40 bg-brand-teal/25" : "border border-brand-teal/30 bg-brand-teal/10"
+                  : isDone
+                  ? isDark ? "opacity-40 bg-brand-deep/20" : "opacity-40 bg-brand-cream/40"
+                  : isDark ? "bg-brand-deep/30" : "bg-brand-cream/60"
+              )}
+            >
+              <span className={cx(
+                "flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold",
+                isDone    ? "bg-brand-teal text-white" :
+                isCurrent ? "bg-brand-orange text-white" :
+                isDark    ? "bg-brand-deep text-[#5A8A94]" : "bg-[#E8EEEF] text-[#8AA8B0]"
+              )}>
+                {isDone ? "✓" : i + 1}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className={cx("block text-xs font-bold truncate", isDark ? "text-white" : "text-brand-ink")}>{sign.name}</span>
+                <span className={cx("block text-[10px]", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{sign.module}</span>
+              </span>
+              <span className={cx("rounded-full px-1.5 py-0.5 text-[9px] font-bold shrink-0", diff.bg, diff.text)}>
+                {sign.difficulty}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      {windowEnd < signsQueue.length && (
+        <p className={cx("mt-2 text-center text-[10px]", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>
+          +{signsQueue.length - windowEnd} señas más…
+        </p>
+      )}
+    </Card>
+  );
 }
 
 function SessionControls({ isDark, recording, onToggle, onEnd }) {
