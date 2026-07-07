@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { HandLandmarker, PoseLandmarker, FaceLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
-import { GLOSARIO_LESSONS } from "./lessons_glosario.js";
+import { GLOSARIO_LESSONS, ALPHABET_LESSON } from "./lessons_glosario.js";
+import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR } from "./lsm_detector.js";
 
 const navItems = [
   { path: "/", label: "Acceso" },
@@ -10,7 +12,7 @@ const navItems = [
   { path: "/practice", label: "Práctica" }
 ];
 
-const modules = GLOSARIO_LESSONS.map((lesson, i) => ({
+const modules = [ALPHABET_LESSON, ...GLOSARIO_LESSONS].map((lesson, i) => ({
   id: lesson.id,
   title: lesson.title,
   desc: `${lesson.items.length} señas · Nivel ${lesson.level}`,
@@ -20,95 +22,71 @@ const modules = GLOSARIO_LESSONS.map((lesson, i) => ({
   level: lesson.level,
 }));
 
+// signsQueue generado desde ALPHABET_LESSON + currículum del lsm_teacher.py
+// Orden: Abecedario (G0) → Números (G1) → Expresiones → Colores → Familia → Salud → Tecnología
 const signsQueue = [
-  // Nivel 1 — Números (G1)
-  { name: "1",          difficulty: "Fácil",   module: "Números" },
-  { name: "2",          difficulty: "Fácil",   module: "Números" },
-  { name: "3",          difficulty: "Fácil",   module: "Números" },
-  { name: "4",          difficulty: "Fácil",   module: "Números" },
-  { name: "5",          difficulty: "Fácil",   module: "Números" },
-  { name: "6",          difficulty: "Fácil",   module: "Números" },
-  { name: "7",          difficulty: "Fácil",   module: "Números" },
-  { name: "8",          difficulty: "Fácil",   module: "Números" },
-  { name: "9",          difficulty: "Fácil",   module: "Números" },
-  { name: "10",         difficulty: "Fácil",   module: "Números" },
-  { name: "20",         difficulty: "Media",   module: "Números" },
-  { name: "30",         difficulty: "Media",   module: "Números" },
-  { name: "100",        difficulty: "Media",   module: "Números" },
-  { name: "1,000",      difficulty: "Difícil", module: "Números" },
-  // Nivel 1 — Expresiones cotidianas (G2)
-  { name: "DISCULPA",         difficulty: "Fácil",   module: "Expresiones" },
-  { name: "POR FAVOR",        difficulty: "Fácil",   module: "Expresiones" },
-  { name: "¿CÓMO ESTÁS?",     difficulty: "Media",   module: "Expresiones" },
-  { name: "¿CÓMO TE LLAMAS?", difficulty: "Media",   module: "Expresiones" },
-  { name: "¡SORPRESA!",       difficulty: "Media",   module: "Expresiones" },
-  { name: "¡QUÉ MILAGRO!",    difficulty: "Difícil", module: "Expresiones" },
-  // Nivel 2 — Colores (G3)
-  { name: "ROJO",    difficulty: "Fácil",   module: "Colores" },
-  { name: "AZUL",    difficulty: "Fácil",   module: "Colores" },
-  { name: "VERDE",   difficulty: "Fácil",   module: "Colores" },
-  { name: "AMARILLO",difficulty: "Fácil",   module: "Colores" },
-  { name: "BLANCO",  difficulty: "Media",   module: "Colores" },
-  { name: "NEGRO",   difficulty: "Media",   module: "Colores" },
-  { name: "NARANJA", difficulty: "Media",   module: "Colores" },
-  { name: "MORADO",  difficulty: "Media",   module: "Colores" },
-  { name: "ROSA",    difficulty: "Difícil", module: "Colores" },
-  { name: "CAFÉ",    difficulty: "Difícil", module: "Colores" },
-  // Nivel 2 — Familia (G4)
-  { name: "MAMÁ",    difficulty: "Fácil",   module: "Familia" },
-  { name: "PAPÁ",    difficulty: "Fácil",   module: "Familia" },
-  { name: "HERMANO", difficulty: "Fácil",   module: "Familia" },
-  { name: "ABUELO",  difficulty: "Media",   module: "Familia" },
-  { name: "ABUELA",  difficulty: "Media",   module: "Familia" },
-  { name: "TÍO",     difficulty: "Media",   module: "Familia" },
-  { name: "ESPOSO",  difficulty: "Difícil", module: "Familia" },
-  { name: "YERNO",   difficulty: "Difícil", module: "Familia" },
-  // Nivel 3 — Salud (G5)
-  { name: "DOCTOR",      difficulty: "Media",   module: "Salud" },
-  { name: "HOSPITAL",    difficulty: "Media",   module: "Salud" },
-  { name: "MEDICINA",    difficulty: "Media",   module: "Salud" },
-  { name: "ENFERMEDAD",  difficulty: "Difícil", module: "Salud" },
-  { name: "EMERGENCIA",  difficulty: "Difícil", module: "Salud" },
-  // Nivel 3 — Educación (G6 — alfabeto completo LSM)
-  { name: "A",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "B",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "C",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "D",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "E",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "F",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "G",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "H",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "I",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "J",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "K",  difficulty: "Media",   module: "Alfabeto" },
-  { name: "L",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "M",  difficulty: "Media",   module: "Alfabeto" },
-  { name: "N",  difficulty: "Media",   module: "Alfabeto" },
-  { name: "Ñ",  difficulty: "Media",   module: "Alfabeto" },
-  { name: "O",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "P",  difficulty: "Media",   module: "Alfabeto" },
-  { name: "Q",  difficulty: "Media",   module: "Alfabeto" },
-  { name: "R",  difficulty: "Media",   module: "Alfabeto" },
-  { name: "RR", difficulty: "Difícil", module: "Alfabeto" },
-  { name: "S",  difficulty: "Media",   module: "Alfabeto" },
-  { name: "T",  difficulty: "Media",   module: "Alfabeto" },
-  { name: "U",  difficulty: "Fácil",   module: "Alfabeto" },
-  { name: "V",  difficulty: "Media",   module: "Alfabeto" },
-  { name: "W",  difficulty: "Media",   module: "Alfabeto" },
-  { name: "X",  difficulty: "Difícil", module: "Alfabeto" },
-  { name: "Y",  difficulty: "Media",   module: "Alfabeto" },
-  { name: "Z",  difficulty: "Difícil", module: "Alfabeto" },
-  { name: "CH", difficulty: "Difícil", module: "Alfabeto" },
-  { name: "LL", difficulty: "Difícil", module: "Alfabeto" },
-  { name: "ESCUELA",  difficulty: "Media",   module: "Educación" },
-  { name: "MAESTRO",  difficulty: "Media",   module: "Educación" },
-  { name: "LIBRO",    difficulty: "Difícil", module: "Educación" },
-  // Nivel 3 — Tecnología (G7)
-  { name: "INTERNET",   difficulty: "Media",   module: "Tecnología" },
-  { name: "TELÉFONO",   difficulty: "Media",   module: "Tecnología" },
-  { name: "COMPUTADORA",difficulty: "Media",   module: "Tecnología" },
-  { name: "INSTAGRAM",  difficulty: "Difícil", module: "Tecnología" },
-  { name: "YOUTUBE",    difficulty: "Difícil", module: "Tecnología" },
+  // ── G0: Abecedario LSM (orden del build_curriculum de lsm_teacher.py) ──
+  ...ALPHABET_LESSON.items.map((it) => ({
+    name:       it.label,
+    difficulty: it.mov ? "Media" : "Fácil",
+    module:     "Abecedario",
+    hint:       it.hint,
+    template:   it.template,
+    mov:        it.mov,
+    video_ref:  it.video_ref,
+    thumbnail:  it.thumbnail,
+  })),
+  // ── G1: Números 1-10 (geométricos, fáciles) ──
+  { name:"1",  difficulty:"Fácil",   module:"Números", hint:"Índice extendido hacia arriba; resto del puño cerrado.",          template:"CECCC", mov:false },
+  { name:"2",  difficulty:"Fácil",   module:"Números", hint:"Índice y medio extendidos en V. Mano quieta.",                    template:"CEECC", mov:false },
+  { name:"3",  difficulty:"Fácil",   module:"Números", hint:"Índice, medio y anular extendidos (como la W).",                  template:"CEEEC", mov:false },
+  { name:"4",  difficulty:"Fácil",   module:"Números", hint:"Cuatro dedos extendidos, pulgar cerrado.",                        template:"CEEEE", mov:false },
+  { name:"5",  difficulty:"Fácil",   module:"Números", hint:"Mano abierta, los cinco dedos extendidos.",                      template:"EEEEE", mov:false },
+  { name:"6",  difficulty:"Media",   module:"Números", hint:"4 dedos extendidos + pulgar doblado tocando la palma (no el costado).", template:"CEEEE", mov:false },
+  { name:"7",  difficulty:"Media",   module:"Números", hint:"Índice+medio+meñique extendidos; anular doblado hacia el pulgar.", template:"CEEEC", mov:false },
+  { name:"8",  difficulty:"Media",   module:"Números", hint:"Índice+anular+meñique extendidos; medio doblado al pulgar.",       template:"CEECE", mov:false },
+  { name:"9",  difficulty:"Media",   module:"Números", hint:"Medio+anular+meñique extendidos; índice doblado al pulgar.",       template:"CECEE", mov:false },
+  { name:"10", difficulty:"Difícil", module:"Números", hint:"Pulgar e índice extendidos — mueve la mano de lado a lado.",       template:null,    mov:true  },
+  { name:"20", difficulty:"Difícil", module:"Números", hint:"Pulgar e índice en círculo — mueve la mano en círculos pequeños.", template:null,    mov:true  },
+  { name:"100",difficulty:"Difícil", module:"Números", hint:"Seña LSM de cien — usa el botón Saltar si no tienes template.",    template:null,    mov:false },
+  // ── G2: Expresiones cotidianas ──
+  { name:"DISCULPA",         difficulty:"Fácil",   module:"Expresiones", hint:"Mano en el pecho, movimiento hacia afuera." },
+  { name:"POR FAVOR",        difficulty:"Fácil",   module:"Expresiones", hint:"Palma hacia arriba, movimiento circular." },
+  { name:"¿CÓMO ESTÁS?",     difficulty:"Media",   module:"Expresiones", hint:"Expresión facial + seña combinada." },
+  { name:"¿CÓMO TE LLAMAS?", difficulty:"Media",   module:"Expresiones", hint:"Pregunta con cejas arriba." },
+  { name:"¡SORPRESA!",       difficulty:"Media",   module:"Expresiones", hint:"Ojos abiertos + manos abiertas.", },
+  { name:"¡QUÉ MILAGRO!",    difficulty:"Difícil", module:"Expresiones", hint:"Expresión facial enfatizada." },
+  // ── G3: Colores ──
+  { name:"ROJO",    difficulty:"Fácil",   module:"Colores", hint:"Índice rozando el labio hacia abajo." },
+  { name:"AZUL",    difficulty:"Fácil",   module:"Colores", hint:"Mano en 'A' moviéndose hacia el lado." },
+  { name:"VERDE",   difficulty:"Fácil",   module:"Colores", hint:"Mano en 'V' con movimiento." },
+  { name:"AMARILLO",difficulty:"Fácil",   module:"Colores", hint:"Mano en 'Y' con movimiento." },
+  { name:"BLANCO",  difficulty:"Media",   module:"Colores", hint:"Mano abierta sobre el pecho, cierra al separar." },
+  { name:"NEGRO",   difficulty:"Media",   module:"Colores", hint:"Índice cruza la frente." },
+  { name:"NARANJA", difficulty:"Media",   module:"Colores", hint:"Mano en 'C' abriendo y cerrando." },
+  { name:"MORADO",  difficulty:"Media",   module:"Colores", hint:"Mano en 'M' moviéndose." },
+  { name:"ROSA",    difficulty:"Difícil", module:"Colores", hint:"Dedo medio rozando los labios hacia abajo." },
+  { name:"CAFÉ",    difficulty:"Difícil", module:"Colores", hint:"Mano en 'C' sobre la otra mano." },
+  // ── G4: Familia ──
+  { name:"MAMÁ",    difficulty:"Fácil",   module:"Familia", hint:"Mano abierta, pulgar toca la barbilla." },
+  { name:"PAPÁ",    difficulty:"Fácil",   module:"Familia", hint:"Mano abierta, pulgar toca la frente." },
+  { name:"HERMANO", difficulty:"Fácil",   module:"Familia", hint:"Índices juntos moviéndose en paralelo." },
+  { name:"ABUELO",  difficulty:"Media",   module:"Familia", hint:"Mano en 'A' desde la barbilla hacia afuera." },
+  { name:"ABUELA",  difficulty:"Media",   module:"Familia", hint:"Mano en 'A' desde la barbilla, dos movimientos." },
+  { name:"TÍO",     difficulty:"Media",   module:"Familia", hint:"Mano en 'T' moviéndose." },
+  { name:"ESPOSO",  difficulty:"Difícil", module:"Familia", hint:"Seña de hombre + anillo." },
+  // ── G5: Salud ──
+  { name:"DOCTOR",     difficulty:"Media",   module:"Salud", hint:"Dedos en 'D' tocando la muñeca." },
+  { name:"HOSPITAL",   difficulty:"Media",   module:"Salud", hint:"Cruz dibujada en el brazo." },
+  { name:"MEDICINA",   difficulty:"Media",   module:"Salud", hint:"Pastilla entre dedos índice y pulgar." },
+  { name:"ENFERMEDAD", difficulty:"Difícil", module:"Salud", hint:"Dedos en la frente y el estómago." },
+  { name:"EMERGENCIA", difficulty:"Difícil", module:"Salud", hint:"Manos en movimiento urgente." },
+  // ── G7: Tecnología ──
+  { name:"INTERNET",    difficulty:"Media",   module:"Tecnología", hint:"Dedos en 'W' moviéndose en círculo." },
+  { name:"TELÉFONO",    difficulty:"Media",   module:"Tecnología", hint:"Mano en 'Y' en la oreja." },
+  { name:"COMPUTADORA", difficulty:"Media",   module:"Tecnología", hint:"Dedos sobre teclado imaginario." },
+  { name:"INSTAGRAM",   difficulty:"Difícil", module:"Tecnología", hint:"Seña compuesta." },
+  { name:"YOUTUBE",     difficulty:"Difícil", module:"Tecnología", hint:"Seña compuesta." },
 ];
 
 const learningMoments = [
@@ -627,7 +605,7 @@ function SignVideoPanel({ sign, isDark, onClose }) {
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h3 className={cx("text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{sign.label}</h3>
-          <p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{sign.desc}</p>
+          <p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{sign.hint || sign.desc}</p>
         </div>
         <button onClick={onClose} className={cx("btn-press rounded-lg p-2", isDark ? "bg-brand-deep text-brand-soft hover:text-white" : "bg-brand-cream text-brand-muted hover:text-brand-ink")}>
           <Icon name="x" className="h-4 w-4" />
@@ -646,77 +624,164 @@ function SignVideoPanel({ sign, isDark, onClose }) {
   );
 }
 
+const WASM_PATH = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm";
+const HAND_MODEL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
+const POSE_MODEL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
+const FACE_MODEL = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task";
+
+// Puntos faciales clave para expresión LSM (cejas, boca, ojos)
+const FACE_KEY_IDXS = [
+  70, 63, 105, 66, 107,          // ceja izq
+  336, 296, 334, 293, 300,       // ceja der
+  13, 14, 78, 308, 61, 291,      // boca
+  159, 145, 386, 374,            // ojos
+];
+
+function mirror(lm) { return { ...lm, x: 1 - lm.x }; }
+
 function useCameraMediaPipe({ onResults }) {
-  const videoRef = useRef(null);
+  const videoRef  = useRef(null);
   const canvasRef = useRef(null);
-  const handsRef = useRef(null);
-  const cameraRef = useRef(null);
+  const hlRef        = useRef(null);
+  const plRef        = useRef(null);
+  const flRef        = useRef(null);
+  const rafRef       = useRef(null);
+  const slowFrameRef = useRef(-1);
+  const lastPoseRef  = useRef({ landmarks: [] });
+  const lastFaceRef  = useRef({ landmarks: [] });
   const [camReady, setCamReady] = useState(false);
   const [camError, setCamError] = useState(null);
 
   useEffect(() => {
-    const Hands = window.Hands;
-    const Camera = window.Camera;
-    if (!Hands || !Camera) {
-      setCamError("MediaPipe no cargó. Verifica tu conexión.");
-      return;
-    }
-    const hands = new Hands({
-      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
-    });
-    hands.setOptions({
-      maxNumHands: 1,
-      modelComplexity: 1,
-      minDetectionConfidence: 0.7,
-      minTrackingConfidence: 0.6,
-    });
-    hands.onResults((results) => {
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      if (!canvas || !video) return;
-      const ctx = canvas.getContext("2d");
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
-      ctx.save();
-      ctx.scale(-1, 1);
-      ctx.translate(-canvas.width, 0);
-      ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-      ctx.restore();
-      if (results.multiHandLandmarks) {
-        for (const landmarks of results.multiHandLandmarks) {
-          if (window.drawConnectors && window.drawLandmarks && window.HAND_CONNECTIONS) {
-            const mirroredLms = landmarks.map((lm) => ({ ...lm, x: 1 - lm.x }));
-            window.drawConnectors(ctx, mirroredLms, window.HAND_CONNECTIONS, { color: "#2AABB8", lineWidth: 2 });
-            window.drawLandmarks(ctx, mirroredLms, { color: "#EC9960", lineWidth: 1, radius: 4 });
-          }
-        }
-      }
-      if (onResults) onResults(results);
-    });
-    handsRef.current = hands;
+    let cancelled = false;
 
-    navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: "user" } })
-      .then((stream) => {
+    async function init() {
+      try {
+        const vision = await FilesetResolver.forVisionTasks(WASM_PATH);
+        if (cancelled) return;
+
+        // Crear los 3 landmarkers en paralelo
+        const [hl, pl, fl] = await Promise.all([
+          HandLandmarker.createFromOptions(vision, {
+            baseOptions: { modelAssetPath: HAND_MODEL, delegate: "GPU" },
+            runningMode: "VIDEO",
+            numHands: 2,
+            minHandDetectionConfidence: 0.5,
+            minHandPresenceConfidence: 0.5,
+            minTrackingConfidence: 0.5,
+          }),
+          PoseLandmarker.createFromOptions(vision, {
+            baseOptions: { modelAssetPath: POSE_MODEL, delegate: "GPU" },
+            runningMode: "VIDEO",
+            numPoses: 1,
+            minPoseDetectionConfidence: 0.5,
+            minPosePresenceConfidence: 0.5,
+            minTrackingConfidence: 0.5,
+          }),
+          FaceLandmarker.createFromOptions(vision, {
+            baseOptions: { modelAssetPath: FACE_MODEL, delegate: "GPU" },
+            runningMode: "VIDEO",
+            numFaces: 1,
+            minFaceDetectionConfidence: 0.5,
+            minFacePresenceConfidence: 0.5,
+            minTrackingConfidence: 0.5,
+          }),
+        ]);
+        if (cancelled) { hl.close(); pl.close(); fl.close(); return; }
+        hlRef.current = hl;
+        plRef.current = pl;
+        flRef.current = fl;
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 640, height: 480, facingMode: "user" },
+        });
+        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
+
         const video = videoRef.current;
         if (!video) return;
         video.srcObject = stream;
-        video.onloadedmetadata = () => {
-          video.play();
-          setCamReady(true);
-          const camera = new Camera(video, {
-            onFrame: async () => { await hands.send({ image: video }); },
-            width: 640, height: 480,
-          });
-          camera.start();
-          cameraRef.current = camera;
-        };
-      })
-      .catch((err) => setCamError("Sin acceso a cámara: " + err.message));
+        await video.play();
+        setCamReady(true);
+
+        function detect() {
+          if (cancelled) return;
+          const canvas = canvasRef.current;
+          const vid = videoRef.current;
+          if (!canvas || !vid || vid.readyState < 2) {
+            rafRef.current = requestAnimationFrame(detect);
+            return;
+          }
+
+          const w = vid.videoWidth || 640;
+          const h = vid.videoHeight || 480;
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          const now = performance.now();
+
+          // Video espejado
+          ctx.save();
+          ctx.scale(-1, 1);
+          ctx.translate(-w, 0);
+          ctx.drawImage(vid, 0, 0, w, h);
+          ctx.restore();
+
+          const draw = new DrawingUtils(ctx);
+
+          // --- Manos cada frame (alta prioridad) ---
+          const handRes = hlRef.current.detectForVideo(vid, now);
+          for (const lms of (handRes.landmarks || [])) {
+            const m = lms.map(mirror);
+            draw.drawConnectors(m, HandLandmarker.HAND_CONNECTIONS, { color: "#2AABB8", lineWidth: 2 });
+            draw.drawLandmarks(m, { color: "#EC9960", lineWidth: 1, radius: 3 });
+          }
+
+          // --- Pose y cara a 8 fps (throttle) para no bloquear el hilo ---
+          const slowFrame = Math.floor(now / 125); // cambia cada 125ms = 8fps
+          if (slowFrame !== slowFrameRef.current) {
+            slowFrameRef.current = slowFrame;
+
+            const poseRes = plRef.current.detectForVideo(vid, now);
+            lastPoseRef.current = poseRes;
+            for (const lms of (poseRes.landmarks || [])) {
+              const m = lms.map(mirror);
+              const armConns = PoseLandmarker.POSE_CONNECTIONS.filter(
+                ({ start, end }) => [11,12,13,14,15,16].includes(start) && [11,12,13,14,15,16].includes(end)
+              );
+              draw.drawConnectors(m, armConns, { color: "#A855F7", lineWidth: 3 });
+              [11,12,13,14,15,16].forEach((i) => {
+                if (m[i]) draw.drawLandmarks([m[i]], { color: "#D946EF", lineWidth: 1, radius: 5 });
+              });
+            }
+
+            const faceRes = flRef.current.detectForVideo(vid, now);
+            lastFaceRef.current = faceRes;
+            for (const lms of (faceRes.landmarks || [])) {
+              const m = lms.map(mirror);
+              const keyPts = FACE_KEY_IDXS.filter((i) => m[i]).map((i) => m[i]);
+              draw.drawLandmarks(keyPts, { color: "#22D3EE", lineWidth: 1, radius: 2 });
+            }
+          }
+
+          if (onResults) onResults({ handRes, poseRes: lastPoseRef.current, faceRes: lastFaceRef.current });
+          rafRef.current = requestAnimationFrame(detect);
+        }
+        rafRef.current = requestAnimationFrame(detect);
+
+      } catch (err) {
+        if (!cancelled) setCamError("Error de cámara: " + err.message);
+      }
+    }
+
+    init();
 
     return () => {
-      if (cameraRef.current) cameraRef.current.stop();
-      if (handsRef.current) handsRef.current.close();
-      if (videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach((t) => t.stop());
+      cancelled = true;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      hlRef.current?.close();
+      plRef.current?.close();
+      flRef.current?.close();
+      videoRef.current?.srcObject?.getTracks().forEach((t) => t.stop());
     };
   }, []);
 
@@ -728,35 +793,77 @@ function PracticePage({ isDark, setIsDark, navigate }) {
   const [correct, setCorrect] = useState(0);
   const [total, setTotal] = useState(0);
   const [handDetected, setHandDetected] = useState(false);
-  const [toasts, setToasts] = useState([{ id: 1, type: "info", message: 'Coloca tu mano frente a la cámara' }]);
+  const [toasts, setToasts] = useState([{ id: 1, type: "info", message: 'Muestra la seña correcta con tu mano' }]);
   const idRef = useRef(2);
-  const detectionTimeout = useRef(null);
+  const [gestureState, setGestureState] = useState("waiting"); // waiting | partial | match | confirmed
+  const [matchScore, setMatchScore]     = useState(0);
+  const confirmedRef = useRef(false);
+  const holdStartRef = useRef(null);   // momentáneo que lleva la mano en MATCH
+  const HOLD_MS = 600;                 // ms que debe mantener la pose correcta
 
   const addToast = (type, message) => setToasts((prev) => [...prev.slice(-2), { id: idRef.current++, type, message }]);
 
-  const handleResults = useCallback((results) => {
-    const hasHand = results.multiHandLandmarks && results.multiHandLandmarks.length > 0;
-    setHandDetected(hasHand);
-    if (hasHand) {
-      clearTimeout(detectionTimeout.current);
-      detectionTimeout.current = setTimeout(() => {
-        setCorrect((v) => v + 1);
-        setTotal((v) => v + 1);
-        addToast("success", `¡Seña detectada! → ${signsQueue[Math.min(signIdx + 1, signsQueue.length - 1)].name}`);
-        setSignIdx((v) => Math.min(v + 1, signsQueue.length - 1));
-      }, 2000);
-    } else {
-      clearTimeout(detectionTimeout.current);
+  const handleResults = useCallback(({ handRes }) => {
+    const lms = handRes?.landmarks?.[0] ?? null;
+    setHandDetected(!!lms);
+
+    if (!lms) {
+      holdStartRef.current = null;
+      if (!confirmedRef.current) setGestureState("waiting");
+      setMatchScore(0);
+      return;
     }
-  }, [signIdx]);
+
+    if (confirmedRef.current) return;
+
+    setSignIdx((prevIdx) => {
+      const sign = signsQueue[prevIdx];
+      const states = fingerStates(lms);
+      const sc = sign.template
+        ? scoreTarget(states, sign.name, sign.template)
+        : 0;  // señas sin template (palabras) siempre pasan con botón
+
+      setMatchScore(sc);
+
+      if (sc >= MATCH_THR) {
+        if (!holdStartRef.current) holdStartRef.current = performance.now();
+        const held = performance.now() - holdStartRef.current;
+        const pct  = Math.min(1, held / HOLD_MS);
+        setGestureState(pct >= 1 ? "match" : "partial");
+
+        if (held >= HOLD_MS) {
+          confirmedRef.current = true;
+          setGestureState("confirmed");
+          setCorrect((v) => v + 1);
+          setTotal((v) => v + 1);
+          const next = Math.min(prevIdx + 1, signsQueue.length - 1);
+          addToast("success", `✓ ${sign.name}  →  ${signsQueue[next].name}`);
+          setTimeout(() => {
+            confirmedRef.current = false;
+            holdStartRef.current = null;
+            setGestureState("waiting");
+            setMatchScore(0);
+          }, 800);
+          return next;
+        }
+      } else {
+        holdStartRef.current = null;
+        setGestureState(sc > 0.45 ? "partial" : "waiting");
+      }
+      return prevIdx;
+    });
+  }, []);
 
   const { videoRef, canvasRef, camReady, camError } = useCameraMediaPipe({ onResults: handleResults });
 
   const skipSign = () => {
-    clearTimeout(detectionTimeout.current);
+    confirmedRef.current = false;
+    holdStartRef.current = null;
+    setGestureState("waiting");
+    setMatchScore(0);
     setTotal((v) => v + 1);
     setSignIdx((v) => Math.min(v + 1, signsQueue.length - 1));
-    addToast("info", `Siguiente: ${signsQueue[Math.min(signIdx + 1, signsQueue.length - 1)].name}`);
+    addToast("info", `Saltada → ${signsQueue[Math.min(signIdx + 1, signsQueue.length - 1)].name}`);
   };
 
   return (
@@ -795,13 +902,40 @@ function PracticePage({ isDark, setIsDark, navigate }) {
               </div>
             )}
 
-            {/* Indicador de mano detectada */}
+            {/* Indicador de detección geométrica */}
             {camReady && (
-              <div className={cx("absolute left-4 top-4 flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-bold backdrop-blur-sm transition-colors",
-                handDetected ? "bg-[#1A6B4A]/90 text-[#D4F5E4]" : "bg-black/50 text-[#8AA8B0]"
-              )}>
-                <span className={cx("h-2 w-2 rounded-full", handDetected ? "bg-green-400 animate-pulse" : "bg-gray-500")} />
-                {handDetected ? "Mano detectada" : "Sin mano"}
+              <div className="absolute left-4 top-4 flex flex-col gap-1.5">
+                <div className={cx(
+                  "flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-bold backdrop-blur-sm transition-all",
+                  gestureState === "confirmed" ? "bg-[#1A6B4A]/90 text-[#D4F5E4]" :
+                  gestureState === "match"     ? "bg-green-600/90 text-white" :
+                  gestureState === "partial"   ? "bg-brand-orange/90 text-white" :
+                  handDetected                 ? "bg-black/60 text-[#2AABB8]" :
+                                                "bg-black/50 text-[#8AA8B0]"
+                )}>
+                  <span className={cx("h-2 w-2 rounded-full",
+                    gestureState === "confirmed" ? "bg-green-400 animate-pulse" :
+                    gestureState === "match"     ? "bg-green-300 animate-pulse" :
+                    gestureState === "partial"   ? "bg-yellow-300 animate-pulse" :
+                    handDetected                 ? "bg-[#2AABB8]" : "bg-gray-500"
+                  )} />
+                  {gestureState === "confirmed" ? "✓ ¡Correcto!" :
+                   gestureState === "match"     ? "✓ Mantén la pose…" :
+                   gestureState === "partial"   ? `Cerca: ${Math.round(matchScore*100)}%` :
+                   handDetected                 ? "Mano detectada" : "Sin mano"}
+                </div>
+                {/* Barra de progreso del score */}
+                {handDetected && gestureState !== "confirmed" && (
+                  <div className="h-1.5 w-32 overflow-hidden rounded-full bg-black/40">
+                    <div
+                      className={cx("h-full rounded-full transition-all duration-150",
+                        matchScore >= MATCH_THR ? "bg-green-400" :
+                        matchScore > 0.45 ? "bg-brand-orange" : "bg-[#2AABB8]/60"
+                      )}
+                      style={{ width: `${Math.round(matchScore*100)}%` }}
+                    />
+                  </div>
+                )}
               </div>
             )}
 
@@ -813,10 +947,12 @@ function PracticePage({ isDark, setIsDark, navigate }) {
             </div>
 
             {/* Seña actual */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-xl border border-white/20 bg-black/60 px-5 py-2.5 text-center shadow-lg backdrop-blur-md">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-[#8AA8B0]">Seña actual</div>
-              <div className="text-lg font-extrabold text-white">{signsQueue[signIdx].name}</div>
-              <div className="text-[10px] text-[#5A8A94]">{signsQueue[signIdx].difficulty}</div>
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-xl border border-white/20 bg-black/60 px-5 py-3 text-center shadow-lg backdrop-blur-md max-w-xs w-full">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-[#8AA8B0]">{signsQueue[signIdx].module} · {signsQueue[signIdx].difficulty}{signsQueue[signIdx].mov ? " · 🤸 con movimiento" : ""}</div>
+              <div className="text-2xl font-extrabold text-white">{signsQueue[signIdx].name}</div>
+              {signsQueue[signIdx].hint && (
+                <div className="mt-1 text-[11px] text-[#8AA8B0] leading-tight">{signsQueue[signIdx].hint}</div>
+              )}
             </div>
 
             {/* Toasts */}

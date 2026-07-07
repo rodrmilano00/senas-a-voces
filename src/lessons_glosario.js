@@ -1,4 +1,39 @@
 // === LECCIONES GENERADAS DESDE EL GLOSARIO CDMX ===
+// G0: Abecedario LSM — lección base, con hints del lsm_teacher.py
+// Moldes: E=extendido C=cerrado ?=wildcard  |  mov=tiene movimiento
+export const ALPHABET_LESSON = {
+  id: "G0", level: 1, title: "Abecedario LSM (A–Z + Ñ)",
+  items: [
+    { glyph:"A", label:"A", mov:false, template:"ECCCC",  hint:"Puño cerrado; el pulgar se ve claramente al costado.",                         video_ref:"https://www.youtube.com/embed/NLkXSBBbCEQ", thumbnail:"https://img.youtube.com/vi/NLkXSBBbCEQ/mqdefault.jpg" },
+    { glyph:"B", label:"B", mov:false, template:"CEEEE",  hint:"Cuatro dedos juntos hacia arriba; pulgar cruzado sobre la palma.",             video_ref:"https://www.youtube.com/embed/QR5BaGjnk9M", thumbnail:"https://img.youtube.com/vi/QR5BaGjnk9M/mqdefault.jpg" },
+    { glyph:"C", label:"C", mov:false, template:"?????",  hint:"Toda la mano curvada en forma de 'C'; dedos juntos.",                         video_ref:"https://www.youtube.com/embed/Kq4i7UHH8A0", thumbnail:"https://img.youtube.com/vi/Kq4i7UHH8A0/mqdefault.jpg" },
+    { glyph:"D", label:"D", mov:false, template:"CECCC",  hint:"Índice apuntando arriba; el pulgar toca la yema del medio.",                   video_ref:"https://www.youtube.com/embed/8Ua3HqVz7W8", thumbnail:"https://img.youtube.com/vi/8Ua3HqVz7W8/mqdefault.jpg" },
+    { glyph:"E", label:"E", mov:false, template:"CCCCC",  hint:"Todos los dedos doblados tocando la palma; pulgar sobre ellos.",               video_ref:"https://www.youtube.com/embed/rKO0XlW3gEM", thumbnail:"https://img.youtube.com/vi/rKO0XlW3gEM/mqdefault.jpg" },
+    { glyph:"F", label:"F", mov:false, template:"CCEEE",  hint:"Pulgar e índice se tocan formando un círculo; otros 3 arriba.",               video_ref:"https://www.youtube.com/embed/2oFZTnBWLqQ", thumbnail:"https://img.youtube.com/vi/2oFZTnBWLqQ/mqdefault.jpg" },
+    { glyph:"G", label:"G", mov:false, template:"EECCC",  hint:"Pulgar e índice extendidos en HORIZONTAL, apuntando al costado.",             video_ref:"https://www.youtube.com/embed/vRcfG8EZFrY", thumbnail:"https://img.youtube.com/vi/vRcfG8EZFrY/mqdefault.jpg" },
+    { glyph:"H", label:"H", mov:false, template:"?EECC",  hint:"Índice y medio juntos en HORIZONTAL, apuntando al costado.",                  video_ref:"https://www.youtube.com/embed/PqME3Vg4lS0", thumbnail:"https://img.youtube.com/vi/PqME3Vg4lS0/mqdefault.jpg" },
+    { glyph:"I", label:"I", mov:false, template:"CCCCE",  hint:"Solo el meñique extendido hacia arriba; resto en puño.",                      video_ref:"https://www.youtube.com/embed/CqJNkZjfde4", thumbnail:"https://img.youtube.com/vi/CqJNkZjfde4/mqdefault.jpg" },
+    { glyph:"J", label:"J", mov:true,  template:"CCCCE",  hint:"Como 'I' pero dibujando una 'J' en el aire con el meñique.",                  video_ref:"https://www.youtube.com/embed/GcZRSAJkFko", thumbnail:"https://img.youtube.com/vi/GcZRSAJkFko/mqdefault.jpg" },
+    { glyph:"K", label:"K", mov:true,  template:"EEECC",  hint:"Índice y medio en 'V', pulgar ENTRE ellos; mano hacia enfrente, mueve al frente.", video_ref:"https://www.youtube.com/embed/aBCdef12345", thumbnail:"https://img.youtube.com/vi/aBCdef12345/mqdefault.jpg" },
+    { glyph:"L", label:"L", mov:false, template:"EECCC",  hint:"Mano VERTICAL: pulgar e índice en ángulo recto ('L').",                       video_ref:"https://www.youtube.com/embed/Lm0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Lm0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"M", label:"M", mov:false, template:"?????",  hint:"Puño con tres dedos doblados sobre el pulgar.",                               video_ref:"https://www.youtube.com/embed/Ma0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Ma0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"N", label:"N", mov:false, template:"?????",  hint:"Puño con dos dedos doblados sobre el pulgar.",                                video_ref:"https://www.youtube.com/embed/Na0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Na0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"Ñ", label:"Ñ", mov:true,  template:"?????",  hint:"Como 'N' pero con un leve movimiento ondulante.",                             video_ref:"https://www.youtube.com/embed/Nia0XkRVe6A", thumbnail:"https://img.youtube.com/vi/Nia0XkRVe6A/mqdefault.jpg" },
+    { glyph:"O", label:"O", mov:false, template:"CCCCC",  hint:"Todos los dedos juntos al pulgar formando un CÍRCULO 'O'.",                   video_ref:"https://www.youtube.com/embed/Oa0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Oa0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"P", label:"P", mov:false, template:"?EECC",  hint:"Índice hacia ARRIBA y medio hacia ENFRENTE; pulgar ENTRE ellos.",             video_ref:"https://www.youtube.com/embed/Pa0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Pa0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"Q", label:"Q", mov:true,  template:"CCCCC",  hint:"Pulgar e índice en PINZA; INCLINA la mano hacia ABAJO con movimiento.",       video_ref:"https://www.youtube.com/embed/Qa0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Qa0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"R", label:"R", mov:false, template:"CEECC",  hint:"Índice y medio CRUZADOS (uno sobre el otro); resto cerrado.",                 video_ref:"https://www.youtube.com/embed/Ra0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Ra0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"S", label:"S", mov:false, template:"CCCCC",  hint:"Puño compacto; el pulgar va SOBRE los dedos, NO al costado.",                 video_ref:"https://www.youtube.com/embed/Sa0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Sa0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"T", label:"T", mov:false, template:"CCCCC",  hint:"Puño con el pulgar asomando ENTRE el índice y el medio.",                     video_ref:"https://www.youtube.com/embed/Ta0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Ta0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"U", label:"U", mov:false, template:"CEECC",  hint:"Índice y medio JUNTOS, apuntando hacia arriba.",                              video_ref:"https://www.youtube.com/embed/Ua0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Ua0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"V", label:"V", mov:false, template:"CEECC",  hint:"Índice y medio SEPARADOS (V de victoria).",                                   video_ref:"https://www.youtube.com/embed/Va0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Va0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"W", label:"W", mov:false, template:"CEEEC",  hint:"Índice, medio y anular extendidos hacia arriba (W de tres dedos).",           video_ref:"https://www.youtube.com/embed/Wa0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Wa0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"X", label:"X", mov:true,  template:"CECCC",  hint:"Índice doblado como un GANCHO; mueve hacia abajo.",                           video_ref:"https://www.youtube.com/embed/Xa0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Xa0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"Y", label:"Y", mov:false, template:"ECCCE",  hint:"Solo pulgar y meñique extendidos ('call me').",                               video_ref:"https://www.youtube.com/embed/Ya0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Ya0XkRVe6oA/mqdefault.jpg" },
+    { glyph:"Z", label:"Z", mov:true,  template:"CECCC",  hint:"Apunta con el ÍNDICE y dibuja una 'Z' en el aire.",                           video_ref:"https://www.youtube.com/embed/Za0XkRVe6oA", thumbnail:"https://img.youtube.com/vi/Za0XkRVe6oA/mqdefault.jpg" },
+  ]
+};
+
 export const GLOSARIO_LESSONS = [
  { id:"G1", level:1, title:"Números (todos)", items:[
  {"glyph": "1", "label": "1", "desc": "Seña LSM oficial: 1", "video_ref": "https://www.youtube.com/embed/zcd4GfYz-fA", "thumbnail": "https://img.youtube.com/vi/zcd4GfYz-fA/mqdefault.jpg"},
