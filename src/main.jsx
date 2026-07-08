@@ -3,7 +3,7 @@ import { HandLandmarker, PoseLandmarker, FaceLandmarker, FilesetResolver, Drawin
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 import { GLOSARIO_LESSONS, ALPHABET_LESSON } from "./lessons_glosario.js";
-import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR } from "./lsm_detector.js";
+import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR, scoreLetter, LSM_ALPHABET, NUMBER_TEMPLATES } from "./lsm_detector.js";
 
 const navItems = [
   { path: "/", label: "Acceso" },
@@ -977,6 +977,9 @@ function PracticePage({ isDark, setIsDark, navigate }) {
             <button onClick={() => navigate("/dashboard")} className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-soft" : "bg-white text-brand-muted shadow-sm")}>
               <Icon name="x" className="h-4 w-4" />Terminar
             </button>
+            <button onClick={() => navigate("/debug")} className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-deep text-[#5A8A94] hover:text-white" : "bg-brand-cream text-brand-muted")} title="Diagnóstico visual">
+              🔬
+            </button>
             <button onClick={skipSign} className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>
               Saltar<Icon name="arrow" className="h-4 w-4" />
             </button>
@@ -1087,6 +1090,162 @@ function Stat({ value, label, isDark }) {
   return <div><div className={cx("text-xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{value}</div><div className={cx("text-[10px] font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{label}</div></div>;
 }
 
+// ── DebugPage: diagnóstico visual de fingerStates + scores ──────────────
+const ALL_SIGNS = [
+  ...LSM_ALPHABET.map(([l, tpl]) => ({ name: l, template: tpl, group: 'Abecedario' })),
+  ...['1','2','3','4','5','6','7','8','9'].map(n => ({ name: n, template: NUMBER_TEMPLATES[n] || '?????', group: 'Números' })),
+];
+
+function DebugPage({ isDark, navigate }) {
+  const [states, setStates]   = useState(null);
+  const [scores, setScores]   = useState([]);
+  const [best, setBest]       = useState(null);
+  const [filterG, setFilterG] = useState('Todos');
+
+  const handleResults = useCallback(({ handRes }) => {
+    const lms = handRes?.landmarks?.[0] ?? null;
+    if (!lms) { setStates(null); setScores([]); setBest(null); return; }
+    const s = fingerStates(lms);
+    setStates(s);
+    const all = ALL_SIGNS.map(({ name, template }) => ({
+      name, template,
+      score: Math.min(1, scoreLetter(s, template, name)),
+    })).sort((a, b) => b.score - a.score);
+    setScores(all);
+    setBest(all[0]?.score >= 0.50 ? all[0].name : null);
+  }, []);
+
+  const { videoRef, canvasRef, camReady } = useCameraMediaPipe({ onResults: handleResults });
+
+  const FINGERS = ['thumb','index','middle','ring','pinky'];
+  const FINGER_ES = { thumb:'Pulgar', index:'Índice', middle:'Medio', ring:'Anular', pinky:'Meñique' };
+  const groups = ['Todos', 'Abecedario', 'Números'];
+  const shown = filterG === 'Todos' ? scores : scores.filter(s => {
+    const sg = ALL_SIGNS.find(x => x.name === s.name)?.group;
+    return sg === filterG;
+  });
+
+  return (
+    <div className={cx('min-h-screen transition-colors', isDark ? 'bg-brand-deep' : 'bg-brand-cream')}>
+      <header className={cx('flex items-center justify-between border-b px-6 py-3', isDark ? 'border-brand-line bg-brand-card' : 'border-brand-mist bg-white')}>
+        <span className={cx('text-lg font-extrabold', isDark ? 'text-white' : 'text-brand-ink')}>🔬 Diagnóstico LSM</span>
+        <div className='flex gap-2'>
+          {groups.map(g => (
+            <button key={g} onClick={() => setFilterG(g)}
+              className={cx('rounded-lg px-3 py-1 text-xs font-bold transition',
+                filterG === g
+                  ? 'bg-brand-teal text-white'
+                  : isDark ? 'bg-brand-deep text-[#5A8A94] hover:text-white' : 'bg-brand-cream text-brand-muted hover:text-brand-ink'
+              )}>{g}</button>
+          ))}
+          <button onClick={() => navigate('/practice')} className={cx('rounded-lg px-3 py-1 text-xs font-bold', isDark ? 'bg-brand-card text-brand-soft' : 'bg-gray-100 text-brand-muted')}>← Práctica</button>
+        </div>
+      </header>
+
+      <div className='mx-auto max-w-7xl px-4 py-6 grid gap-4 lg:grid-cols-12'>
+
+        {/* Cámara */}
+        <div className='lg:col-span-5'>
+          <Card isDark={isDark}>
+            <SectionLabel isDark={isDark}>Cámara en vivo</SectionLabel>
+            <div className='relative mt-3 overflow-hidden rounded-xl bg-black' style={{ aspectRatio: '4/3' }}>
+              <video ref={videoRef} className='absolute inset-0 h-full w-full object-cover opacity-0' playsInline muted />
+              <canvas ref={canvasRef} className='absolute inset-0 h-full w-full object-cover' />
+              {/* Mejor seña detectada */}
+              {best && (
+                <div className='absolute bottom-4 left-1/2 -translate-x-1/2 rounded-2xl bg-green-600/90 px-6 py-2 text-center backdrop-blur'>
+                  <div className='text-[10px] font-bold uppercase tracking-widest text-green-200'>Detectando</div>
+                  <div className='text-3xl font-extrabold text-white'>{best}</div>
+                </div>
+              )}
+            </div>
+
+            {/* Estado de dedos */}
+            <div className='mt-4 grid grid-cols-5 gap-2'>
+              {FINGERS.map(f => {
+                const ext = states?.[f];
+                return (
+                  <div key={f} className={cx('flex flex-col items-center gap-1 rounded-xl p-2',
+                    ext === true  ? 'bg-green-500/20 ring-1 ring-green-400' :
+                    ext === false ? 'bg-red-500/10 ring-1 ring-red-400/40' :
+                    isDark ? 'bg-brand-deep' : 'bg-brand-cream'
+                  )}>
+                    <span className='text-lg'>{ext === true ? '🟢' : ext === false ? '🔴' : '⚪'}</span>
+                    <span className={cx('text-[10px] font-bold text-center leading-tight', isDark ? 'text-[#8AA8B0]' : 'text-brand-muted')}>{FINGER_ES[f]}</span>
+                    <span className={cx('text-[10px] font-mono', ext === true ? 'text-green-400' : 'text-red-400/70')}>{ext === true ? 'E' : ext === false ? 'C' : '?'}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Extras del estado */}
+            {states && (
+              <div className='mt-3 grid grid-cols-2 gap-1'>
+                {[
+                  ['Puño', states.fistTight],
+                  ['Palma plana', states.palmFlat],
+                  ['Pulgar lateral', states.thumbOut],
+                  ['Pulgar toca índice', states.thumbTouchIndex],
+                  ['Pulgar toca medio', states.thumbTouchMiddle],
+                  ['Mano arriba', states.handUp],
+                  ['Mano abajo', states.handDown],
+                  ['Palma a cámara', states.palmFacingCamera],
+                  ['UV juntos', states.uvClose],
+                  ['UV separados', states.uvSpread],
+                  ['UV cruzados', states.uvTouching],
+                ].map(([lbl, val]) => (
+                  <div key={lbl} className={cx('flex items-center justify-between rounded-lg px-2 py-1 text-[10px]',
+                    val ? (isDark ? 'bg-brand-teal/20' : 'bg-brand-teal/10') : (isDark ? 'bg-brand-deep' : 'bg-brand-cream')
+                  )}>
+                    <span className={isDark ? 'text-[#8AA8B0]' : 'text-brand-muted'}>{lbl}</span>
+                    <span className={cx('font-bold', val ? 'text-green-400' : isDark ? 'text-[#5A8A94]' : 'text-[#B0C4CC]')}>{val ? 'SÍ' : 'no'}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </div>
+
+        {/* Scores */}
+        <div className='lg:col-span-7'>
+          <Card isDark={isDark}>
+            <SectionLabel isDark={isDark}>Scores por seña (ordenados)</SectionLabel>
+            <div className='mt-3 space-y-1 max-h-[70vh] overflow-y-auto pr-1'>
+              {shown.length === 0 && (
+                <p className={cx('py-8 text-center text-sm', isDark ? 'text-[#5A8A94]' : 'text-brand-muted')}>Pon una mano frente a la cámara…</p>
+              )}
+              {shown.map(({ name, score, template }) => {
+                const pct = Math.round(score * 100);
+                const isMatch = score >= MATCH_THR;
+                return (
+                  <div key={name} className={cx('flex items-center gap-3 rounded-lg px-3 py-2',
+                    isMatch ? (isDark ? 'bg-green-900/30 ring-1 ring-green-500/40' : 'bg-green-50 ring-1 ring-green-300') :
+                    isDark ? 'bg-brand-deep/40' : 'bg-brand-cream'
+                  )}>
+                    <span className={cx('w-8 text-center text-lg font-extrabold shrink-0', isDark ? 'text-white' : 'text-brand-ink')}>{name}</span>
+                    <span className={cx('font-mono text-[10px] shrink-0', isDark ? 'text-[#5A8A94]' : 'text-[#B0C4CC]')}>{template}</span>
+                    <div className={cx('flex-1 h-2 rounded-full overflow-hidden', isDark ? 'bg-brand-deep' : 'bg-brand-mist')}>
+                      <div
+                        className={cx('h-full rounded-full transition-all duration-150',
+                          isMatch ? 'bg-green-400' : score > 0.45 ? 'bg-brand-orange' : 'bg-[#2AABB8]/50'
+                        )}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className={cx('w-10 text-right text-xs font-bold shrink-0',
+                      isMatch ? 'text-green-400' : score > 0.45 ? 'text-brand-orange' : isDark ? 'text-[#5A8A94]' : 'text-[#B0C4CC]'
+                    )}>{pct}%</span>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [isDark, setIsDark] = useState(true);
   const [path, navigate] = useRoute();
@@ -1098,6 +1257,7 @@ function App() {
   if (path === "/" || path === "/login") return <AuthPage mode="login" isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;
   if (path === "/signup") return <AuthPage mode="signup" isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;
   if (path === "/practice") return <PracticePage isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;
+  if (path === "/debug")   return <DebugPage isDark={isDark} navigate={navigate} />;
 
   return (
     <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
