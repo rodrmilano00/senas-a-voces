@@ -1090,17 +1090,204 @@ function Stat({ value, label, isDark }) {
   return <div><div className={cx("text-xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{value}</div><div className={cx("text-[10px] font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{label}</div></div>;
 }
 
+// ── useVideoFileMediaPipe: procesa un archivo de video con HandLandmarker ──
+function useVideoFileMediaPipe({ onResults, videoFile }) {
+  const videoRef  = useRef(null);
+  const canvasRef = useRef(null);
+  const hlRef     = useRef(null);
+  const rafRef    = useRef(null);
+  const [ready, setReady]   = useState(false);
+  const [error, setError]   = useState(null);
+  const [playing, setPlaying] = useState(false);
+
+  // Inicializar HandLandmarker una vez
+  useEffect(() => {
+    let cancelled = false;
+    async function init() {
+      try {
+        const vision = await FilesetResolver.forVisionTasks(WASM_PATH);
+        if (cancelled) return;
+        const hl = await HandLandmarker.createFromOptions(vision, {
+          baseOptions: { modelAssetPath: HAND_MODEL, delegate: "GPU" },
+          runningMode: "VIDEO",
+          numHands: 2,
+          minHandDetectionConfidence: 0.4,
+          minHandPresenceConfidence: 0.4,
+          minTrackingConfidence: 0.4,
+        });
+        if (cancelled) { hl.close(); return; }
+        hlRef.current = hl;
+        setReady(true);
+      } catch (e) { if (!cancelled) setError(e.message); }
+    }
+    init();
+    return () => {
+      cancelled = true;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      hlRef.current?.close();
+    };
+  }, []);
+
+  // Cargar archivo de video cuando cambia
+  useEffect(() => {
+    const vid = videoRef.current;
+    if (!vid || !videoFile) return;
+    const url = URL.createObjectURL(videoFile);
+    vid.src = url;
+    vid.load();
+    setPlaying(false);
+    return () => URL.revokeObjectURL(url);
+  }, [videoFile]);
+
+  // Loop de detección mientras el video reproduce
+  useEffect(() => {
+    const vid = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!ready || !vid || !canvas) return;
+
+    let stopped = false;
+    function detect() {
+      if (stopped) return;
+      if (vid.paused || vid.ended || vid.readyState < 2) {
+        rafRef.current = requestAnimationFrame(detect);
+        return;
+      }
+      const w = vid.videoWidth || 640;
+      const h = vid.videoHeight || 480;
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(vid, 0, 0, w, h);
+
+      if (hlRef.current) {
+        const now = performance.now();
+        const draw = new DrawingUtils(ctx);
+        const handRes = hlRef.current.detectForVideo(vid, now);
+        for (const lms of (handRes.landmarks || [])) {
+          draw.drawConnectors(lms, HandLandmarker.HAND_CONNECTIONS, { color: "#2AABB8", lineWidth: 3 });
+          draw.drawLandmarks(lms, { color: "#EC9960", lineWidth: 1, radius: 4 });
+        }
+        if (onResults) onResults({ handRes });
+      }
+      rafRef.current = requestAnimationFrame(detect);
+    }
+
+    const onPlay  = () => { setPlaying(true);  rafRef.current = requestAnimationFrame(detect); };
+    const onPause = () => { setPlaying(false); };
+    const onEnd   = () => { setPlaying(false); };
+    vid.addEventListener("play",  onPlay);
+    vid.addEventListener("pause", onPause);
+    vid.addEventListener("ended", onEnd);
+    return () => {
+      stopped = true;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      vid.removeEventListener("play",  onPlay);
+      vid.removeEventListener("pause", onPause);
+      vid.removeEventListener("ended", onEnd);
+    };
+  }, [ready, onResults]);
+
+  return { videoRef, canvasRef, ready, error, playing };
+}
+
 // ── DebugPage: diagnóstico visual de fingerStates + scores ──────────────
 const ALL_SIGNS = [
   ...LSM_ALPHABET.map(([l, tpl]) => ({ name: l, template: tpl, group: 'Abecedario' })),
   ...['1','2','3','4','5','6','7','8','9'].map(n => ({ name: n, template: NUMBER_TEMPLATES[n] || '?????', group: 'Números' })),
 ];
 
+// Panel compartido: dedos + extras + scores
+function DebugPanel({ states, scores, filterG, setFilterG, isDark, shown }) {
+  const FINGERS   = ['thumb','index','middle','ring','pinky'];
+  const FINGER_ES = { thumb:'Pulgar', index:'Índice', middle:'Medio', ring:'Anular', pinky:'Meñique' };
+  return (
+    <>
+      {/* Estado de dedos */}
+      <div className='mt-4 grid grid-cols-5 gap-2'>
+        {FINGERS.map(f => {
+          const ext = states?.[f];
+          return (
+            <div key={f} className={cx('flex flex-col items-center gap-1 rounded-xl p-2',
+              ext === true  ? 'bg-green-500/20 ring-1 ring-green-400' :
+              ext === false ? 'bg-red-500/10 ring-1 ring-red-400/40' :
+              isDark ? 'bg-brand-deep' : 'bg-brand-cream'
+            )}>
+              <span className='text-lg'>{ext === true ? '🟢' : ext === false ? '🔴' : '⚪'}</span>
+              <span className={cx('text-[10px] font-bold text-center leading-tight', isDark ? 'text-[#8AA8B0]' : 'text-brand-muted')}>{FINGER_ES[f]}</span>
+              <span className={cx('text-[10px] font-mono', ext === true ? 'text-green-400' : 'text-red-400/70')}>{ext === true ? 'E' : ext === false ? 'C' : '?'}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Extras booleanos */}
+      {states && (
+        <div className='mt-3 grid grid-cols-2 gap-1'>
+          {[
+            ['Puño', states.fistTight], ['Palma plana', states.palmFlat],
+            ['Pulgar lateral', states.thumbOut], ['Pulgar↔índice', states.thumbTouchIndex],
+            ['Pulgar↔medio', states.thumbTouchMiddle], ['Mano arriba', states.handUp],
+            ['Mano abajo', states.handDown], ['Palma a cámara', states.palmFacingCamera],
+            ['UV juntos', states.uvClose], ['UV separados', states.uvSpread],
+            ['UV cruzados', states.uvTouching],
+          ].map(([lbl, val]) => (
+            <div key={lbl} className={cx('flex items-center justify-between rounded-lg px-2 py-1 text-[10px]',
+              val ? (isDark ? 'bg-brand-teal/20' : 'bg-brand-teal/10') : (isDark ? 'bg-brand-deep' : 'bg-brand-cream')
+            )}>
+              <span className={isDark ? 'text-[#8AA8B0]' : 'text-brand-muted'}>{lbl}</span>
+              <span className={cx('font-bold', val ? 'text-green-400' : isDark ? 'text-[#5A8A94]' : 'text-[#B0C4CC]')}>{val ? 'SÍ' : 'no'}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Ranking de scores */}
+      <div className='mt-4'>
+        <div className='mb-2 flex gap-1'>
+          {['Todos','Abecedario','Números'].map(g => (
+            <button key={g} onClick={() => setFilterG(g)}
+              className={cx('rounded-lg px-2 py-0.5 text-[10px] font-bold transition',
+                filterG === g ? 'bg-brand-teal text-white' : isDark ? 'bg-brand-deep text-[#5A8A94]' : 'bg-brand-cream text-brand-muted'
+              )}>{g}</button>
+          ))}
+        </div>
+        <div className='space-y-0.5 max-h-52 overflow-y-auto'>
+          {shown.length === 0 && <p className={cx('py-4 text-center text-xs', isDark ? 'text-[#5A8A94]' : 'text-brand-muted')}>Sin mano detectada…</p>}
+          {shown.map(({ name, score, template }) => {
+            const pct = Math.round(score * 100);
+            const isMatch = score >= MATCH_THR;
+            return (
+              <div key={name} className={cx('flex items-center gap-2 rounded-lg px-2 py-1',
+                isMatch ? (isDark ? 'bg-green-900/30 ring-1 ring-green-500/40' : 'bg-green-50 ring-1 ring-green-300') :
+                isDark ? 'bg-brand-deep/40' : 'bg-brand-cream'
+              )}>
+                <span className={cx('w-6 text-center font-extrabold text-sm shrink-0', isDark ? 'text-white' : 'text-brand-ink')}>{name}</span>
+                <span className={cx('font-mono text-[9px] w-12 shrink-0', isDark ? 'text-[#5A8A94]' : 'text-[#B0C4CC]')}>{template}</span>
+                <div className={cx('flex-1 h-1.5 rounded-full overflow-hidden', isDark ? 'bg-brand-deep' : 'bg-brand-mist')}>
+                  <div className={cx('h-full rounded-full transition-all duration-100',
+                    isMatch ? 'bg-green-400' : score > 0.45 ? 'bg-brand-orange' : 'bg-[#2AABB8]/50'
+                  )} style={{ width: `${pct}%` }} />
+                </div>
+                <span className={cx('w-8 text-right text-[10px] font-bold shrink-0',
+                  isMatch ? 'text-green-400' : score > 0.45 ? 'text-brand-orange' : isDark ? 'text-[#5A8A94]' : 'text-[#B0C4CC]'
+                )}>{pct}%</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+}
+
 function DebugPage({ isDark, navigate }) {
+  const [tab, setTab]         = useState('cam');    // 'cam' | 'video'
   const [states, setStates]   = useState(null);
   const [scores, setScores]   = useState([]);
   const [best, setBest]       = useState(null);
   const [filterG, setFilterG] = useState('Todos');
+  const [videoFile, setVideoFile] = useState(null);
+  const [speed, setSpeed]     = useState(0.5);      // velocidad de reproducción
+  const fileInputRef = useRef(null);
 
   const handleResults = useCallback(({ handRes }) => {
     const lms = handRes?.landmarks?.[0] ?? null;
@@ -1115,124 +1302,189 @@ function DebugPage({ isDark, navigate }) {
     setBest(all[0]?.score >= 0.50 ? all[0].name : null);
   }, []);
 
-  const { videoRef, canvasRef, camReady } = useCameraMediaPipe({ onResults: handleResults });
+  // Modo cámara
+  const cam = useCameraMediaPipe({ onResults: tab === 'cam' ? handleResults : undefined });
+  // Modo video
+  const vid = useVideoFileMediaPipe({ onResults: tab === 'video' ? handleResults : undefined, videoFile });
 
-  const FINGERS = ['thumb','index','middle','ring','pinky'];
-  const FINGER_ES = { thumb:'Pulgar', index:'Índice', middle:'Medio', ring:'Anular', pinky:'Meñique' };
-  const groups = ['Todos', 'Abecedario', 'Números'];
   const shown = filterG === 'Todos' ? scores : scores.filter(s => {
     const sg = ALL_SIGNS.find(x => x.name === s.name)?.group;
     return sg === filterG;
   });
 
+  // Ajustar velocidad del video
+  useEffect(() => {
+    if (vid.videoRef.current) vid.videoRef.current.playbackRate = speed;
+  }, [speed, vid.videoRef]);
+
   return (
     <div className={cx('min-h-screen transition-colors', isDark ? 'bg-brand-deep' : 'bg-brand-cream')}>
-      <header className={cx('flex items-center justify-between border-b px-6 py-3', isDark ? 'border-brand-line bg-brand-card' : 'border-brand-mist bg-white')}>
-        <span className={cx('text-lg font-extrabold', isDark ? 'text-white' : 'text-brand-ink')}>🔬 Diagnóstico LSM</span>
-        <div className='flex gap-2'>
-          {groups.map(g => (
-            <button key={g} onClick={() => setFilterG(g)}
-              className={cx('rounded-lg px-3 py-1 text-xs font-bold transition',
-                filterG === g
-                  ? 'bg-brand-teal text-white'
-                  : isDark ? 'bg-brand-deep text-[#5A8A94] hover:text-white' : 'bg-brand-cream text-brand-muted hover:text-brand-ink'
-              )}>{g}</button>
-          ))}
+      {/* Header */}
+      <header className={cx('flex items-center justify-between border-b px-6 py-3 gap-4 flex-wrap', isDark ? 'border-brand-line bg-brand-card' : 'border-brand-mist bg-white')}>
+        <span className={cx('text-lg font-extrabold shrink-0', isDark ? 'text-white' : 'text-brand-ink')}>🔬 Diagnóstico LSM</span>
+        <div className='flex gap-2 flex-wrap items-center'>
+          {/* Tabs */}
+          <div className={cx('flex rounded-lg overflow-hidden border', isDark ? 'border-brand-line' : 'border-brand-mist')}>
+            {[['cam','📷 Cámara'],['video','🎬 Video']].map(([t, lbl]) => (
+              <button key={t} onClick={() => { setTab(t); setStates(null); setScores([]); setBest(null); }}
+                className={cx('px-3 py-1 text-xs font-bold transition',
+                  tab === t ? 'bg-brand-teal text-white' : isDark ? 'bg-brand-deep text-[#5A8A94]' : 'bg-white text-brand-muted'
+                )}>{lbl}</button>
+            ))}
+          </div>
           <button onClick={() => navigate('/practice')} className={cx('rounded-lg px-3 py-1 text-xs font-bold', isDark ? 'bg-brand-card text-brand-soft' : 'bg-gray-100 text-brand-muted')}>← Práctica</button>
         </div>
       </header>
 
       <div className='mx-auto max-w-7xl px-4 py-6 grid gap-4 lg:grid-cols-12'>
 
-        {/* Cámara */}
-        <div className='lg:col-span-5'>
+        {/* Panel izquierdo: visor */}
+        <div className='lg:col-span-6'>
           <Card isDark={isDark}>
-            <SectionLabel isDark={isDark}>Cámara en vivo</SectionLabel>
-            <div className='relative mt-3 overflow-hidden rounded-xl bg-black' style={{ aspectRatio: '4/3' }}>
-              <video ref={videoRef} className='absolute inset-0 h-full w-full object-cover opacity-0' playsInline muted />
-              <canvas ref={canvasRef} className='absolute inset-0 h-full w-full object-cover' />
-              {/* Mejor seña detectada */}
-              {best && (
-                <div className='absolute bottom-4 left-1/2 -translate-x-1/2 rounded-2xl bg-green-600/90 px-6 py-2 text-center backdrop-blur'>
-                  <div className='text-[10px] font-bold uppercase tracking-widest text-green-200'>Detectando</div>
-                  <div className='text-3xl font-extrabold text-white'>{best}</div>
+
+            {/* ── TAB CÁMARA ── */}
+            {tab === 'cam' && (
+              <>
+                <SectionLabel isDark={isDark}>Cámara en vivo</SectionLabel>
+                <div className='relative mt-3 overflow-hidden rounded-xl bg-black' style={{ aspectRatio: '4/3' }}>
+                  <video ref={cam.videoRef} className='absolute inset-0 h-full w-full object-cover opacity-0' playsInline muted />
+                  <canvas ref={cam.canvasRef} className='absolute inset-0 h-full w-full object-cover' />
+                  {best && (
+                    <div className='absolute bottom-4 left-1/2 -translate-x-1/2 rounded-2xl bg-green-600/90 px-6 py-2 text-center backdrop-blur'>
+                      <div className='text-[10px] font-bold uppercase tracking-widest text-green-200'>Detectando</div>
+                      <div className='text-4xl font-extrabold text-white'>{best}</div>
+                    </div>
+                  )}
+                  {!cam.camReady && !cam.camError && (
+                    <div className='absolute inset-0 flex items-center justify-center'>
+                      <span className={cx('text-xs animate-pulse', isDark ? 'text-[#5A8A94]' : 'text-brand-muted')}>Iniciando cámara…</span>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-
-            {/* Estado de dedos */}
-            <div className='mt-4 grid grid-cols-5 gap-2'>
-              {FINGERS.map(f => {
-                const ext = states?.[f];
-                return (
-                  <div key={f} className={cx('flex flex-col items-center gap-1 rounded-xl p-2',
-                    ext === true  ? 'bg-green-500/20 ring-1 ring-green-400' :
-                    ext === false ? 'bg-red-500/10 ring-1 ring-red-400/40' :
-                    isDark ? 'bg-brand-deep' : 'bg-brand-cream'
-                  )}>
-                    <span className='text-lg'>{ext === true ? '🟢' : ext === false ? '🔴' : '⚪'}</span>
-                    <span className={cx('text-[10px] font-bold text-center leading-tight', isDark ? 'text-[#8AA8B0]' : 'text-brand-muted')}>{FINGER_ES[f]}</span>
-                    <span className={cx('text-[10px] font-mono', ext === true ? 'text-green-400' : 'text-red-400/70')}>{ext === true ? 'E' : ext === false ? 'C' : '?'}</span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Extras del estado */}
-            {states && (
-              <div className='mt-3 grid grid-cols-2 gap-1'>
-                {[
-                  ['Puño', states.fistTight],
-                  ['Palma plana', states.palmFlat],
-                  ['Pulgar lateral', states.thumbOut],
-                  ['Pulgar toca índice', states.thumbTouchIndex],
-                  ['Pulgar toca medio', states.thumbTouchMiddle],
-                  ['Mano arriba', states.handUp],
-                  ['Mano abajo', states.handDown],
-                  ['Palma a cámara', states.palmFacingCamera],
-                  ['UV juntos', states.uvClose],
-                  ['UV separados', states.uvSpread],
-                  ['UV cruzados', states.uvTouching],
-                ].map(([lbl, val]) => (
-                  <div key={lbl} className={cx('flex items-center justify-between rounded-lg px-2 py-1 text-[10px]',
-                    val ? (isDark ? 'bg-brand-teal/20' : 'bg-brand-teal/10') : (isDark ? 'bg-brand-deep' : 'bg-brand-cream')
-                  )}>
-                    <span className={isDark ? 'text-[#8AA8B0]' : 'text-brand-muted'}>{lbl}</span>
-                    <span className={cx('font-bold', val ? 'text-green-400' : isDark ? 'text-[#5A8A94]' : 'text-[#B0C4CC]')}>{val ? 'SÍ' : 'no'}</span>
-                  </div>
-                ))}
-              </div>
+              </>
             )}
+
+            {/* ── TAB VIDEO ── */}
+            {tab === 'video' && (
+              <>
+                <div className='flex items-center justify-between'>
+                  <SectionLabel isDark={isDark}>Video de entrenamiento</SectionLabel>
+                  <button onClick={() => fileInputRef.current?.click()}
+                    className='rounded-lg bg-brand-teal px-3 py-1 text-xs font-bold text-white hover:bg-brand-cyan transition'>
+                    📂 Cargar video
+                  </button>
+                  <input ref={fileInputRef} type='file' accept='video/*' className='hidden'
+                    onChange={e => { if (e.target.files[0]) setVideoFile(e.target.files[0]); }} />
+                </div>
+
+                {!videoFile ? (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className={cx('mt-3 flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed cursor-pointer py-12',
+                      isDark ? 'border-brand-line text-[#5A8A94] hover:border-brand-cyan' : 'border-brand-mist text-brand-muted hover:border-brand-teal'
+                    )}>
+                    <span className='text-4xl'>🎬</span>
+                    <span className='text-sm font-semibold'>Haz clic para seleccionar un video</span>
+                    <span className='text-xs opacity-60'>MP4, MOV, WebM…</span>
+                  </div>
+                ) : (
+                  <>
+                    {/* Video + canvas superpuesto */}
+                    <div className='relative mt-3 overflow-hidden rounded-xl bg-black' style={{ aspectRatio: '16/9' }}>
+                      <video
+                        ref={vid.videoRef}
+                        className='absolute inset-0 h-full w-full object-contain'
+                        controls={false}
+                        playsInline
+                        style={{ opacity: 0 }}
+                      />
+                      <canvas ref={vid.canvasRef} className='absolute inset-0 h-full w-full object-contain' />
+
+                      {/* Seña detectada */}
+                      {best && (
+                        <div className='absolute top-3 left-3 rounded-xl bg-green-600/90 px-4 py-1.5 text-center backdrop-blur'>
+                          <div className='text-[9px] font-bold uppercase tracking-widest text-green-200'>Detecta</div>
+                          <div className='text-3xl font-extrabold text-white leading-none'>{best}</div>
+                        </div>
+                      )}
+
+                      {/* Nombre del archivo */}
+                      <div className='absolute bottom-2 right-3 rounded-lg bg-black/60 px-2 py-0.5 text-[10px] text-white backdrop-blur truncate max-w-[60%]'>
+                        {videoFile.name}
+                      </div>
+                    </div>
+
+                    {/* Controles */}
+                    <div className='mt-3 flex items-center gap-3'>
+                      <button
+                        onClick={() => {
+                          const v = vid.videoRef.current;
+                          if (!v) return;
+                          if (v.paused) v.play(); else v.pause();
+                        }}
+                        className='rounded-lg bg-brand-teal px-4 py-2 text-xs font-bold text-white hover:bg-brand-cyan transition min-w-[70px]'>
+                        {vid.playing ? '⏸ Pausar' : '▶ Play'}
+                      </button>
+                      <button
+                        onClick={() => { const v = vid.videoRef.current; if (v) { v.currentTime = 0; v.pause(); } }}
+                        className={cx('rounded-lg px-3 py-2 text-xs font-bold transition', isDark ? 'bg-brand-deep text-[#5A8A94] hover:text-white' : 'bg-brand-cream text-brand-muted')}>
+                        ⏮ Reiniciar
+                      </button>
+                      <div className='flex items-center gap-2 ml-auto'>
+                        <span className={cx('text-[10px] shrink-0', isDark ? 'text-[#5A8A94]' : 'text-brand-muted')}>Velocidad</span>
+                        {[0.25, 0.5, 1].map(s => (
+                          <button key={s} onClick={() => setSpeed(s)}
+                            className={cx('rounded px-2 py-0.5 text-[10px] font-bold transition',
+                              speed === s ? 'bg-brand-orange text-white' : isDark ? 'bg-brand-deep text-[#5A8A94]' : 'bg-brand-cream text-brand-muted'
+                            )}>{s}×</button>
+                        ))}
+                      </div>
+                    </div>
+                    <button onClick={() => { setVideoFile(null); setStates(null); setScores([]); setBest(null); }}
+                      className={cx('mt-2 w-full rounded-lg py-1 text-[10px] font-bold', isDark ? 'text-[#5A8A94] hover:text-white' : 'text-brand-muted hover:text-brand-ink')}>
+                      🗑 Cambiar video
+                    </button>
+                  </>
+                )}
+              </>
+            )}
+
+            {/* Panel dedos + scores compartido */}
+            <DebugPanel states={states} scores={scores} filterG={filterG} setFilterG={setFilterG} isDark={isDark} shown={shown} />
           </Card>
         </div>
 
-        {/* Scores */}
-        <div className='lg:col-span-7'>
+        {/* Panel derecho: scores completos */}
+        <div className='lg:col-span-6'>
           <Card isDark={isDark}>
-            <SectionLabel isDark={isDark}>Scores por seña (ordenados)</SectionLabel>
-            <div className='mt-3 space-y-1 max-h-[70vh] overflow-y-auto pr-1'>
-              {shown.length === 0 && (
-                <p className={cx('py-8 text-center text-sm', isDark ? 'text-[#5A8A94]' : 'text-brand-muted')}>Pon una mano frente a la cámara…</p>
+            <div className='flex items-center justify-between mb-3'>
+              <SectionLabel isDark={isDark}>Ranking completo</SectionLabel>
+              {best && <span className='rounded-full bg-green-500/20 px-3 py-1 text-xs font-extrabold text-green-400 ring-1 ring-green-500/40'>✓ {best}</span>}
+            </div>
+            <div className='space-y-0.5 max-h-[75vh] overflow-y-auto'>
+              {scores.length === 0 && (
+                <p className={cx('py-12 text-center text-sm', isDark ? 'text-[#5A8A94]' : 'text-brand-muted')}>
+                  {tab === 'cam' ? 'Pon una mano frente a la cámara…' : 'Carga un video y dale Play…'}
+                </p>
               )}
-              {shown.map(({ name, score, template }) => {
+              {scores.map(({ name, score, template }) => {
                 const pct = Math.round(score * 100);
                 const isMatch = score >= MATCH_THR;
+                const grp = ALL_SIGNS.find(x => x.name === name)?.group;
                 return (
-                  <div key={name} className={cx('flex items-center gap-3 rounded-lg px-3 py-2',
+                  <div key={name} className={cx('flex items-center gap-3 rounded-lg px-3 py-1.5',
                     isMatch ? (isDark ? 'bg-green-900/30 ring-1 ring-green-500/40' : 'bg-green-50 ring-1 ring-green-300') :
                     isDark ? 'bg-brand-deep/40' : 'bg-brand-cream'
                   )}>
-                    <span className={cx('w-8 text-center text-lg font-extrabold shrink-0', isDark ? 'text-white' : 'text-brand-ink')}>{name}</span>
-                    <span className={cx('font-mono text-[10px] shrink-0', isDark ? 'text-[#5A8A94]' : 'text-[#B0C4CC]')}>{template}</span>
+                    <span className={cx('w-7 text-center font-extrabold shrink-0', isDark ? 'text-white' : 'text-brand-ink')}>{name}</span>
+                    <span className={cx('text-[9px] shrink-0 w-16', isDark ? 'text-[#5A8A94]' : 'text-[#B0C4CC]')}>{grp}</span>
+                    <span className={cx('font-mono text-[9px] shrink-0 w-12', isDark ? 'text-[#5A8A94]' : 'text-[#B0C4CC]')}>{template}</span>
                     <div className={cx('flex-1 h-2 rounded-full overflow-hidden', isDark ? 'bg-brand-deep' : 'bg-brand-mist')}>
-                      <div
-                        className={cx('h-full rounded-full transition-all duration-150',
-                          isMatch ? 'bg-green-400' : score > 0.45 ? 'bg-brand-orange' : 'bg-[#2AABB8]/50'
-                        )}
-                        style={{ width: `${pct}%` }}
-                      />
+                      <div className={cx('h-full rounded-full transition-all duration-100',
+                        isMatch ? 'bg-green-400' : score > 0.45 ? 'bg-brand-orange' : 'bg-[#2AABB8]/40'
+                      )} style={{ width: `${pct}%` }} />
                     </div>
-                    <span className={cx('w-10 text-right text-xs font-bold shrink-0',
+                    <span className={cx('w-9 text-right text-xs font-bold shrink-0',
                       isMatch ? 'text-green-400' : score > 0.45 ? 'text-brand-orange' : isDark ? 'text-[#5A8A94]' : 'text-[#B0C4CC]'
                     )}>{pct}%</span>
                   </div>
