@@ -1,7 +1,15 @@
 import { supabase } from '../lib/supabaseClient';
 
+function hasSupabase() {
+  if (supabase) return true;
+  console.error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
+  return false;
+}
+
 // Fetch user progress
 export async function fetchUserProgress(userId) {
+  if (!hasSupabase()) return null;
+
   try {
     const { data, error } = await supabase
       .from('user_progress')
@@ -19,6 +27,8 @@ export async function fetchUserProgress(userId) {
 
 // Fetch module progress for a user
 export async function fetchModuleProgress(userId) {
+  if (!hasSupabase()) return [];
+
   try {
     const { data, error } = await supabase
       .from('module_progress')
@@ -35,6 +45,8 @@ export async function fetchModuleProgress(userId) {
 
 // Update user progress after completing a sign
 export async function updateSignProgress(userId, signName, module, accuracy, timeSpent) {
+  if (!hasSupabase()) return { success: false, error: new Error('Supabase is not configured') };
+
   try {
     // Record the practice session
     const { error: practiceError } = await supabase
@@ -85,6 +97,8 @@ export async function updateSignProgress(userId, signName, module, accuracy, tim
 
 // Update module progress
 export async function updateModuleProgress(userId, moduleId, signsCompleted, totalSigns, status) {
+  if (!hasSupabase()) return { success: false, error: new Error('Supabase is not configured') };
+
   try {
     const { data: existing, error: fetchError } = await supabase
       .from('module_progress')
@@ -134,6 +148,8 @@ export async function updateModuleProgress(userId, moduleId, signsCompleted, tot
 
 // Update streak
 export async function updateStreak(userId) {
+  if (!hasSupabase()) return { success: false, error: new Error('Supabase is not configured') };
+
   try {
     const { data: currentProgress, error: fetchError } = await supabase
       .from('user_progress')
@@ -187,6 +203,8 @@ export async function updateStreak(userId) {
 
 // Get recent practice history
 export async function getRecentPractice(userId, limit = 10) {
+  if (!hasSupabase()) return [];
+
   try {
     const { data, error } = await supabase
       .from('sign_practice')
