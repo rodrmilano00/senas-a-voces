@@ -1077,10 +1077,24 @@ function Stat({ value, label, isDark }) {
   return <div><div className={cx("text-xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{value}</div><div className={cx("text-[10px] font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{label}</div></div>;
 }
 
+function ConfigErrorPage({ isDark }) {
+  return (
+    <div className={cx("flex min-h-screen items-center justify-center px-6", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+      <div className={cx("w-full max-w-lg rounded-2xl border p-6 text-center", isDark ? "border-brand-line bg-brand-card text-white" : "border-brand-mist bg-white text-brand-ink")}>
+        <Logo isDark={isDark} compact />
+        <h1 className="mt-6 text-2xl font-extrabold">Configuracion pendiente</h1>
+        <p className={cx("mt-3 text-sm leading-6", isDark ? "text-brand-soft" : "text-brand-muted")}>
+          Agrega `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en las variables de entorno del deploy y vuelve a desplegar.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [isDark, setIsDark] = useState(true);
   const [path, navigate, state] = useRoute();
-  const { user, loading } = useAuth();
+  const { user, loading, authConfigError } = useAuth();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
@@ -1097,6 +1111,8 @@ function App() {
       </div>
     );
   }
+
+  if (authConfigError) return <ConfigErrorPage isDark={isDark} />;
 
   // Auth pages
   if (path === "/" || path === "/login") return <AuthPage mode="login" isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;

@@ -74,27 +74,6 @@ export default function AuthPage({ mode, isDark, setIsDark, navigate }) {
     confirmPassword: "",
   });
 
-  const devEmail = import.meta.env.VITE_DEV_USER_EMAIL;
-  const devPassword = import.meta.env.VITE_DEV_USER_PASSWORD;
-  const isDevMode = !!(devEmail && devPassword);
-
-  const handleDevLogin = async () => {
-    setError("");
-    setLoading(true);
-    
-    const { data, error } = await signIn({
-      email: devEmail,
-      password: devPassword,
-    });
-
-    if (error) {
-      setError("Error al iniciar sesión como dev: " + error.message);
-      setLoading(false);
-    } else {
-      navigate("/dashboard");
-    }
-  };
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError("");
@@ -320,21 +299,6 @@ export default function AuthPage({ mode, isDark, setIsDark, navigate }) {
               >
                 {loading ? "Procesando..." : isSignup ? "Crear cuenta gratis" : "Iniciar sesión"}
               </button>
-
-              {!isSignup && isDevMode && (
-                <button
-                  type="button"
-                  onClick={handleDevLogin}
-                  disabled={loading}
-                  className={`btn-press w-full rounded-lg py-3 text-xs font-bold transition ${
-                    isDark
-                      ? "border border-brand-cyan text-brand-cyan hover:bg-brand-cyan/10"
-                      : "border border-brand-teal text-brand-teal hover:bg-brand-teal/10"
-                  } ${loading && "cursor-not-allowed opacity-55"}`}
-                >
-                  🚀 Iniciar como Dev ({devEmail})
-                </button>
-              )}
             </form>
             <p className={`mt-8 text-center text-sm ${isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]"}`}>
               {isSignup ? "¿Ya tienes cuenta? " : "¿No tienes cuenta? "}
