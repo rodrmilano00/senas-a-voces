@@ -1,9 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { HandLandmarker, PoseLandmarker, FaceLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import { createRoot } from "react-dom/client";
-import "./styles.css";
-import { GLOSARIO_LESSONS, ALPHABET_LESSON } from "./lessons_glosario.js";
-import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR } from "./lsm_detector.js";
+import "./styles/styles.css";
+import { GLOSARIO_LESSONS, ALPHABET_LESSON } from "./data/lessons_glosario.js";
+import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR } from "./utils/lsm_detector.js";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import AuthPage from "./components/AuthPage";
+import EmailConfirmationPage from "./components/EmailConfirmationPage";
+import { updateSignProgress, updateModuleProgress, updateStreak } from "./services/progressService";
 
 const navItems = [
   { path: "/", label: "Acceso" },
@@ -116,6 +120,7 @@ function cx(...classes) {
 
 function useRoute() {
   const [path, setPath] = useState(() => window.location.pathname);
+  const [state, setState] = useState(null);
 
   useEffect(() => {
     const onPop = () => setPath(window.location.pathname);
@@ -123,12 +128,13 @@ function useRoute() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  const navigate = useCallback((to) => {
-    window.history.pushState({}, "", to);
+  const navigate = useCallback((to, options = {}) => {
+    window.history.pushState(options.state || {}, "", to);
     setPath(to);
+    setState(options.state || null);
   }, []);
 
-  return [path, navigate];
+  return [path, navigate, state];
 }
 
 function Icon({ name, className = "h-5 w-5" }) {
@@ -176,6 +182,7 @@ function ThemeToggle({ isDark, setIsDark }) {
 function AppHeader({ isDark, setIsDark, navigate, path }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const { profile, signOut } = useAuth();
 
   useEffect(() => {
     if (!menuOpen) return undefined;
@@ -194,9 +201,17 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
   }, [menuOpen]);
 
   const selectAccountAction = (to) => {
-    navigate(to);
+    if (to === "/") {
+      signOut();
+    } else {
+      navigate(to);
+    }
     setMenuOpen(false);
   };
+
+  const userInitials = profile?.avatar_initials || profile?.full_name?.substring(0, 2).toUpperCase() || "US";
+  const userName = profile?.full_name || "Usuario";
+  const userEmail = profile?.email || "";
 
   return (
     <header className={cx("app-header sticky top-0 z-40 border-b backdrop-blur-xl transition-colors", isDark ? "border-brand-line bg-brand-deep/85" : "border-brand-mist bg-brand-cream/85")}>
@@ -219,15 +234,15 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
               onClick={() => setMenuOpen((open) => !open)}
               className={cx("profile-trigger btn-press flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal text-white")}
             >
-              MA
+              {userInitials}
             </button>
             {menuOpen && (
               <div className={cx("account-menu", isDark ? "account-menu-dark" : "account-menu-light")} role="menu">
                 <div className="account-menu-head">
-                  <span className={cx("flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal text-white")}>MA</span>
+                  <span className={cx("flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal text-white")}>{userInitials}</span>
                   <span>
-                    <strong className={cx("block text-sm", isDark ? "text-white" : "text-brand-ink")}>Maria</strong>
-                    <small className={cx("block text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>maria@senasavoces.mx</small>
+                    <strong className={cx("block text-sm", isDark ? "text-white" : "text-brand-ink")}>{userName}</strong>
+                    <small className={cx("block text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>{userEmail}</small>
                   </span>
                 </div>
                 <div className="mt-2">
@@ -263,101 +278,6 @@ function WaveBackground({ isDark }) {
   );
 }
 
-function AuthPage({ mode, isDark, setIsDark, navigate }) {
-  const isSignup = mode === "signup";
-  const [showPassword, setShowPassword] = useState(false);
-  const [agreed, setAgreed] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const submit = (event) => {
-    event.preventDefault();
-    setLoading(true);
-    setTimeout(() => navigate("/dashboard"), 700);
-  };
-
-  return (
-    <div className={cx("relative min-h-screen overflow-hidden transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
-      <WaveBackground isDark={isDark} />
-      <button onClick={() => setIsDark(!isDark)} className={cx("btn-press fixed right-6 top-6 z-50 rounded-xl p-2.5", isDark ? "bg-brand-card text-brand-orange" : "bg-white text-brand-teal shadow-sm")} aria-label="Cambiar tema">
-        <Icon name={isDark ? "sun" : "moon"} />
-      </button>
-      <div className="relative z-10 flex min-h-screen flex-col lg:flex-row">
-        <section className="hidden w-[55%] items-center justify-center p-12 lg:flex">
-          <div className="relative max-w-lg">
-            <Logo isDark={isDark} />
-            <h1 className={cx("mt-8 text-4xl font-extrabold leading-tight", isDark ? "text-white" : "text-brand-ink")}>
-              {isSignup ? "Únete a la" : "Aprende LSM"}<br />
-              <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{isSignup ? "comunidad LSM" : "a tu ritmo"}</span>
-            </h1>
-            <p className={cx("mt-4 text-lg leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>
-              {isSignup ? "Crea tu cuenta gratuita y comienza con práctica inmersiva y retroalimentación inteligente." : "Únete a miles de personas que ya aprenden Lengua de Señas Mexicana con práctica inmersiva."}
-            </p>
-            <div className="mt-10 flex gap-8">
-              {(isSignup ? [
-                ["Gratis", "Para siempre"],
-                ["5 min", "Por día"],
-                ["IA", "Retroalimentación"]
-              ] : [
-                ["2,400+", "Señas enseñadas"],
-                ["15K+", "Estudiantes activos"],
-                ["98%", "Satisfacción"]
-              ]).map(([num, label]) => (
-                <div key={label}>
-                  <div className={cx("text-2xl font-extrabold", isDark ? "text-brand-cyan" : "text-brand-teal")}>{num}</div>
-                  <div className={cx("mt-1 text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-        <section className="flex flex-1 items-center justify-center p-6 lg:p-12">
-          <div className={cx("animate-float-in w-full max-w-md rounded-3xl p-8 lg:p-10", isDark ? "border border-brand-line bg-brand-card/80 backdrop-blur-xl" : "border border-gray-100 bg-white/90 shadow-2xl shadow-gray-200/50 backdrop-blur-xl")}>
-            <div className="mb-8 flex justify-center lg:hidden"><Logo isDark={isDark} /></div>
-            <h2 className={cx("text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{isSignup ? "Crea tu cuenta" : "Bienvenido de nuevo"}</h2>
-            <p className={cx("mb-8 mt-1 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>{isSignup ? "Empieza a aprender LSM hoy mismo" : "Inicia sesión para continuar tu aprendizaje"}</p>
-            <form onSubmit={submit} className="space-y-5">
-              {isSignup && <Field icon="user" label="Nombre completo" placeholder="Tu nombre" isDark={isDark} />}
-              <Field icon="mail" label="Correo electrónico" type="email" placeholder="tu@correo.com" isDark={isDark} />
-              <Field icon="lock" label="Contraseña" type={showPassword ? "text" : "password"} placeholder={isSignup ? "Mínimo 8 caracteres" : "••••••••"} isDark={isDark} action={<button type="button" onClick={() => setShowPassword(!showPassword)} className={cx("rounded-lg p-1", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}><Icon name="eye" className="h-4 w-4" /></button>} />
-              {isSignup && <Field icon="lock" label="Confirmar contraseña" type="password" placeholder="Repite tu contraseña" isDark={isDark} />}
-              {isSignup ? (
-                <label className="flex cursor-pointer items-start gap-2.5">
-                  <input checked={agreed} onChange={(e) => setAgreed(e.target.checked)} type="checkbox" className="mt-0.5 h-4 w-4 accent-brand-teal" />
-                  <span className={cx("text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>Acepto los términos de servicio y la política de privacidad.</span>
-                </label>
-              ) : (
-                <div className="flex items-center justify-between">
-                  <label className={cx("flex cursor-pointer items-center gap-2 text-xs font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}><input type="checkbox" className="h-4 w-4 accent-brand-teal" />Recordarme</label>
-                  <button type="button" className={cx("text-xs font-semibold", isDark ? "text-brand-cyan" : "text-brand-teal")}>¿Olvidaste tu contraseña?</button>
-                </div>
-              )}
-              <button disabled={loading || (isSignup && !agreed)} className={cx("btn-press w-full rounded-lg py-3.5 text-sm font-bold transition", isSignup ? "bg-brand-orange text-white hover:bg-[#E08A50]" : "bg-brand-teal text-white hover:bg-[#0A4D5D]", (loading || (isSignup && !agreed)) && "cursor-not-allowed opacity-55")}>
-                {loading ? "Procesando..." : isSignup ? "Crear cuenta gratis" : "Iniciar sesión"}
-              </button>
-            </form>
-            <p className={cx("mt-8 text-center text-sm", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>
-              {isSignup ? "¿Ya tienes cuenta? " : "¿No tienes cuenta? "}
-              <button onClick={() => navigate(isSignup ? "/" : "/signup")} className={cx("font-bold", isDark ? "text-brand-cyan" : "text-brand-teal")}>{isSignup ? "Inicia sesión" : "Regístrate gratis"}</button>
-            </p>
-          </div>
-        </section>
-      </div>
-    </div>
-  );
-}
-
-function Field({ icon, label, action, isDark, ...props }) {
-  return (
-    <label className="block">
-      <span className={cx("mb-2 block text-xs font-semibold uppercase tracking-wide", isDark ? "text-brand-soft" : "text-brand-muted")}>{label}</span>
-      <span className="relative block">
-        <span className={cx("absolute left-3.5 top-1/2 -translate-y-1/2", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}><Icon name={icon} className="h-4 w-4" /></span>
-        <input {...props} className={cx("input-focus-ring w-full rounded-lg border py-3.5 pl-11 pr-12 text-sm font-medium transition", isDark ? "border-brand-line bg-brand-deep text-white placeholder:text-[#5A8A94]" : "border-brand-mist bg-brand-cream text-brand-ink placeholder:text-[#8AA8B0]")} />
-        {action && <span className="absolute right-3.5 top-1/2 -translate-y-1/2">{action}</span>}
-      </span>
-    </label>
-  );
-}
 
 function Card({ isDark, className = "", children }) {
   return <div className={cx("surface-card rounded-2xl p-6", isDark ? "border border-brand-line bg-brand-card" : "border border-gray-100 bg-white shadow-sm", className)}>{children}</div>;
@@ -404,16 +324,40 @@ function QuestList({ isDark }) {
 }
 
 function Dashboard({ isDark, navigate }) {
-  const activity = useMemo(() => Array.from({ length: 16 }, (_, week) => Array.from({ length: 7 }, (_, day) => (week * 3 + day * 5) % 5)), []);
+  const { profile, userProgress, moduleProgress } = useAuth();
   const levels = isDark ? ["#0C4A57", "#0E5F6E", "#14889A", "#1FAAB8", "#2AABB8"] : ["#E8EEEF", "#A8CDD6", "#5AADBE", "#1D7F94", "#0D5C6F"];
+  
+  // Parse weekly activity from database or use default
+  const activity = useMemo(() => {
+    if (userProgress?.weekly_activity && userProgress.weekly_activity.length > 0) {
+      return userProgress.weekly_activity;
+    }
+    return Array.from({ length: 16 }, (_, week) => Array.from({ length: 7 }, (_, day) => (week * 3 + day * 5) % 5));
+  }, [userProgress]);
+
+  const userName = profile?.full_name || "Usuario";
+  const streakDays = userProgress?.streak_days || 0;
+  const currentLevel = userProgress?.current_level || 1;
+  const currentLesson = userProgress?.current_lesson || 1;
+  const totalSignsLearned = userProgress?.total_signs_learned || 0;
+  const totalPracticeTime = userProgress?.total_practice_time || 0;
+  const averageAccuracy = userProgress?.average_accuracy || 0;
+
+  // Calculate module progress
+  const completedModules = moduleProgress?.filter(m => m.status === 'completed').length || 0;
+  const totalModules = modules.length;
+  const moduleProgressPercent = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-8">
-      <PageTitle isDark={isDark} title="Buenas tardes, María" accent="María" subtitle="Tu progreso de la semana va excelente" />
+      <PageTitle isDark={isDark} title={`Buenas tardes, ${userName.split(' ')[0]}`} accent={userName.split(' ')[0]} subtitle="Tu progreso de la semana va excelente" />
       <LearningPulse isDark={isDark} />
-      <div className={cx("streak-banner animate-fade mb-6 flex items-center gap-4 rounded-xl border p-4", isDark ? "border-brand-line bg-brand-card/70" : "border-brand-mist bg-white/60")}>
-        <div className="flex items-center gap-2 text-brand-orange"><Icon name="flame" className="streak-fire h-7 w-7" /><strong className="text-3xl">12</strong></div>
-        <div><div className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>¡Racha de 12 días!</div><div className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>Sigue practicando para mantener tu racha activa</div></div>
-      </div>
+      {streakDays > 0 && (
+        <div className={cx("streak-banner animate-fade mb-6 flex items-center gap-4 rounded-xl border p-4", isDark ? "border-brand-line bg-brand-card/70" : "border-brand-mist bg-white/60")}>
+          <div className="flex items-center gap-2 text-brand-orange"><Icon name="flame" className="streak-fire h-7 w-7" /><strong className="text-3xl">{streakDays}</strong></div>
+          <div><div className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>¡Racha de {streakDays} días!</div><div className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>Sigue practicando para mantener tu racha activa</div></div>
+        </div>
+      )}
       <div className="grid gap-6 lg:grid-cols-5">
         <div className="space-y-6 lg:col-span-3">
           <Card isDark={isDark}>
@@ -424,7 +368,15 @@ function Dashboard({ isDark, navigate }) {
               </div>
             </div>
           </Card>
-          <ProgressCard isDark={isDark} />
+          <ProgressCard 
+            isDark={isDark} 
+            currentLevel={currentLevel}
+            currentLesson={currentLesson}
+            totalSignsLearned={totalSignsLearned}
+            totalPracticeTime={totalPracticeTime}
+            averageAccuracy={averageAccuracy}
+            moduleProgressPercent={moduleProgressPercent}
+          />
         </div>
         <div className="space-y-6 lg:col-span-2">
           <QuestList isDark={isDark} />
@@ -435,9 +387,9 @@ function Dashboard({ isDark, navigate }) {
           <div>
             <SectionLabel isDark={isDark}>Acciones rápidas</SectionLabel>
             <div className="mt-3 space-y-3">
-              <QuickAction isDark={isDark} icon="play" title="Comenzar lección" desc="Lección 7: Saludos" onClick={() => navigate("/learn")} />
+              <QuickAction isDark={isDark} icon="play" title="Comenzar lección" desc={`Lección ${currentLesson}`} onClick={() => navigate("/learn")} />
               <QuickAction isDark={isDark} icon="camera" title="Práctica inmersiva" desc="Feedback con IA" onClick={() => navigate("/practice")} accent />
-              <QuickAction isDark={isDark} icon="refresh" title="Repaso diario" desc="12 señas pendientes" onClick={() => navigate("/learn")} />
+              <QuickAction isDark={isDark} icon="refresh" title="Repaso diario" desc={`${Math.max(0, 12 - totalSignsLearned)} señas pendientes`} onClick={() => navigate("/learn")} />
             </div>
           </div>
         </div>
@@ -460,14 +412,25 @@ function SectionLabel({ isDark, children }) {
   return <h3 className={cx("text-sm font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>{children}</h3>;
 }
 
-function ProgressCard({ isDark }) {
+function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, totalPracticeTime, averageAccuracy, moduleProgressPercent }) {
   return (
     <Card isDark={isDark}>
-      <div className="mb-4 flex items-center justify-between"><SectionLabel isDark={isDark}>Progreso actual</SectionLabel><span className={cx("rounded-full px-3 py-1 text-xs font-semibold", isDark ? "bg-brand-cyan/15 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>Nivel 3</span></div>
-      <h3 className={cx("text-3xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>Lección 7:</h3>
-      <p className={cx("text-sm font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}>Saludos y presentaciones</p>
-      <div className={cx("mt-5 h-2.5 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}><div className="h-full w-[68%] rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" /></div>
-      <div className="mt-5 grid grid-cols-3 gap-3 border-t border-dashed pt-5" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>{[["12", "Señas hoy"], ["45 min", "Tiempo total"], ["89%", "Precisión"]].map(([v, l]) => <div key={l} className="text-center"><div className={cx("text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{v}</div><div className={cx("mt-0.5 text-[10px] font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{l}</div></div>)}</div>
+      <div className="mb-4 flex items-center justify-between"><SectionLabel isDark={isDark}>Progreso actual</SectionLabel><span className={cx("rounded-full px-3 py-1 text-xs font-semibold", isDark ? "bg-brand-cyan/15 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>Nivel {currentLevel}</span></div>
+      <h3 className={cx("text-3xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>Lección {currentLesson}:</h3>
+      <p className={cx("text-sm font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}>Progreso del módulo</p>
+      <div className={cx("mt-5 h-2.5 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}><div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" style={{ width: `${moduleProgressPercent}%` }} /></div>
+      <div className="mt-5 grid grid-cols-3 gap-3 border-t border-dashed pt-5" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
+        {[
+          [totalSignsLearned, "Señas aprendidas"],
+          [`${totalPracticeTime} min`, "Tiempo total"],
+          [`${Math.round(averageAccuracy)}%`, "Precisión"]
+        ].map(([v, l]) => (
+          <div key={l} className="text-center">
+            <div className={cx("text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{v}</div>
+            <div className={cx("mt-0.5 text-[10px] font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{l}</div>
+          </div>
+        ))}
+      </div>
     </Card>
   );
 }
@@ -487,12 +450,28 @@ function QuickAction({ isDark, icon, title, desc, onClick, accent }) {
 }
 
 function LearnPage({ isDark }) {
+  const { userProgress, moduleProgress } = useAuth();
   const [selected, setSelected] = useState(modules[0]);
   const [activeSign, setActiveSign] = useState(null);
   const [search, setSearch] = useState("");
-  const completedSigns = modules.filter((m) => m.status === "completed").reduce((sum, m) => sum + m.signs, 0);
-  const totalSigns = modules.reduce((sum, m) => sum + m.signs, 0);
+
+  // Merge module data with progress from database
+  const modulesWithProgress = useMemo(() => {
+    return modules.map(module => {
+      const progressData = moduleProgress?.find(mp => mp.module_id === module.id);
+      return {
+        ...module,
+        status: progressData?.status || (module.id === 'alphabet' ? 'current' : 'locked'),
+        signs_completed: progressData?.signs_completed || 0,
+      };
+    });
+  }, [moduleProgress]);
+
+  const completedSigns = modulesWithProgress.filter((m) => m.status === "completed").reduce((sum, m) => sum + (m.signs_completed || m.signs), 0);
+  const totalSigns = modulesWithProgress.reduce((sum, m) => sum + m.signs, 0);
   const progress = Math.round((completedSigns / totalSigns) * 100);
+  const streakDays = userProgress?.streak_days || 0;
+
   const filteredItems = useMemo(() => {
     if (!selected) return [];
     if (!search.trim()) return selected.items;
@@ -506,7 +485,7 @@ function LearnPage({ isDark }) {
       <PageTitle isDark={isDark} title="Tu ruta de aprendizaje" accent="aprendizaje" subtitle="Selecciona un módulo y toca cualquier seña para ver el video" />
       <div className="grid gap-6 lg:grid-cols-12">
         <section className="space-y-0 lg:col-span-4 overflow-y-auto max-h-[80vh] pr-1">
-          {modules.map((module, index) => (
+          {modulesWithProgress.map((module, index) => (
             <SkillNode
               key={module.id} module={module} index={index} isDark={isDark}
               selected={selected?.id === module.id}
@@ -519,7 +498,7 @@ function LearnPage({ isDark }) {
             <Card isDark={isDark}>
               <SectionLabel isDark={isDark}>Tu racha</SectionLabel>
               <div className="mt-4 text-center">
-                <div className="text-4xl font-extrabold text-brand-orange">12</div>
+                <div className="text-4xl font-extrabold text-brand-orange">{streakDays}</div>
                 <div className={cx("mt-1 text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>días consecutivos</div>
               </div>
             </Card>
@@ -789,6 +768,7 @@ function useCameraMediaPipe({ onResults }) {
 }
 
 function PracticePage({ isDark, setIsDark, navigate }) {
+  const { user, userProgress } = useAuth();
   const [signIdx, setSignIdx] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [total, setTotal] = useState(0);
@@ -800,6 +780,7 @@ function PracticePage({ isDark, setIsDark, navigate }) {
   const confirmedRef = useRef(false);
   const holdStartRef = useRef(null);   // momentáneo que lleva la mano en MATCH
   const HOLD_MS = 600;                 // ms que debe mantener la pose correcta
+  const practiceStartTime = useRef(Date.now());
 
   const addToast = (type, message) => setToasts((prev) => [...prev.slice(-2), { id: idRef.current++, type, message }]);
 
@@ -838,6 +819,15 @@ function PracticePage({ isDark, setIsDark, navigate }) {
           setTotal((v) => v + 1);
           const next = Math.min(prevIdx + 1, signsQueue.length - 1);
           addToast("success", `✓ ${sign.name}  →  ${signsQueue[next].name}`);
+          
+          // Save progress to database
+          if (user) {
+            const timeSpent = Math.floor((Date.now() - practiceStartTime.current) / 1000);
+            updateSignProgress(user.id, sign.name, sign.module || 'practice', sc, timeSpent);
+            updateStreak(user.id);
+            practiceStartTime.current = Date.now();
+          }
+          
           setTimeout(() => {
             confirmedRef.current = false;
             holdStartRef.current = null;
@@ -1089,14 +1079,37 @@ function Stat({ value, label, isDark }) {
 
 function App() {
   const [isDark, setIsDark] = useState(true);
-  const [path, navigate] = useRoute();
+  const [path, navigate, state] = useRoute();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
 
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className={`flex min-h-screen items-center justify-center ${isDark ? "bg-brand-deep" : "bg-brand-cream"}`}>
+        <div className="text-center">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-brand-teal border-t-transparent"></div>
+          <p className={cx(isDark ? "text-brand-soft" : "text-brand-muted")}>Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Auth pages
   if (path === "/" || path === "/login") return <AuthPage mode="login" isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;
   if (path === "/signup") return <AuthPage mode="signup" isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;
+  if (path === "/confirm-email") return <EmailConfirmationPage isDark={isDark} setIsDark={setIsDark} navigate={navigate} email={state?.email || ""} />;
+
+  // Protected routes - redirect to login if not authenticated
+  if (!user) {
+    navigate("/");
+    return null;
+  }
+
+  // Protected pages
   if (path === "/practice") return <PracticePage isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;
 
   return (
@@ -1107,4 +1120,8 @@ function App() {
   );
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+createRoot(document.getElementById("root")).render(
+  <AuthProvider>
+    <App />
+  </AuthProvider>
+);
