@@ -6,6 +6,34 @@ function hasSupabase() {
   return false;
 }
 
+// Initialize user progress for a new user
+export async function initializeUserProgress(userId) {
+  if (!hasSupabase()) return { success: false, error: new Error('Supabase is not configured') };
+
+  try {
+    const { error } = await supabase
+      .from('user_progress')
+      .insert({
+        user_id: userId,
+        current_level: 1,
+        current_lesson: 1,
+        lesson_progress: {},
+        total_signs_learned: 0,
+        total_practice_time: 0,
+        average_accuracy: 0,
+        streak_days: 0,
+        weekly_activity: [],
+        daily_quests: [],
+      });
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Error initializing user progress:', error);
+    return { success: false, error };
+  }
+}
+
 // Fetch user progress
 export async function fetchUserProgress(userId) {
   if (!hasSupabase()) return null;
@@ -62,13 +90,32 @@ export async function updateSignProgress(userId, signName, module, accuracy, tim
     if (practiceError) throw practiceError;
 
     // Update user progress
-    const { data: currentProgress, error: fetchError } = await supabase
+    let currentProgress;
+    const { data: progressData, error: fetchError } = await supabase
       .from('user_progress')
       .select('*')
       .eq('user_id', userId)
       .single();
 
-    if (fetchError) throw fetchError;
+    // If user progress doesn't exist, initialize it first
+    if (fetchError && fetchError.code === 'PGRST116') {
+      const { error: initError } = await initializeUserProgress(userId);
+      if (initError) throw initError;
+      
+      // Fetch the newly created progress
+      const { data: newProgress, error: refetchError } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (refetchError) throw refetchError;
+      currentProgress = newProgress;
+    } else if (fetchError) {
+      throw fetchError;
+    } else {
+      currentProgress = progressData;
+    }
 
     const newTotalSigns = (currentProgress.total_signs_learned || 0) + 1;
     const newTotalTime = (currentProgress.total_practice_time || 0) + Math.floor(timeSpent / 60);
@@ -151,13 +198,32 @@ export async function updateStreak(userId) {
   if (!hasSupabase()) return { success: false, error: new Error('Supabase is not configured') };
 
   try {
-    const { data: currentProgress, error: fetchError } = await supabase
+    let currentProgress;
+    const { data: progressData, error: fetchError } = await supabase
       .from('user_progress')
       .select('*')
       .eq('user_id', userId)
       .single();
 
-    if (fetchError) throw fetchError;
+    // If user progress doesn't exist, initialize it first
+    if (fetchError && fetchError.code === 'PGRST116') {
+      const { error: initError } = await initializeUserProgress(userId);
+      if (initError) throw initError;
+      
+      // Fetch the newly created progress
+      const { data: newProgress, error: refetchError } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (refetchError) throw refetchError;
+      currentProgress = newProgress;
+    } else if (fetchError) {
+      throw fetchError;
+    } else {
+      currentProgress = progressData;
+    }
 
     const lastPractice = currentProgress.last_practice_date ? new Date(currentProgress.last_practice_date) : null;
     const today = new Date();

@@ -628,6 +628,7 @@ function useCameraMediaPipe({ onResults }) {
   const slowFrameRef = useRef(-1);
   const lastPoseRef  = useRef({ landmarks: [] });
   const lastFaceRef  = useRef({ landmarks: [] });
+  const streamRef    = useRef(null); // Store stream reference for cleanup
   const [camReady, setCamReady] = useState(false);
   const [camError, setCamError] = useState(null);
 
@@ -675,6 +676,8 @@ function useCameraMediaPipe({ onResults }) {
           video: { width: 640, height: 480, facingMode: "user" },
         });
         if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
+        
+        streamRef.current = stream; // Store stream reference
 
         const video = videoRef.current;
         if (!video) return;
@@ -760,7 +763,17 @@ function useCameraMediaPipe({ onResults }) {
       hlRef.current?.close();
       plRef.current?.close();
       flRef.current?.close();
-      videoRef.current?.srcObject?.getTracks().forEach((t) => t.stop());
+      
+      // Ensure camera is completely stopped
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+      
+      if (videoRef.current?.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach((t) => t.stop());
+        videoRef.current.srcObject = null;
+      }
     };
   }, []);
 
@@ -781,8 +794,29 @@ function PracticePage({ isDark, setIsDark, navigate }) {
   const holdStartRef = useRef(null);   // momentáneo que lleva la mano en MATCH
   const HOLD_MS = 600;                 // ms que debe mantener la pose correcta
   const practiceStartTime = useRef(Date.now());
+  const streamRef = useRef(null); // Store the media stream for cleanup
 
   const addToast = (type, message) => setToasts((prev) => [...prev.slice(-2), { id: idRef.current++, type, message }]);
+
+  // Cleanup camera when component unmounts or route changes
+  useEffect(() => {
+    return () => {
+      // Stop all media streams
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+      
+      // Also stop any video elements
+      const videoElements = document.querySelectorAll('video');
+      videoElements.forEach(video => {
+        if (video.srcObject) {
+          video.srcObject.getTracks().forEach(track => track.stop());
+          video.srcObject = null;
+        }
+      });
+    };
+  }, []);
 
   const handleResults = useCallback(({ handRes }) => {
     const lms = handRes?.landmarks?.[0] ?? null;
@@ -856,6 +890,18 @@ function PracticePage({ isDark, setIsDark, navigate }) {
     addToast("info", `Saltada → ${signsQueue[Math.min(signIdx + 1, signsQueue.length - 1)].name}`);
   };
 
+  const stopCamera = () => {
+    // Stop all media streams
+    const videoElements = document.querySelectorAll('video');
+    videoElements.forEach(video => {
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+      }
+    });
+    addToast("info", "Cámara detenida");
+  };
+
   return (
     <div className={cx("flex h-screen flex-col transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
       <header className={cx("flex items-center justify-between border-b px-6 py-3 backdrop-blur-xl", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}>
@@ -866,6 +912,12 @@ function PracticePage({ isDark, setIsDark, navigate }) {
         </div>
         <div className="flex items-center gap-3">
           <span className={cx("rounded-xl px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-white text-brand-teal shadow-sm")}>{correct}/{total}</span>
+          <button 
+            onClick={stopCamera}
+            className={cx("rounded-xl px-3 py-1.5 text-xs font-bold transition", isDark ? "bg-brand-card text-brand-orange hover:bg-brand-orange/20" : "bg-white text-brand-orange hover:bg-brand-orange/10 shadow-sm")}
+          >
+            Detener Cámara
+          </button>
           <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
         </div>
       </header>
@@ -1099,6 +1151,31 @@ function App() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
+
+  // Ensure camera is stopped when navigating away from practice page
+  useEffect(() => {
+    const stopCamera = () => {
+      // Stop all active media streams
+      const videoElements = document.querySelectorAll('video');
+      videoElements.forEach(video => {
+        if (video.srcObject) {
+          video.srcObject.getTracks().forEach(track => {
+            track.stop();
+          });
+          video.srcObject = null;
+        }
+      });
+    };
+
+    if (path !== "/practice") {
+      stopCamera();
+    }
+
+    return () => {
+      // Also stop camera on unmount
+      stopCamera();
+    };
+  }, [path]);
 
   // Show loading state while checking authentication
   if (loading) {

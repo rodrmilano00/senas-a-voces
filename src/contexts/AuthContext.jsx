@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
+import { initializeUserProgress } from '../services/progressService';
 
 const AuthContext = createContext(null);
 
@@ -137,12 +138,21 @@ export function AuthProvider({ children }) {
       
       // Check if user was created but session is null (email confirmation required)
       if (data.user && !data.session) {
+        // Initialize user progress for the new user
+        if (data.user?.id) {
+          await initializeUserProgress(data.user.id);
+        }
         return { 
           data, 
           requiresEmailConfirmation: true,
           email: email,
           error: null 
         };
+      }
+      
+      // Initialize user progress for the new user (if session exists)
+      if (data.user?.id) {
+        await initializeUserProgress(data.user.id);
       }
       
       return { data, error: null, requiresEmailConfirmation: false };
