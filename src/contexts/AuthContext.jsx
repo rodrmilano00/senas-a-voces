@@ -89,6 +89,7 @@ export function AuthProvider({ children }) {
             streak_days: 0,
             weekly_activity: [],
             daily_quests: [],
+            practice_days: 0,
           });
         } else {
           throw error;

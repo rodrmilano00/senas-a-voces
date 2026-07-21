@@ -24,6 +24,7 @@ export async function initializeUserProgress(userId) {
         streak_days: 0,
         weekly_activity: [],
         daily_quests: [],
+        practice_days: 0,
       });
 
     if (error) throw error;
@@ -134,6 +135,10 @@ export async function updateSignProgress(userId, signName, module, accuracy, tim
       .eq('user_id', userId);
 
     if (updateError) throw updateError;
+
+    // Update weekly activity and practice days
+    await updateWeeklyActivity(userId);
+    await updatePracticeDays(userId);
 
     return { success: true };
   } catch (error) {
@@ -284,5 +289,240 @@ export async function getRecentPractice(userId, limit = 10) {
   } catch (error) {
     console.error('Error fetching recent practice:', error);
     return [];
+  }
+}
+
+// Record video view
+export async function recordVideoView(userId, signName, moduleId, lessonId) {
+  if (!hasSupabase()) return { success: false, error: new Error('Supabase is not configured') };
+
+  try {
+    const { error } = await supabase
+      .from('video_views')
+      .insert({
+        user_id: userId,
+        sign_name: signName,
+        module_id: moduleId,
+        lesson_id: lessonId,
+        view_date: new Date().toISOString(),
+      });
+
+    if (error) throw error;
+
+    // Update lesson progress
+    await updateLessonProgress(userId, lessonId, signName);
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error recording video view:', error);
+    return { success: false, error };
+  }
+}
+
+// Update lesson progress
+export async function updateLessonProgress(userId, lessonId, signName) {
+  if (!hasSupabase()) return { success: false, error: new Error('Supabase is not configured') };
+
+  try {
+    let currentProgress;
+    const { data: progressData, error: fetchError } = await supabase
+      .from('user_progress')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError && fetchError.code === 'PGRST116') {
+      const { error: initError } = await initializeUserProgress(userId);
+      if (initError) throw initError;
+      
+      const { data: newProgress, error: refetchError } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (refetchError) throw refetchError;
+      currentProgress = newProgress;
+    } else if (fetchError) {
+      throw fetchError;
+    } else {
+      currentProgress = progressData;
+    }
+
+    const lessonProgress = currentProgress.lesson_progress || {};
+    if (!lessonProgress[lessonId]) {
+      lessonProgress[lessonId] = { signs_viewed: [], completed: false };
+    }
+    
+    if (!lessonProgress[lessonId].signs_viewed.includes(signName)) {
+      lessonProgress[lessonId].signs_viewed.push(signName);
+    }
+
+    const { error: updateError } = await supabase
+      .from('user_progress')
+      .update({ lesson_progress: lessonProgress })
+      .eq('user_id', userId);
+
+    if (updateError) throw updateError;
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating lesson progress:', error);
+    return { success: false, error };
+  }
+}
+
+// Update weekly activity
+export async function updateWeeklyActivity(userId) {
+  if (!hasSupabase()) return { success: false, error: new Error('Supabase is not configured') };
+
+  try {
+    let currentProgress;
+    const { data: progressData, error: fetchError } = await supabase
+      .from('user_progress')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError && fetchError.code === 'PGRST116') {
+      const { error: initError } = await initializeUserProgress(userId);
+      if (initError) throw initError;
+      
+      const { data: newProgress, error: refetchError } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+      
+      if (refetchError) throw refetchError;
+      currentProgress = newProgress;
+    } else if (fetchError) {
+      throw fetchError;
+    } else {
+      currentProgress = progressData;
+    }
+
+    const weeklyActivity = currentProgress.weekly_activity || [];
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+    const weekNumber = Math.floor(today.getDate() / 7);
+
+    // Ensure we have enough weeks
+    while (weeklyActivity.length <= weekNumber) {
+      weeklyActivity.push(Array(7).fill(0));
+    }
+
+    // Increment today's activity level (max 4)
+    weeklyActivity[weekNumber][dayOfWeek] = Math.min(4, (weeklyActivity[weekNumber][dayOfWeek] || 0) + 1);
+
+    const { error: updateError } = await supabase
+      .from('user_progress')
+      .update({ weekly_activity: weeklyActivity })
+      .eq('user_id', userId);
+
+    if (updateError) throw updateError;
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating weekly activity:', error);
+    return { success: false, error };
+  }
+}
+
+// Get recommendations based on user progress
+export async function getRecommendations(userId) {
+  if (!hasSupabase()) return [];
+
+  try {
+    const { data: progressData, error: progressError } = await supabase
+      .from('user_progress')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (progressError && progressError.code !== 'PGRST116') throw progressError;
+
+    const { data: moduleData, error: moduleError } = await supabase
+      .from('module_progress')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (moduleError) throw moduleError;
+
+    const recommendations = [];
+
+    // Recommend current module if not completed
+    const currentModule = moduleData?.find(m => m.status === 'current');
+    if (currentModule) {
+      recommendations.push({
+        type: 'continue',
+        moduleId: currentModule.module_id,
+        reason: 'Continúa con tu módulo actual',
+      });
+    }
+
+    // Recommend practice if streak is low
+    if (progressData?.streak_days < 3) {
+      recommendations.push({
+        type: 'practice',
+        reason: 'Practica más para aumentar tu racha',
+      });
+    }
+
+    // Recommend review if accuracy is below threshold
+    if (progressData?.average_accuracy < 0.7) {
+      recommendations.push({
+        type: 'review',
+        reason: 'Repasa señas para mejorar tu precisión',
+      });
+    }
+
+    // Recommend next module if current is nearly complete
+    if (currentModule && currentModule.signs_completed / currentModule.total_signs > 0.8) {
+      const nextModuleIndex = moduleData?.findIndex(m => m.module_id === currentModule.module_id) + 1;
+      if (nextModuleIndex < moduleData?.length) {
+        recommendations.push({
+          type: 'next_module',
+          moduleId: moduleData[nextModuleIndex].module_id,
+          reason: '¡Estás cerca de completar este módulo!',
+        });
+      }
+    }
+
+    return recommendations;
+  } catch (error) {
+    console.error('Error getting recommendations:', error);
+    return [];
+  }
+}
+
+// Update practice days count
+export async function updatePracticeDays(userId) {
+  if (!hasSupabase()) return { success: false, error: new Error('Supabase is not configured') };
+
+  try {
+    // Count unique practice days
+    const { data: practiceData, error: countError } = await supabase
+      .from('sign_practice')
+      .select('practice_date')
+      .eq('user_id', userId);
+
+    if (countError) throw countError;
+
+    const uniqueDays = new Set(
+      practiceData?.map(p => new Date(p.practice_date).toDateString()) || []
+    ).size;
+
+    const { error: updateError } = await supabase
+      .from('user_progress')
+      .update({ practice_days: uniqueDays })
+      .eq('user_id', userId);
+
+    if (updateError) throw updateError;
+
+    return { success: true, practiceDays: uniqueDays };
+  } catch (error) {
+    console.error('Error updating practice days:', error);
+    return { success: false, error };
   }
 }

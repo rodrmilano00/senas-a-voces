@@ -7,7 +7,7 @@ import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR } from "./utils/
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AuthPage from "./components/AuthPage";
 import EmailConfirmationPage from "./components/EmailConfirmationPage";
-import { updateSignProgress, updateModuleProgress, updateStreak } from "./services/progressService";
+import { updateSignProgress, updateModuleProgress, updateStreak, recordVideoView, updateWeeklyActivity, updatePracticeDays, getRecommendations } from "./services/progressService";
 
 const navItems = [
   { path: "/", label: "Acceso" },
@@ -324,8 +324,9 @@ function QuestList({ isDark }) {
 }
 
 function Dashboard({ isDark, navigate }) {
-  const { profile, userProgress, moduleProgress } = useAuth();
+  const { profile, userProgress, moduleProgress, user } = useAuth();
   const levels = isDark ? ["#0C4A57", "#0E5F6E", "#14889A", "#1FAAB8", "#2AABB8"] : ["#E8EEEF", "#A8CDD6", "#5AADBE", "#1D7F94", "#0D5C6F"];
+  const [recommendations, setRecommendations] = useState([]);
   
   // Parse weekly activity from database or use default
   const activity = useMemo(() => {
@@ -337,6 +338,7 @@ function Dashboard({ isDark, navigate }) {
 
   const userName = profile?.full_name || "Usuario";
   const streakDays = userProgress?.streak_days || 0;
+  const practiceDays = userProgress?.practice_days || 0;
   const currentLevel = userProgress?.current_level || 1;
   const currentLesson = userProgress?.current_lesson || 1;
   const totalSignsLearned = userProgress?.total_signs_learned || 0;
@@ -347,6 +349,13 @@ function Dashboard({ isDark, navigate }) {
   const completedModules = moduleProgress?.filter(m => m.status === 'completed').length || 0;
   const totalModules = modules.length;
   const moduleProgressPercent = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
+
+  // Fetch recommendations
+  useEffect(() => {
+    if (user) {
+      getRecommendations(user.id).then(setRecommendations);
+    }
+  }, [user]);
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-8">
@@ -376,10 +385,24 @@ function Dashboard({ isDark, navigate }) {
             totalPracticeTime={totalPracticeTime}
             averageAccuracy={averageAccuracy}
             moduleProgressPercent={moduleProgressPercent}
+            practiceDays={practiceDays}
           />
         </div>
         <div className="space-y-6 lg:col-span-2">
           <QuestList isDark={isDark} />
+          {recommendations.length > 0 && (
+            <Card isDark={isDark}>
+              <SectionLabel isDark={isDark}>Recomendaciones</SectionLabel>
+              <div className="mt-4 space-y-2">
+                {recommendations.map((rec, i) => (
+                  <div key={i} className={cx("flex items-start gap-3 rounded-lg p-3", isDark ? "bg-brand-deep/50" : "bg-brand-cream/50")}>
+                    <span className={cx("mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>{i + 1}</span>
+                    <p className={cx("text-xs font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}>{rec.reason}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
           <Card isDark={isDark}>
             <SectionLabel isDark={isDark}>Tu semana</SectionLabel>
             <div className="mt-4 space-y-3">{[45, 30, 60, 25, 0, 0, 0].map((min, i) => <BarRow key={i} label={["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"][i]} value={min} isDark={isDark} />)}</div>
@@ -412,18 +435,19 @@ function SectionLabel({ isDark, children }) {
   return <h3 className={cx("text-sm font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>{children}</h3>;
 }
 
-function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, totalPracticeTime, averageAccuracy, moduleProgressPercent }) {
+function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, totalPracticeTime, averageAccuracy, moduleProgressPercent, practiceDays }) {
   return (
     <Card isDark={isDark}>
       <div className="mb-4 flex items-center justify-between"><SectionLabel isDark={isDark}>Progreso actual</SectionLabel><span className={cx("rounded-full px-3 py-1 text-xs font-semibold", isDark ? "bg-brand-cyan/15 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>Nivel {currentLevel}</span></div>
       <h3 className={cx("text-3xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>Lección {currentLesson}:</h3>
       <p className={cx("text-sm font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}>Progreso del módulo</p>
       <div className={cx("mt-5 h-2.5 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}><div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" style={{ width: `${moduleProgressPercent}%` }} /></div>
-      <div className="mt-5 grid grid-cols-3 gap-3 border-t border-dashed pt-5" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
+      <div className="mt-5 grid grid-cols-4 gap-3 border-t border-dashed pt-5" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
         {[
           [totalSignsLearned, "Señas aprendidas"],
           [`${totalPracticeTime} min`, "Tiempo total"],
-          [`${Math.round(averageAccuracy)}%`, "Precisión"]
+          [`${Math.round(averageAccuracy)}%`, "Precisión"],
+          [practiceDays, "Días practicados"]
         ].map(([v, l]) => (
           <div key={l} className="text-center">
             <div className={cx("text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{v}</div>
@@ -512,7 +536,7 @@ function LearnPage({ isDark }) {
             </Card>
           </div>
           {activeSign ? (
-            <SignVideoPanel sign={activeSign} isDark={isDark} onClose={() => setActiveSign(null)} />
+            <SignVideoPanel sign={activeSign} isDark={isDark} onClose={() => setActiveSign(null)} moduleId={selected.id} />
           ) : (
             <ModuleDetail
               module={selected} isDark={isDark}
@@ -578,7 +602,17 @@ function ModuleDetail({ module, isDark, items, search, onSearch, onSelect }) {
   );
 }
 
-function SignVideoPanel({ sign, isDark, onClose }) {
+function SignVideoPanel({ sign, isDark, onClose, moduleId }) {
+  const { user } = useAuth();
+  const [viewRecorded, setViewRecorded] = useState(false);
+
+  useEffect(() => {
+    if (!viewRecorded && user && sign) {
+      recordVideoView(user.id, sign.label || sign.name, moduleId, sign.lessonId || moduleId);
+      setViewRecorded(true);
+    }
+  }, [user, sign, moduleId, viewRecorded]);
+
   return (
     <Card isDark={isDark}>
       <div className="mb-4 flex items-center justify-between">
