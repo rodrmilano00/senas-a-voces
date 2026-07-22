@@ -181,7 +181,9 @@ function ThemeToggle({ isDark, setIsDark }) {
 
 function AppHeader({ isDark, setIsDark, navigate, path }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const menuRef = useRef(null);
+  const mobileNavRef = useRef(null);
   const { profile, signOut } = useAuth();
 
   useEffect(() => {
@@ -200,6 +202,22 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!mobileNavOpen) return undefined;
+    const closeFromOutside = (event) => {
+      if (mobileNavRef.current && !mobileNavRef.current.contains(event.target)) setMobileNavOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setMobileNavOpen(false);
+    };
+    document.addEventListener("mousedown", closeFromOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeFromOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [mobileNavOpen]);
+
   const selectAccountAction = (to) => {
     if (to === "/") {
       signOut();
@@ -215,8 +233,25 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
 
   return (
     <header className={cx("app-header sticky top-0 z-40 border-b backdrop-blur-xl transition-colors", isDark ? "border-brand-line bg-brand-deep/85" : "border-brand-mist bg-brand-cream/85")}>
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
         <button onClick={() => navigate("/dashboard")} className="btn-press"><Logo isDark={isDark} compact /></button>
+        
+        {/* Mobile Navigation Button */}
+        <button 
+          onClick={() => setMobileNavOpen(!mobileNavOpen)}
+          className={cx("md:hidden btn-press rounded-xl p-2", isDark ? "text-brand-soft hover:bg-brand-card" : "text-brand-muted hover:bg-white")}
+          aria-label="Menu"
+        >
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {mobileNavOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+
+        {/* Desktop Navigation */}
         <nav className="hidden items-center gap-1 md:flex">
           {navItems.slice(1).map((item) => (
             <button key={item.path} onClick={() => navigate(item.path)} className={cx("rounded-2xl px-3 py-2 text-xs font-bold transition", path === item.path ? (isDark ? "bg-brand-card text-white" : "bg-white text-brand-teal shadow-sm") : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-brand-muted hover:bg-white"))}>
@@ -224,7 +259,8 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
             </button>
           ))}
         </nav>
-        <div className="flex items-center gap-3">
+
+        <div className="hidden items-center gap-3 md:flex">
           <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
           <div ref={menuRef} className="relative">
             <button
@@ -261,6 +297,35 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
           </div>
         </div>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {mobileNavOpen && (
+        <div ref={mobileNavRef} className={cx("md:hidden border-t px-4 py-3", isDark ? "border-brand-line bg-brand-deep/95" : "border-brand-mist bg-brand-cream/95")}>
+          <nav className="flex flex-col gap-2">
+            {navItems.slice(1).map((item) => (
+              <button 
+                key={item.path} 
+                onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
+                className={cx("rounded-xl px-4 py-3 text-left text-sm font-bold transition", path === item.path ? (isDark ? "bg-brand-card text-white" : "bg-white text-brand-teal shadow-sm") : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-brand-muted hover:bg-white"))}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+          <div className="mt-4 flex items-center justify-between border-t pt-4" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
+            <div className="flex items-center gap-3">
+              <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
+              <span className={cx("text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{userName}</span>
+            </div>
+            <button 
+              onClick={() => { signOut(); setMobileNavOpen(false); }}
+              className={cx("btn-press rounded-xl px-4 py-2 text-xs font-bold", isDark ? "bg-brand-card text-brand-orange" : "bg-white text-brand-orange shadow-sm")}
+            >
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
@@ -285,20 +350,20 @@ function Card({ isDark, className = "", children }) {
 
 function LearningPulse({ isDark }) {
   return (
-    <Card isDark={isDark} className="learning-pulse mb-6 p-8">
-      <div className="flex items-start justify-between gap-6">
-        <div>
+    <Card isDark={isDark} className="learning-pulse mb-6 p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between sm:gap-6">
+        <div className="flex-1">
           <SectionLabel isDark={isDark}>Brujula de aprendizaje</SectionLabel>
-          <h2 className={cx("mt-4 text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>Hoy conviene practicar Familia</h2>
+          <h2 className={cx("mt-4 text-xl font-extrabold sm:text-2xl", isDark ? "text-white" : "text-brand-ink")}>Hoy conviene practicar Familia</h2>
           <p className={cx("mt-3 max-w-2xl text-sm leading-7", isDark ? "text-brand-soft" : "text-brand-muted")}>Tu ruta detecta buena memoria visual. Manten sesiones cortas y repite las senas que mezclan parentesco y saludo.</p>
         </div>
-        <span className={cx("hidden h-14 w-14 shrink-0 items-center justify-center rounded-2xl sm:flex", isDark ? "bg-brand-cyan/10 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}><Icon name="sparkles" /></span>
+        <span className={cx("hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl sm:flex sm:h-14 sm:w-14", isDark ? "bg-brand-cyan/10 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}><Icon name="sparkles" /></span>
       </div>
-      <div className="mt-7 grid gap-3 md:grid-cols-3">
+      <div className="mt-7 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
         {learningMoments.map((item) => (
-          <div key={item.label} className={cx("rounded-xl border p-4", isDark ? "border-brand-line bg-brand-deep/20" : "border-brand-mist bg-white/35")}>
+          <div key={item.label} className={cx("rounded-xl border p-3 sm:p-4", isDark ? "border-brand-line bg-brand-deep/20" : "border-brand-mist bg-white/35")}>
             <span className={cx("text-xs font-bold", isDark ? "text-brand-soft" : "text-brand-muted")}>{item.label}</span>
-            <strong className={cx("mt-2 block text-xl", isDark ? "text-white" : "text-brand-ink")}>{item.value}</strong>
+            <strong className={cx("mt-2 block text-lg sm:text-xl", isDark ? "text-white" : "text-brand-ink")}>{item.value}</strong>
             <p className={cx("mt-2 text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>{item.detail}</p>
           </div>
         ))}
@@ -358,12 +423,12 @@ function Dashboard({ isDark, navigate }) {
   }, [user]);
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-8">
+    <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <PageTitle isDark={isDark} title={`Buenas tardes, ${userName.split(' ')[0]}`} accent={userName.split(' ')[0]} subtitle="Tu progreso de la semana va excelente" />
       <LearningPulse isDark={isDark} />
       {streakDays > 0 && (
-        <div className={cx("streak-banner animate-fade mb-6 flex items-center gap-4 rounded-xl border p-4", isDark ? "border-brand-line bg-brand-card/70" : "border-brand-mist bg-white/60")}>
-          <div className="flex items-center gap-2 text-brand-orange"><Icon name="flame" className="streak-fire h-7 w-7" /><strong className="text-3xl">{streakDays}</strong></div>
+        <div className={cx("streak-banner animate-fade mb-6 flex items-center gap-3 rounded-xl border p-3 sm:gap-4 sm:p-4", isDark ? "border-brand-line bg-brand-card/70" : "border-brand-mist bg-white/60")}>
+          <div className="flex items-center gap-2 text-brand-orange"><Icon name="flame" className="streak-fire h-6 w-6 sm:h-7 sm:w-7" /><strong className="text-2xl sm:text-3xl">{streakDays}</strong></div>
           <div><div className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>¡Racha de {streakDays} días!</div><div className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>Sigue practicando para mantener tu racha activa</div></div>
         </div>
       )}
@@ -373,7 +438,7 @@ function Dashboard({ isDark, navigate }) {
             <div className="mb-4 flex items-center justify-between"><SectionLabel isDark={isDark}>Actividad reciente</SectionLabel><span className={cx("text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>Últimas 16 semanas</span></div>
             <div className="overflow-x-auto">
               <div className="flex w-max gap-1.5">
-                {activity.map((week, wi) => <div key={wi} className="flex flex-col gap-[3px]">{week.map((level, di) => <div key={di} className="heatmap-cell h-[14px] w-[14px] rounded-[3px]" style={{ backgroundColor: levels[level] }} />)}</div>)}
+                {activity.map((week, wi) => <div key={wi} className="flex flex-col gap-[3px]">{week.map((level, di) => <div key={di} className="heatmap-cell h-[12px] w-[12px] sm:h-[14px] sm:w-[14px] rounded-[3px]" style={{ backgroundColor: levels[level] }} />)}</div>)}
               </div>
             </div>
           </Card>
@@ -439,10 +504,10 @@ function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, 
   return (
     <Card isDark={isDark}>
       <div className="mb-4 flex items-center justify-between"><SectionLabel isDark={isDark}>Progreso actual</SectionLabel><span className={cx("rounded-full px-3 py-1 text-xs font-semibold", isDark ? "bg-brand-cyan/15 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>Nivel {currentLevel}</span></div>
-      <h3 className={cx("text-3xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>Lección {currentLesson}:</h3>
+      <h3 className={cx("text-2xl font-extrabold sm:text-3xl", isDark ? "text-white" : "text-brand-ink")}>Lección {currentLesson}:</h3>
       <p className={cx("text-sm font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}>Progreso del módulo</p>
       <div className={cx("mt-5 h-2.5 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}><div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" style={{ width: `${moduleProgressPercent}%` }} /></div>
-      <div className="mt-5 grid grid-cols-4 gap-3 border-t border-dashed pt-5" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
+      <div className="mt-5 grid grid-cols-2 gap-3 border-t border-dashed pt-5 sm:grid-cols-4" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
         {[
           [totalSignsLearned, "Señas aprendidas"],
           [`${totalPracticeTime} min`, "Tiempo total"],
@@ -450,7 +515,7 @@ function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, 
           [practiceDays, "Días practicados"]
         ].map(([v, l]) => (
           <div key={l} className="text-center">
-            <div className={cx("text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{v}</div>
+            <div className={cx("text-lg font-extrabold sm:text-xl", isDark ? "text-white" : "text-brand-ink")}>{v}</div>
             <div className={cx("mt-0.5 text-[10px] font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{l}</div>
           </div>
         ))}
@@ -505,10 +570,10 @@ function LearnPage({ isDark }) {
   }, [selected, search]);
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-8">
+    <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <PageTitle isDark={isDark} title="Tu ruta de aprendizaje" accent="aprendizaje" subtitle="Selecciona un módulo y toca cualquier seña para ver el video" />
       <div className="grid gap-6 lg:grid-cols-12">
-        <section className="space-y-0 lg:col-span-4 overflow-y-auto max-h-[80vh] pr-1">
+        <section className="space-y-0 lg:col-span-4 overflow-y-auto max-h-[60vh] lg:max-h-[80vh] pr-1">
           {modulesWithProgress.map((module, index) => (
             <SkillNode
               key={module.id} module={module} index={index} isDark={isDark}
@@ -522,13 +587,13 @@ function LearnPage({ isDark }) {
             <Card isDark={isDark}>
               <SectionLabel isDark={isDark}>Tu racha</SectionLabel>
               <div className="mt-4 text-center">
-                <div className="text-4xl font-extrabold text-brand-orange">{streakDays}</div>
+                <div className="text-3xl font-extrabold text-brand-orange sm:text-4xl">{streakDays}</div>
                 <div className={cx("mt-1 text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>días consecutivos</div>
               </div>
             </Card>
             <Card isDark={isDark}>
               <SectionLabel isDark={isDark}>Progreso general</SectionLabel>
-              <div className={cx("mt-3 text-3xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{progress}%</div>
+              <div className={cx("mt-3 text-2xl font-extrabold sm:text-3xl", isDark ? "text-white" : "text-brand-ink")}>{progress}%</div>
               <div className={cx("mt-3 h-2 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}>
                 <div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" style={{ width: `${progress}%` }} />
               </div>
@@ -556,14 +621,14 @@ function SkillNode({ module, index, isDark, selected, onClick }) {
   const locked = module.status === "locked";
   return (
     <div>
-      <button onClick={onClick} className={cx("animate-fade flex w-full items-center gap-4 text-left", locked && "cursor-default opacity-60")} style={{ animationDelay: `${index * 60}ms` }}>
-        <span className={cx("flex h-14 w-14 shrink-0 items-center justify-center rounded-xl transition", completed ? "bg-brand-teal text-white" : current ? "node-glow bg-brand-orange text-white" : isDark ? "border border-brand-line bg-brand-card text-[#5A8A94]" : "border border-brand-mist bg-[#E8EEEF] text-[#8AA8B0]")}>{completed ? <Icon name="check" /> : current ? <Icon name="play" /> : <Icon name="lock" />}</span>
-        <span className={cx("flex-1 rounded-xl p-4 transition", selected ? (isDark ? "border border-brand-cyan/30 bg-brand-card" : "border border-brand-teal/20 bg-white shadow-sm") : (isDark ? "hover:bg-brand-card/50" : "hover:bg-white/50"))}>
+      <button onClick={onClick} className={cx("animate-fade flex w-full items-center gap-3 text-left sm:gap-4", locked && "cursor-default opacity-60")} style={{ animationDelay: `${index * 60}ms` }}>
+        <span className={cx("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition sm:h-14 sm:w-14", completed ? "bg-brand-teal text-white" : current ? "node-glow bg-brand-orange text-white" : isDark ? "border border-brand-line bg-brand-card text-[#5A8A94]" : "border border-brand-mist bg-[#E8EEEF] text-[#8AA8B0]")}>{completed ? <Icon name="check" /> : current ? <Icon name="play" /> : <Icon name="lock" />}</span>
+        <span className={cx("flex-1 rounded-xl p-3 transition sm:p-4", selected ? (isDark ? "border border-brand-cyan/30 bg-brand-card" : "border border-brand-teal/20 bg-white shadow-sm") : (isDark ? "hover:bg-brand-card/50" : "hover:bg-white/50"))}>
           <span className={cx("block text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{module.title}</span>
           <span className={cx("block text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{module.desc}</span>
         </span>
       </button>
-      {index < modules.length - 1 && <div className="flex justify-center py-1"><div className={cx("h-10 w-px rounded-full", isDark ? "bg-brand-line" : "bg-brand-mist")} /></div>}
+      {index < modules.length - 1 && <div className="flex justify-center py-1"><div className={cx("h-8 w-px rounded-full sm:h-10", isDark ? "bg-brand-line" : "bg-brand-mist")} /></div>}
     </div>
   );
 }
@@ -585,16 +650,16 @@ function ModuleDetail({ module, isDark, items, search, onSearch, onSelect }) {
         placeholder="Buscar seña..."
         className={cx("mb-4 w-full rounded-lg border px-3 py-2 text-sm", isDark ? "border-brand-line bg-brand-deep text-white placeholder:text-[#5A8A94]" : "border-brand-mist bg-brand-cream text-brand-ink placeholder:text-[#8AA8B0]")}
       />
-      <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto sm:max-h-72 sm:grid-cols-3">
         {items.map((item) => (
           <button
             key={item.label} onClick={() => onSelect(item)}
-            className={cx("btn-press group flex flex-col items-center gap-2 rounded-xl border p-3 text-center transition",
+            className={cx("btn-press group flex flex-col items-center gap-2 rounded-xl border p-2 sm:p-3 text-center transition",
               isDark ? "border-brand-line bg-brand-deep/40 hover:border-brand-cyan/40 hover:bg-brand-card" : "border-brand-mist bg-brand-cream hover:border-brand-teal/30 hover:bg-white hover:shadow-sm"
             )}
           >
-            <img src={item.thumbnail} alt={item.label} className="h-14 w-full rounded-lg object-cover" loading="lazy" />
-            <span className={cx("text-[11px] font-semibold leading-tight", isDark ? "text-brand-soft" : "text-brand-muted")}>{item.label}</span>
+            <img src={item.thumbnail} alt={item.label} className="h-12 w-full rounded-lg object-cover sm:h-14" loading="lazy" />
+            <span className={cx("text-[10px] font-semibold leading-tight sm:text-[11px]", isDark ? "text-brand-soft" : "text-brand-muted")}>{item.label}</span>
           </button>
         ))}
       </div>
@@ -824,13 +889,14 @@ function PracticePage({ isDark, setIsDark, navigate }) {
   const idRef = useRef(2);
   const [gestureState, setGestureState] = useState("waiting"); // waiting | partial | match | confirmed
   const [matchScore, setMatchScore]     = useState(0);
+  const [confirmedSignName, setConfirmedSignName] = useState(null);
   const confirmedRef = useRef(false);
   const holdStartRef = useRef(null);   // momentáneo que lleva la mano en MATCH
   const HOLD_MS = 600;                 // ms que debe mantener la pose correcta
   const practiceStartTime = useRef(Date.now());
   const streamRef = useRef(null); // Store the media stream for cleanup
 
-  const addToast = (type, message) => setToasts((prev) => [...prev.slice(-2), { id: idRef.current++, type, message }]);
+  const addToast = (type, message) => setToasts((prev) => [{ id: idRef.current++, type, message }]); // Solo mantener el toast más reciente
 
   // Cleanup camera when component unmounts or route changes
   useEffect(() => {
@@ -883,6 +949,7 @@ function PracticePage({ isDark, setIsDark, navigate }) {
         if (held >= HOLD_MS) {
           confirmedRef.current = true;
           setGestureState("confirmed");
+          setConfirmedSignName(sign.name); // Guardar el nombre de la seña detectada
           setCorrect((v) => v + 1);
           setTotal((v) => v + 1);
           const next = Math.min(prevIdx + 1, signsQueue.length - 1);
@@ -901,6 +968,7 @@ function PracticePage({ isDark, setIsDark, navigate }) {
             holdStartRef.current = null;
             setGestureState("waiting");
             setMatchScore(0);
+            setConfirmedSignName(null); // Limpiar el nombre confirmado
           }, 800);
           return next;
         }
@@ -938,26 +1006,27 @@ function PracticePage({ isDark, setIsDark, navigate }) {
 
   return (
     <div className={cx("flex h-screen flex-col transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
-      <header className={cx("flex items-center justify-between border-b px-6 py-3 backdrop-blur-xl", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}>
-        <div className="flex items-center gap-3">
+      <header className={cx("flex items-center justify-between border-b px-4 py-2 sm:px-6 sm:py-3 backdrop-blur-xl", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}>
+        <div className="flex items-center gap-2 sm:gap-3">
           <Logo isDark={isDark} compact />
-          <div className={cx("h-5 w-px", isDark ? "bg-brand-line" : "bg-brand-mist")} />
-          <span className={cx("text-xs font-semibold", isDark ? "text-brand-soft" : "text-brand-muted")}>Práctica Inmersiva · MediaPipe</span>
+          <div className={cx("hidden h-5 w-px sm:block", isDark ? "bg-brand-line" : "bg-brand-mist")} />
+          <span className={cx("hidden text-xs font-semibold sm:block", isDark ? "text-brand-soft" : "text-brand-muted")}>Práctica Inmersiva · MediaPipe</span>
         </div>
-        <div className="flex items-center gap-3">
-          <span className={cx("rounded-xl px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-white text-brand-teal shadow-sm")}>{correct}/{total}</span>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className={cx("rounded-xl px-2 py-1.5 text-xs font-bold sm:px-3", isDark ? "bg-brand-card text-brand-cyan" : "bg-white text-brand-teal shadow-sm")}>{correct}/{total}</span>
           <button 
             onClick={stopCamera}
-            className={cx("rounded-xl px-3 py-1.5 text-xs font-bold transition", isDark ? "bg-brand-card text-brand-orange hover:bg-brand-orange/20" : "bg-white text-brand-orange hover:bg-brand-orange/10 shadow-sm")}
+            className={cx("rounded-xl px-2 py-1.5 text-xs font-bold transition sm:px-3", isDark ? "bg-brand-card text-brand-orange hover:bg-brand-orange/20" : "bg-white text-brand-orange hover:bg-brand-orange/10 shadow-sm")}
           >
-            Detener Cámara
+            <span className="hidden sm:inline">Detener Cámara</span>
+            <span className="sm:hidden">Detener</span>
           </button>
           <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
         </div>
       </header>
 
       <div className="flex min-h-0 flex-1">
-        <main className="relative flex-1 p-4">
+        <main className="relative flex-1 p-2 sm:p-4">
           <div className="relative h-full overflow-hidden rounded-xl bg-black">
             {/* Video oculto — solo usado como fuente para MediaPipe */}
             <video ref={videoRef} className="absolute opacity-0 pointer-events-none" playsInline muted />
@@ -965,24 +1034,24 @@ function PracticePage({ isDark, setIsDark, navigate }) {
             <canvas ref={canvasRef} className="absolute inset-0 h-full w-full object-cover" />
 
             {!camReady && !camError && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-4">
                 <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-teal border-t-transparent" />
-                <p className={cx("text-sm font-semibold", isDark ? "text-brand-soft" : "text-white")}>Iniciando cámara…</p>
+                <p className={cx("text-sm font-semibold text-center", isDark ? "text-brand-soft" : "text-white")}>Iniciando cámara…</p>
               </div>
             )}
             {camError && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-8 text-center">
-                <Icon name="camera" className="h-12 w-12 text-[#D96B6B]" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4 sm:p-8 text-center">
+                <Icon name="camera" className="h-10 w-10 sm:h-12 sm:w-12 text-[#D96B6B]" />
                 <p className="text-sm font-semibold text-white">{camError}</p>
                 <p className="text-xs text-[#8AA8B0]">Permite el acceso a la cámara en tu navegador y recarga la página.</p>
               </div>
             )}
 
-            {/* Indicador de detección geométrica */}
-            {camReady && (
-              <div className="absolute left-4 top-4 flex flex-col gap-1.5">
+            {/* Indicador de detección geométrica - ocultar cuando se confirma la seña */}
+            {camReady && gestureState !== "confirmed" && (
+              <div className="absolute left-2 top-2 sm:left-4 sm:top-4 flex flex-col gap-1.5 transition-opacity duration-300">
                 <div className={cx(
-                  "flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-bold backdrop-blur-sm transition-all",
+                  "flex items-center gap-2 rounded-full px-2 py-1.5 text-[10px] font-bold backdrop-blur-sm transition-all sm:px-3 sm:text-[11px]",
                   gestureState === "confirmed" ? "bg-[#1A6B4A]/90 text-[#D4F5E4]" :
                   gestureState === "match"     ? "bg-green-600/90 text-white" :
                   gestureState === "partial"   ? "bg-brand-orange/90 text-white" :
@@ -1002,7 +1071,7 @@ function PracticePage({ isDark, setIsDark, navigate }) {
                 </div>
                 {/* Barra de progreso del score */}
                 {handDetected && gestureState !== "confirmed" && (
-                  <div className="h-1.5 w-32 overflow-hidden rounded-full bg-black/40">
+                  <div className="h-1.5 w-24 overflow-hidden rounded-full bg-black/40 sm:w-32">
                     <div
                       className={cx("h-full rounded-full transition-all duration-150",
                         matchScore >= MATCH_THR ? "bg-green-400" :
@@ -1022,19 +1091,38 @@ function PracticePage({ isDark, setIsDark, navigate }) {
               ))}
             </div>
 
-            {/* Seña actual */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-xl border border-white/20 bg-black/60 px-5 py-3 text-center shadow-lg backdrop-blur-md max-w-xs w-full">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-[#8AA8B0]">{signsQueue[signIdx].module} · {signsQueue[signIdx].difficulty}{signsQueue[signIdx].mov ? " · 🤸 con movimiento" : ""}</div>
-              <div className="text-2xl font-extrabold text-white">{signsQueue[signIdx].name}</div>
-              {signsQueue[signIdx].hint && (
-                <div className="mt-1 text-[11px] text-[#8AA8B0] leading-tight">{signsQueue[signIdx].hint}</div>
-              )}
-            </div>
+            {/* Indicador de éxito cuando se confirma la seña */}
+            {gestureState === "confirmed" && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm transition-opacity duration-300">
+                <div className="flex flex-col items-center gap-4 animate-fade">
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-green-500/20 shadow-2xl sm:h-32 sm:w-32">
+                    <Icon name="check" className="h-12 w-12 text-green-400 sm:h-16 sm:w-16" />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-extrabold text-white sm:text-3xl">¡Excelente!</div>
+                    <div className="mt-2 text-sm text-green-300">{confirmedSignName || signsQueue[signIdx].name} detectada</div>
+                  </div>
+                </div>
+              </div>
+            )}
 
-            {/* Toasts */}
-            <div className="absolute left-1/2 top-6 flex w-full max-w-md -translate-x-1/2 flex-col gap-2 px-4">
-              {toasts.map((toast) => <Toast key={toast.id} toast={toast} isDark={isDark} />)}
-            </div>
+            {/* Seña actual - ocultar cuando se confirma la seña */}
+            {gestureState !== "confirmed" && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-xl border border-white/20 bg-black/60 px-4 py-2.5 text-center shadow-lg backdrop-blur-md max-w-xs w-full sm:bottom-6 sm:px-5 sm:py-3 transition-opacity duration-300">
+                <div className="text-[9px] font-bold uppercase tracking-widest text-[#8AA8B0] sm:text-[10px]">{signsQueue[signIdx].module} · {signsQueue[signIdx].difficulty}{signsQueue[signIdx].mov ? " · 🤸 con movimiento" : ""}</div>
+                <div className="text-xl font-extrabold text-white sm:text-2xl">{signsQueue[signIdx].name}</div>
+                {signsQueue[signIdx].hint && (
+                  <div className="mt-1 text-[10px] text-[#8AA8B0] leading-tight sm:text-[11px]">{signsQueue[signIdx].hint}</div>
+                )}
+              </div>
+            )}
+
+            {/* Toasts - reposicionados a la esquina superior derecha, más pequeños y sin stackeo */}
+            {gestureState !== "confirmed" && (
+              <div className="absolute right-2 top-2 flex w-full max-w-[180px] flex-col gap-1 px-2 sm:right-4 sm:top-4 sm:max-w-[220px] sm:px-0 transition-opacity duration-300">
+                {toasts.map((toast) => <Toast key={toast.id} toast={toast} isDark={isDark} />)}
+              </div>
+            )}
           </div>
         </main>
 
@@ -1061,15 +1149,15 @@ function PracticePage({ isDark, setIsDark, navigate }) {
       </div>
 
       {/* Controles móvil */}
-      <div className={cx("md:hidden flex items-center justify-between gap-3 border-t px-6 py-3", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}>
-        <button onClick={() => navigate("/dashboard")} className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-soft" : "bg-white text-brand-muted shadow-sm")}>
-          <Icon name="x" className="h-4 w-4" />Terminar
+      <div className={cx("md:hidden flex items-center justify-between gap-2 border-t px-4 py-3 sm:gap-3 sm:px-6", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}>
+        <button onClick={() => navigate("/dashboard")} className={cx("btn-press flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold sm:px-4", isDark ? "bg-brand-card text-brand-soft" : "bg-white text-brand-muted shadow-sm")}>
+          <Icon name="x" className="h-4 w-4" /><span className="hidden sm:inline">Terminar</span><span className="sm:hidden">Salir</span>
         </button>
-        <div className="text-center">
-          <div className={cx("text-xs font-bold", isDark ? "text-white" : "text-brand-ink")}>{signsQueue[signIdx].name}</div>
+        <div className="text-center flex-1">
+          <div className={cx("text-xs font-bold truncate", isDark ? "text-white" : "text-brand-ink")}>{signsQueue[signIdx].name}</div>
           <div className={cx("text-[10px]", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{correct}/{total} detectadas</div>
         </div>
-        <button onClick={skipSign} className={cx("btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>
+        <button onClick={skipSign} className={cx("btn-press flex items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-bold sm:px-4", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>
           Saltar<Icon name="arrow" className="h-4 w-4" />
         </button>
       </div>
@@ -1087,7 +1175,7 @@ function Toast({ toast, isDark }) {
     success: isDark ? "bg-[#1A6B4A] text-[#D4F5E4]" : "bg-brand-mint text-[#1A4A32]",
     warning: isDark ? "bg-[#8B5A2B] text-[#FDE8D4]" : "bg-brand-orange text-[#5A3A1A]"
   };
-  return <div className={cx("animate-toast-in rounded-xl px-4 py-3 text-sm font-semibold shadow-lg backdrop-blur-sm", styles[toast.type])}>{toast.message}</div>;
+  return <div className={cx("animate-toast-in rounded-lg px-3 py-2 text-xs font-semibold shadow-lg backdrop-blur-sm", styles[toast.type])}>{toast.message}</div>;
 }
 
 const DIFF_COLORS = {
