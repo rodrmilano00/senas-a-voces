@@ -546,12 +546,33 @@ function LearnPage({ isDark }) {
 
   // Merge module data with progress from database
   const modulesWithProgress = useMemo(() => {
-    return modules.map(module => {
+    return modules.map((module, index) => {
       const progressData = moduleProgress?.find(mp => mp.module_id === module.id);
+      const signsCompleted = progressData?.signs_completed || 0;
+      const isCompleted = signsCompleted >= module.signs;
+      
+      // Lógica de desbloqueo progresivo
+      let status = 'locked';
+      if (index === 0) {
+        // Primer módulo siempre desbloqueado
+        status = isCompleted ? 'completed' : 'current';
+      } else {
+        // Verificar si el módulo anterior está completado
+        const prevModule = modules[index - 1];
+        const prevProgressData = moduleProgress?.find(mp => mp.module_id === prevModule.id);
+        const prevCompleted = (prevProgressData?.signs_completed || 0) >= prevModule.signs;
+        
+        if (prevCompleted) {
+          status = isCompleted ? 'completed' : 'current';
+        } else {
+          status = 'locked';
+        }
+      }
+      
       return {
         ...module,
-        status: progressData?.status || (module.id === 'alphabet' ? 'current' : 'locked'),
-        signs_completed: progressData?.signs_completed || 0,
+        status: progressData?.status || status,
+        signs_completed: signsCompleted,
       };
     });
   }, [moduleProgress]);
