@@ -587,6 +587,38 @@ a:focus-visible {
   main {
     padding-bottom: 6.5rem !important;
   }
+  
+  .surface-card {
+    padding: 1rem !important;
+  }
+  
+  .account-menu {
+    top: 4.5rem;
+    right: 1rem;
+    width: calc(100vw - 2rem);
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .surface-card {
+    padding: 0.75rem !important;
+  }
+  
+  .app-header {
+    padding: 0.5rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  .surface-card {
+    border-radius: 1rem !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
