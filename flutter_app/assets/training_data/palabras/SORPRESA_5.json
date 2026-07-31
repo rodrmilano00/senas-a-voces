@@ -1,0 +1,4187 @@
+[
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.4634590951904522,
+      "thumbLateralPos": -0.6467444899487123,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.7892777002844706,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.20063948617082403,
+      "palmOriY": 0.4988097285950505,
+      "fingerOriY": 0.7564548449259332,
+      "fingerOriZ": -0.3660438213812025,
+      "orientationY": 0.4988097285950505,
+      "handUp": false,
+      "handDown": true,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": false,
+      "ang": {
+        "index": 133.38693995093567,
+        "middle": 128.7183058410267,
+        "ring": 124.50155054907502,
+        "pinky": 127.79767069039791,
+        "thumb": 173.01005380236182
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4848,
+        "y": 0.7673,
+        "z": 0
+      },
+      {
+        "x": 0.4914,
+        "y": 0.7781,
+        "z": -0.0025
+      },
+      {
+        "x": 0.5007,
+        "y": 0.7966,
+        "z": -0.0079
+      },
+      {
+        "x": 0.5078,
+        "y": 0.8143,
+        "z": -0.0136
+      },
+      {
+        "x": 0.5139,
+        "y": 0.8259,
+        "z": -0.0184
+      },
+      {
+        "x": 0.5147,
+        "y": 0.7849,
+        "z": -0.0155
+      },
+      {
+        "x": 0.5322,
+        "y": 0.8047,
+        "z": -0.0252
+      },
+      {
+        "x": 0.5339,
+        "y": 0.8186,
+        "z": -0.0293
+      },
+      {
+        "x": 0.5297,
+        "y": 0.8251,
+        "z": -0.0302
+      },
+      {
+        "x": 0.5143,
+        "y": 0.7874,
+        "z": -0.0188
+      },
+      {
+        "x": 0.5322,
+        "y": 0.8093,
+        "z": -0.0273
+      },
+      {
+        "x": 0.533,
+        "y": 0.8256,
+        "z": -0.0291
+      },
+      {
+        "x": 0.5276,
+        "y": 0.8319,
+        "z": -0.0291
+      },
+      {
+        "x": 0.5107,
+        "y": 0.7916,
+        "z": -0.022
+      },
+      {
+        "x": 0.528,
+        "y": 0.8141,
+        "z": -0.0303
+      },
+      {
+        "x": 0.528,
+        "y": 0.8277,
+        "z": -0.0303
+      },
+      {
+        "x": 0.5233,
+        "y": 0.8321,
+        "z": -0.0288
+      },
+      {
+        "x": 0.5042,
+        "y": 0.7979,
+        "z": -0.025
+      },
+      {
+        "x": 0.5134,
+        "y": 0.8181,
+        "z": -0.0307
+      },
+      {
+        "x": 0.5143,
+        "y": 0.8258,
+        "z": -0.0294
+      },
+      {
+        "x": 0.5115,
+        "y": 0.8264,
+        "z": -0.0271
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 1.0009144329518682,
+      "thumbLateralPos": 1.6869885919926275,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.6092449348192325,
+      "uvTouching": false,
+      "uvClose": false,
+      "uvSpread": true,
+      "imGap": 0.9224874921994082,
+      "palmOriY": -0.3915429434379293,
+      "fingerOriY": -0.1999507039456138,
+      "fingerOriZ": -0.47850821864590287,
+      "orientationY": -0.3915429434379293,
+      "handUp": false,
+      "handDown": false,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": false,
+      "ang": {
+        "index": 133.95605320488403,
+        "middle": 145.8150359151235,
+        "ring": 152.9071724086001,
+        "pinky": 144.63764445629917,
+        "thumb": 160.63255292344581
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4668,
+        "y": 0.6972,
+        "z": 0
+      },
+      {
+        "x": 0.4747,
+        "y": 0.6781,
+        "z": -0.0056
+      },
+      {
+        "x": 0.4866,
+        "y": 0.6639,
+        "z": -0.0095
+      },
+      {
+        "x": 0.4951,
+        "y": 0.6525,
+        "z": -0.0131
+      },
+      {
+        "x": 0.4989,
+        "y": 0.6397,
+        "z": -0.0169
+      },
+      {
+        "x": 0.4899,
+        "y": 0.672,
+        "z": -0.0126
+      },
+      {
+        "x": 0.5019,
+        "y": 0.668,
+        "z": -0.0194
+      },
+      {
+        "x": 0.5084,
+        "y": 0.6711,
+        "z": -0.0233
+      },
+      {
+        "x": 0.5136,
+        "y": 0.6758,
+        "z": -0.0262
+      },
+      {
+        "x": 0.4875,
+        "y": 0.6864,
+        "z": -0.015
+      },
+      {
+        "x": 0.4991,
+        "y": 0.6871,
+        "z": -0.02
+      },
+      {
+        "x": 0.5059,
+        "y": 0.6912,
+        "z": -0.0227
+      },
+      {
+        "x": 0.5114,
+        "y": 0.6972,
+        "z": -0.025
+      },
+      {
+        "x": 0.4824,
+        "y": 0.7009,
+        "z": -0.0177
+      },
+      {
+        "x": 0.4928,
+        "y": 0.7034,
+        "z": -0.0246
+      },
+      {
+        "x": 0.4996,
+        "y": 0.7078,
+        "z": -0.0277
+      },
+      {
+        "x": 0.5058,
+        "y": 0.7138,
+        "z": -0.0301
+      },
+      {
+        "x": 0.4757,
+        "y": 0.7148,
+        "z": -0.0205
+      },
+      {
+        "x": 0.4792,
+        "y": 0.7203,
+        "z": -0.0282
+      },
+      {
+        "x": 0.4823,
+        "y": 0.7258,
+        "z": -0.0304
+      },
+      {
+        "x": 0.4859,
+        "y": 0.732,
+        "z": -0.0317
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": true,
+      "middle": true,
+      "ring": true,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.8425865931809482,
+      "thumbLateralPos": 1.0088582921615952,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.5559684054770606,
+      "uvTouching": false,
+      "uvClose": false,
+      "uvSpread": false,
+      "imGap": 0.4107997808913555,
+      "palmOriY": -0.8976097591838051,
+      "fingerOriY": -0.9129591967273754,
+      "fingerOriZ": -0.38221021599688776,
+      "orientationY": -0.9129591967273754,
+      "handUp": true,
+      "handDown": false,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": false,
+      "ang": {
+        "index": 175.81295226579817,
+        "middle": 178.3190357623761,
+        "ring": 169.2119047216759,
+        "pinky": 154.15937723567092,
+        "thumb": 174.2232241473197
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.5743,
+        "y": 0.6697,
+        "z": 0
+      },
+      {
+        "x": 0.565,
+        "y": 0.6477,
+        "z": -0.0087
+      },
+      {
+        "x": 0.5625,
+        "y": 0.6206,
+        "z": -0.0148
+      },
+      {
+        "x": 0.5617,
+        "y": 0.6,
+        "z": -0.0203
+      },
+      {
+        "x": 0.5592,
+        "y": 0.5816,
+        "z": -0.026
+      },
+      {
+        "x": 0.5745,
+        "y": 0.6171,
+        "z": -0.0165
+      },
+      {
+        "x": 0.5792,
+        "y": 0.5955,
+        "z": -0.0265
+      },
+      {
+        "x": 0.5814,
+        "y": 0.5823,
+        "z": -0.0333
+      },
+      {
+        "x": 0.5827,
+        "y": 0.5701,
+        "z": -0.0385
+      },
+      {
+        "x": 0.5819,
+        "y": 0.6272,
+        "z": -0.0195
+      },
+      {
+        "x": 0.5881,
+        "y": 0.6074,
+        "z": -0.0285
+      },
+      {
+        "x": 0.5917,
+        "y": 0.5949,
+        "z": -0.0346
+      },
+      {
+        "x": 0.595,
+        "y": 0.5828,
+        "z": -0.0396
+      },
+      {
+        "x": 0.5871,
+        "y": 0.6419,
+        "z": -0.0232
+      },
+      {
+        "x": 0.5939,
+        "y": 0.625,
+        "z": -0.0339
+      },
+      {
+        "x": 0.5976,
+        "y": 0.6144,
+        "z": -0.0388
+      },
+      {
+        "x": 0.6009,
+        "y": 0.6031,
+        "z": -0.0424
+      },
+      {
+        "x": 0.5908,
+        "y": 0.6596,
+        "z": -0.0272
+      },
+      {
+        "x": 0.5979,
+        "y": 0.6531,
+        "z": -0.038
+      },
+      {
+        "x": 0.6018,
+        "y": 0.6485,
+        "z": -0.0415
+      },
+      {
+        "x": 0.6049,
+        "y": 0.6425,
+        "z": -0.0438
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": false,
+      "index": true,
+      "middle": true,
+      "ring": true,
+      "pinky": true,
+      "thumbOut": false,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": true,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.9754912202446213,
+      "thumbLateralPos": 0.8603335284505957,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.9740698737129433,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.18661324630156353,
+      "palmOriY": -0.9995610870282813,
+      "fingerOriY": -0.9859086678088754,
+      "fingerOriZ": -0.1637560083827197,
+      "orientationY": -0.9859086678088754,
+      "handUp": true,
+      "handDown": false,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": true,
+      "ang": {
+        "index": 172.9842598164221,
+        "middle": 169.74997940077228,
+        "ring": 178.83846333571097,
+        "pinky": 176.0331814175061,
+        "thumb": 175.32405278855967
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.5721,
+        "y": 0.6508,
+        "z": 0
+      },
+      {
+        "x": 0.5641,
+        "y": 0.6212,
+        "z": -0.0057
+      },
+      {
+        "x": 0.5622,
+        "y": 0.5911,
+        "z": -0.0073
+      },
+      {
+        "x": 0.561,
+        "y": 0.567,
+        "z": -0.0085
+      },
+      {
+        "x": 0.5587,
+        "y": 0.549,
+        "z": -0.0094
+      },
+      {
+        "x": 0.5666,
+        "y": 0.5961,
+        "z": -0.0011
+      },
+      {
+        "x": 0.5685,
+        "y": 0.5757,
+        "z": -0.006
+      },
+      {
+        "x": 0.5702,
+        "y": 0.5615,
+        "z": -0.0113
+      },
+      {
+        "x": 0.5719,
+        "y": 0.5488,
+        "z": -0.0158
+      },
+      {
+        "x": 0.5726,
+        "y": 0.5993,
+        "z": -0.0014
+      },
+      {
+        "x": 0.5752,
+        "y": 0.5802,
+        "z": -0.006
+      },
+      {
+        "x": 0.5771,
+        "y": 0.5661,
+        "z": -0.0118
+      },
+      {
+        "x": 0.5791,
+        "y": 0.5552,
+        "z": -0.017
+      },
+      {
+        "x": 0.5789,
+        "y": 0.6054,
+        "z": -0.0027
+      },
+      {
+        "x": 0.5844,
+        "y": 0.5885,
+        "z": -0.008
+      },
+      {
+        "x": 0.5889,
+        "y": 0.574,
+        "z": -0.013
+      },
+      {
+        "x": 0.5927,
+        "y": 0.5629,
+        "z": -0.0168
+      },
+      {
+        "x": 0.5843,
+        "y": 0.6143,
+        "z": -0.0044
+      },
+      {
+        "x": 0.5898,
+        "y": 0.6021,
+        "z": -0.0093
+      },
+      {
+        "x": 0.5937,
+        "y": 0.5931,
+        "z": -0.0122
+      },
+      {
+        "x": 0.5975,
+        "y": 0.5859,
+        "z": -0.0146
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": true,
+      "middle": true,
+      "ring": true,
+      "pinky": true,
+      "thumbOut": false,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": true,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.49693663879728034,
+      "thumbLateralPos": 0.4671152207237607,
+      "palmFacingCamera": false,
+      "palmNormalZ": 0.4344924041024344,
+      "uvTouching": true,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.11340915400304831,
+      "palmOriY": -0.9559124343693166,
+      "fingerOriY": -0.9538917527478501,
+      "fingerOriZ": -0.14941736007756135,
+      "orientationY": -0.9538917527478501,
+      "handUp": true,
+      "handDown": false,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": true,
+      "ang": {
+        "index": 178.4200143769729,
+        "middle": 174.76178093212346,
+        "ring": 177.33086408783487,
+        "pinky": 167.51590179146854,
+        "thumb": 167.23274739404022
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4538,
+        "y": 0.6304,
+        "z": 0
+      },
+      {
+        "x": 0.4566,
+        "y": 0.6015,
+        "z": 0.0004
+      },
+      {
+        "x": 0.4633,
+        "y": 0.5723,
+        "z": -0.0004
+      },
+      {
+        "x": 0.4689,
+        "y": 0.5512,
+        "z": -0.0021
+      },
+      {
+        "x": 0.4696,
+        "y": 0.5331,
+        "z": -0.0042
+      },
+      {
+        "x": 0.4706,
+        "y": 0.5638,
+        "z": -0.0005
+      },
+      {
+        "x": 0.4767,
+        "y": 0.5378,
+        "z": -0.0076
+      },
+      {
+        "x": 0.4811,
+        "y": 0.5182,
+        "z": -0.0138
+      },
+      {
+        "x": 0.4853,
+        "y": 0.5032,
+        "z": -0.018
+      },
+      {
+        "x": 0.4721,
+        "y": 0.5679,
+        "z": -0.0058
+      },
+      {
+        "x": 0.4799,
+        "y": 0.5408,
+        "z": -0.0109
+      },
+      {
+        "x": 0.4858,
+        "y": 0.5201,
+        "z": -0.0171
+      },
+      {
+        "x": 0.4916,
+        "y": 0.5033,
+        "z": -0.0218
+      },
+      {
+        "x": 0.4724,
+        "y": 0.5765,
+        "z": -0.0113
+      },
+      {
+        "x": 0.4809,
+        "y": 0.5515,
+        "z": -0.017
+      },
+      {
+        "x": 0.4871,
+        "y": 0.5345,
+        "z": -0.0217
+      },
+      {
+        "x": 0.4928,
+        "y": 0.5201,
+        "z": -0.0253
+      },
+      {
+        "x": 0.4721,
+        "y": 0.59,
+        "z": -0.0168
+      },
+      {
+        "x": 0.4777,
+        "y": 0.5761,
+        "z": -0.0219
+      },
+      {
+        "x": 0.481,
+        "y": 0.5641,
+        "z": -0.024
+      },
+      {
+        "x": 0.4837,
+        "y": 0.5525,
+        "z": -0.0256
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": true,
+      "middle": true,
+      "ring": true,
+      "pinky": true,
+      "thumbOut": false,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.0991676832385245,
+      "thumbLateralPos": -0.0003489062700171431,
+      "palmFacingCamera": false,
+      "palmNormalZ": -0.18582769739515995,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.1535989760074895,
+      "palmOriY": -0.9878988298880309,
+      "fingerOriY": -0.9659252335995132,
+      "fingerOriZ": -0.20461427467835053,
+      "orientationY": -0.9659252335995132,
+      "handUp": true,
+      "handDown": false,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": true,
+      "ang": {
+        "index": 172.10036865869316,
+        "middle": 171.54237671681585,
+        "ring": 168.18729435454927,
+        "pinky": 165.7399266535151,
+        "thumb": 179.86776151220997
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.5509,
+        "y": 0.5118,
+        "z": 0
+      },
+      {
+        "x": 0.5569,
+        "y": 0.5,
+        "z": -0.0069
+      },
+      {
+        "x": 0.5611,
+        "y": 0.481,
+        "z": -0.0103
+      },
+      {
+        "x": 0.563,
+        "y": 0.4652,
+        "z": -0.0132
+      },
+      {
+        "x": 0.5642,
+        "y": 0.4538,
+        "z": -0.0153
+      },
+      {
+        "x": 0.5569,
+        "y": 0.46,
+        "z": -0.0074
+      },
+      {
+        "x": 0.5638,
+        "y": 0.439,
+        "z": -0.0143
+      },
+      {
+        "x": 0.5671,
+        "y": 0.4246,
+        "z": -0.0193
+      },
+      {
+        "x": 0.5686,
+        "y": 0.4121,
+        "z": -0.0225
+      },
+      {
+        "x": 0.5544,
+        "y": 0.4576,
+        "z": -0.0078
+      },
+      {
+        "x": 0.5618,
+        "y": 0.4347,
+        "z": -0.0148
+      },
+      {
+        "x": 0.5652,
+        "y": 0.418,
+        "z": -0.0191
+      },
+      {
+        "x": 0.5674,
+        "y": 0.4039,
+        "z": -0.0215
+      },
+      {
+        "x": 0.5542,
+        "y": 0.4589,
+        "z": -0.0089
+      },
+      {
+        "x": 0.562,
+        "y": 0.4389,
+        "z": -0.0145
+      },
+      {
+        "x": 0.5657,
+        "y": 0.4241,
+        "z": -0.0168
+      },
+      {
+        "x": 0.5681,
+        "y": 0.4116,
+        "z": -0.0177
+      },
+      {
+        "x": 0.5557,
+        "y": 0.4638,
+        "z": -0.0109
+      },
+      {
+        "x": 0.5623,
+        "y": 0.4488,
+        "z": -0.0143
+      },
+      {
+        "x": 0.5655,
+        "y": 0.4374,
+        "z": -0.0149
+      },
+      {
+        "x": 0.5674,
+        "y": 0.4279,
+        "z": -0.015
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": true,
+      "middle": true,
+      "ring": true,
+      "pinky": true,
+      "thumbOut": false,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": true,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.11509611678998219,
+      "thumbLateralPos": 0.02160497470071996,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.4557795524063914,
+      "uvTouching": true,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.10614389499023126,
+      "palmOriY": -0.995658701199937,
+      "fingerOriY": -0.9844213859552445,
+      "fingerOriZ": -0.07472222488388,
+      "orientationY": -0.9844213859552445,
+      "handUp": true,
+      "handDown": false,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": true,
+      "ang": {
+        "index": 169.7294224297332,
+        "middle": 166.79861223664835,
+        "ring": 172.47100117115048,
+        "pinky": 173.13415671639672,
+        "thumb": 175.16172546234776
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.5632,
+        "y": 0.4981,
+        "z": 0
+      },
+      {
+        "x": 0.5583,
+        "y": 0.4736,
+        "z": 0.0016
+      },
+      {
+        "x": 0.5591,
+        "y": 0.454,
+        "z": 0.0012
+      },
+      {
+        "x": 0.5607,
+        "y": 0.4392,
+        "z": -0.0012
+      },
+      {
+        "x": 0.5611,
+        "y": 0.4264,
+        "z": -0.0037
+      },
+      {
+        "x": 0.5653,
+        "y": 0.4348,
+        "z": 0.0083
+      },
+      {
+        "x": 0.5713,
+        "y": 0.4177,
+        "z": 0.0043
+      },
+      {
+        "x": 0.5751,
+        "y": 0.4043,
+        "z": -0.0016
+      },
+      {
+        "x": 0.5782,
+        "y": 0.3922,
+        "z": -0.0063
+      },
+      {
+        "x": 0.5683,
+        "y": 0.4347,
+        "z": 0.0031
+      },
+      {
+        "x": 0.5755,
+        "y": 0.4169,
+        "z": 0.0003
+      },
+      {
+        "x": 0.5795,
+        "y": 0.4026,
+        "z": -0.0054
+      },
+      {
+        "x": 0.583,
+        "y": 0.3892,
+        "z": -0.01
+      },
+      {
+        "x": 0.5712,
+        "y": 0.4382,
+        "z": -0.003
+      },
+      {
+        "x": 0.5784,
+        "y": 0.4217,
+        "z": -0.0056
+      },
+      {
+        "x": 0.5826,
+        "y": 0.409,
+        "z": -0.0088
+      },
+      {
+        "x": 0.5862,
+        "y": 0.3975,
+        "z": -0.0117
+      },
+      {
+        "x": 0.5733,
+        "y": 0.446,
+        "z": -0.0094
+      },
+      {
+        "x": 0.5793,
+        "y": 0.4334,
+        "z": -0.011
+      },
+      {
+        "x": 0.5832,
+        "y": 0.4233,
+        "z": -0.0111
+      },
+      {
+        "x": 0.5867,
+        "y": 0.4139,
+        "z": -0.0116
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": true,
+      "middle": true,
+      "ring": true,
+      "pinky": true,
+      "thumbOut": false,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": -0.009263197648254045,
+      "thumbLateralPos": -0.061787624063467946,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.46127677607776557,
+      "uvTouching": true,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.10770928537917565,
+      "palmOriY": -0.9832077587035838,
+      "fingerOriY": -0.9639936278191656,
+      "fingerOriZ": -0.2037112436984804,
+      "orientationY": -0.9639936278191656,
+      "handUp": true,
+      "handDown": false,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": true,
+      "ang": {
+        "index": 175.47870627143163,
+        "middle": 173.4052969959992,
+        "ring": 172.79493402856602,
+        "pinky": 164.01689929261198,
+        "thumb": 170.45212295027463
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.5614,
+        "y": 0.4846,
+        "z": 0
+      },
+      {
+        "x": 0.558,
+        "y": 0.4672,
+        "z": -0.0042
+      },
+      {
+        "x": 0.5594,
+        "y": 0.4492,
+        "z": -0.0079
+      },
+      {
+        "x": 0.5614,
+        "y": 0.4364,
+        "z": -0.0122
+      },
+      {
+        "x": 0.5613,
+        "y": 0.4249,
+        "z": -0.0167
+      },
+      {
+        "x": 0.5668,
+        "y": 0.4231,
+        "z": -0.0031
+      },
+      {
+        "x": 0.5729,
+        "y": 0.4021,
+        "z": -0.0107
+      },
+      {
+        "x": 0.5764,
+        "y": 0.3859,
+        "z": -0.0179
+      },
+      {
+        "x": 0.5794,
+        "y": 0.3725,
+        "z": -0.023
+      },
+      {
+        "x": 0.57,
+        "y": 0.4244,
+        "z": -0.0072
+      },
+      {
+        "x": 0.5771,
+        "y": 0.4017,
+        "z": -0.0136
+      },
+      {
+        "x": 0.5808,
+        "y": 0.3839,
+        "z": -0.0204
+      },
+      {
+        "x": 0.584,
+        "y": 0.3684,
+        "z": -0.0253
+      },
+      {
+        "x": 0.5722,
+        "y": 0.4303,
+        "z": -0.0121
+      },
+      {
+        "x": 0.5802,
+        "y": 0.4088,
+        "z": -0.0184
+      },
+      {
+        "x": 0.584,
+        "y": 0.3934,
+        "z": -0.0236
+      },
+      {
+        "x": 0.5869,
+        "y": 0.3794,
+        "z": -0.0274
+      },
+      {
+        "x": 0.5733,
+        "y": 0.4412,
+        "z": -0.0177
+      },
+      {
+        "x": 0.5803,
+        "y": 0.4289,
+        "z": -0.0234
+      },
+      {
+        "x": 0.5842,
+        "y": 0.4179,
+        "z": -0.0259
+      },
+      {
+        "x": 0.5875,
+        "y": 0.4073,
+        "z": -0.0276
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": true,
+      "middle": true,
+      "ring": true,
+      "pinky": true,
+      "thumbOut": false,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.06172055986139447,
+      "thumbLateralPos": -0.003222132653003975,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.45484054676463004,
+      "uvTouching": true,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.0900821053749177,
+      "palmOriY": -0.9731950926979059,
+      "fingerOriY": -0.9558501792983459,
+      "fingerOriZ": -0.24686099491346516,
+      "orientationY": -0.9558501792983459,
+      "handUp": true,
+      "handDown": false,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": true,
+      "ang": {
+        "index": 176.46380853793613,
+        "middle": 172.9612015445013,
+        "ring": 173.21000867051595,
+        "pinky": 166.01655936190875,
+        "thumb": 169.8896065290191
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.5613,
+        "y": 0.4894,
+        "z": 0
+      },
+      {
+        "x": 0.5578,
+        "y": 0.4723,
+        "z": -0.0053
+      },
+      {
+        "x": 0.5594,
+        "y": 0.4535,
+        "z": -0.0098
+      },
+      {
+        "x": 0.562,
+        "y": 0.4406,
+        "z": -0.0147
+      },
+      {
+        "x": 0.5622,
+        "y": 0.4281,
+        "z": -0.0199
+      },
+      {
+        "x": 0.5665,
+        "y": 0.4286,
+        "z": -0.0071
+      },
+      {
+        "x": 0.5723,
+        "y": 0.4049,
+        "z": -0.0159
+      },
+      {
+        "x": 0.5757,
+        "y": 0.3891,
+        "z": -0.0232
+      },
+      {
+        "x": 0.5784,
+        "y": 0.3758,
+        "z": -0.0284
+      },
+      {
+        "x": 0.5697,
+        "y": 0.4313,
+        "z": -0.0109
+      },
+      {
+        "x": 0.5768,
+        "y": 0.4068,
+        "z": -0.0184
+      },
+      {
+        "x": 0.5801,
+        "y": 0.389,
+        "z": -0.0257
+      },
+      {
+        "x": 0.5825,
+        "y": 0.3736,
+        "z": -0.0309
+      },
+      {
+        "x": 0.5718,
+        "y": 0.4385,
+        "z": -0.0154
+      },
+      {
+        "x": 0.58,
+        "y": 0.4165,
+        "z": -0.0221
+      },
+      {
+        "x": 0.5842,
+        "y": 0.4013,
+        "z": -0.0276
+      },
+      {
+        "x": 0.5871,
+        "y": 0.3876,
+        "z": -0.0318
+      },
+      {
+        "x": 0.5728,
+        "y": 0.4501,
+        "z": -0.0206
+      },
+      {
+        "x": 0.5795,
+        "y": 0.4379,
+        "z": -0.0266
+      },
+      {
+        "x": 0.5833,
+        "y": 0.4274,
+        "z": -0.0294
+      },
+      {
+        "x": 0.5864,
+        "y": 0.4176,
+        "z": -0.0315
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": true,
+      "middle": true,
+      "ring": true,
+      "pinky": true,
+      "thumbOut": false,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": true,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.1455914564338667,
+      "thumbLateralPos": 0.09065657896635794,
+      "palmFacingCamera": false,
+      "palmNormalZ": 0.34960842688121024,
+      "uvTouching": true,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.08469249346214214,
+      "palmOriY": -0.969231730640408,
+      "fingerOriY": -0.9528363042032202,
+      "fingerOriZ": -0.2644486274119706,
+      "orientationY": -0.9528363042032202,
+      "handUp": true,
+      "handDown": false,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": true,
+      "ang": {
+        "index": 175.6806310127838,
+        "middle": 171.78379936663416,
+        "ring": 171.7578693516303,
+        "pinky": 160.1869781157,
+        "thumb": 171.9030690027105
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.5617,
+        "y": 0.4968,
+        "z": 0
+      },
+      {
+        "x": 0.5576,
+        "y": 0.4773,
+        "z": -0.0042
+      },
+      {
+        "x": 0.5594,
+        "y": 0.4576,
+        "z": -0.0085
+      },
+      {
+        "x": 0.5621,
+        "y": 0.4443,
+        "z": -0.0132
+      },
+      {
+        "x": 0.5628,
+        "y": 0.4317,
+        "z": -0.0184
+      },
+      {
+        "x": 0.5664,
+        "y": 0.4358,
+        "z": -0.0077
+      },
+      {
+        "x": 0.5721,
+        "y": 0.4133,
+        "z": -0.0167
+      },
+      {
+        "x": 0.5751,
+        "y": 0.3976,
+        "z": -0.0242
+      },
+      {
+        "x": 0.5775,
+        "y": 0.3841,
+        "z": -0.0297
+      },
+      {
+        "x": 0.5692,
+        "y": 0.4401,
+        "z": -0.0123
+      },
+      {
+        "x": 0.5762,
+        "y": 0.4172,
+        "z": -0.0203
+      },
+      {
+        "x": 0.579,
+        "y": 0.3997,
+        "z": -0.0275
+      },
+      {
+        "x": 0.5812,
+        "y": 0.3841,
+        "z": -0.0328
+      },
+      {
+        "x": 0.571,
+        "y": 0.4498,
+        "z": -0.0175
+      },
+      {
+        "x": 0.5793,
+        "y": 0.429,
+        "z": -0.025
+      },
+      {
+        "x": 0.5832,
+        "y": 0.4147,
+        "z": -0.0303
+      },
+      {
+        "x": 0.5858,
+        "y": 0.4012,
+        "z": -0.0345
+      },
+      {
+        "x": 0.5713,
+        "y": 0.464,
+        "z": -0.0231
+      },
+      {
+        "x": 0.5781,
+        "y": 0.4532,
+        "z": -0.0301
+      },
+      {
+        "x": 0.5818,
+        "y": 0.4429,
+        "z": -0.0331
+      },
+      {
+        "x": 0.5847,
+        "y": 0.4328,
+        "z": -0.0353
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": true,
+      "middle": true,
+      "ring": true,
+      "pinky": true,
+      "thumbOut": false,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.18665076674416325,
+      "thumbLateralPos": -0.0994412055609731,
+      "palmFacingCamera": true,
+      "palmNormalZ": -0.6981402860958731,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.19508055978909516,
+      "palmOriY": -0.984665747644143,
+      "fingerOriY": -0.9681064040668691,
+      "fingerOriZ": -0.21461367807072673,
+      "orientationY": -0.9681064040668691,
+      "handUp": true,
+      "handDown": false,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": true,
+      "ang": {
+        "index": 169.40065073261331,
+        "middle": 170.92372272416762,
+        "ring": 178.0569253024995,
+        "pinky": 165.17388714142126,
+        "thumb": 176.42859770080872
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.5617,
+        "y": 0.5111,
+        "z": 0
+      },
+      {
+        "x": 0.562,
+        "y": 0.4974,
+        "z": -0.0078
+      },
+      {
+        "x": 0.5635,
+        "y": 0.4779,
+        "z": -0.0111
+      },
+      {
+        "x": 0.5632,
+        "y": 0.4601,
+        "z": -0.0141
+      },
+      {
+        "x": 0.562,
+        "y": 0.4443,
+        "z": -0.0168
+      },
+      {
+        "x": 0.5724,
+        "y": 0.4576,
+        "z": -0.0045
+      },
+      {
+        "x": 0.5766,
+        "y": 0.4383,
+        "z": -0.0117
+      },
+      {
+        "x": 0.5773,
+        "y": 0.4238,
+        "z": -0.0185
+      },
+      {
+        "x": 0.5772,
+        "y": 0.411,
+        "z": -0.0236
+      },
+      {
+        "x": 0.5696,
+        "y": 0.455,
+        "z": -0.006
+      },
+      {
+        "x": 0.5737,
+        "y": 0.4329,
+        "z": -0.0127
+      },
+      {
+        "x": 0.5743,
+        "y": 0.4158,
+        "z": -0.0189
+      },
+      {
+        "x": 0.5743,
+        "y": 0.4003,
+        "z": -0.0232
+      },
+      {
+        "x": 0.5662,
+        "y": 0.4579,
+        "z": -0.0088
+      },
+      {
+        "x": 0.5695,
+        "y": 0.4383,
+        "z": -0.0161
+      },
+      {
+        "x": 0.5713,
+        "y": 0.4272,
+        "z": -0.0206
+      },
+      {
+        "x": 0.5727,
+        "y": 0.4165,
+        "z": -0.0235
+      },
+      {
+        "x": 0.5621,
+        "y": 0.4651,
+        "z": -0.0125
+      },
+      {
+        "x": 0.5636,
+        "y": 0.4545,
+        "z": -0.0194
+      },
+      {
+        "x": 0.5645,
+        "y": 0.4478,
+        "z": -0.022
+      },
+      {
+        "x": 0.5653,
+        "y": 0.442,
+        "z": -0.0235
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": false,
+      "thumbBetween": true,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": -0.3010430125710351,
+      "thumbLateralPos": 0.07103812306695628,
+      "palmFacingCamera": true,
+      "palmNormalZ": -0.8564556151275299,
+      "uvTouching": true,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.10001566923660349,
+      "palmOriY": -0.9950077749770525,
+      "fingerOriY": -0.9780051212668325,
+      "fingerOriZ": -0.11177750293408982,
+      "orientationY": -0.9950077749770525,
+      "handUp": true,
+      "handDown": false,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": false,
+      "ang": {
+        "index": 107.96715838963226,
+        "middle": 83.82176288446438,
+        "ring": 81.77929261749746,
+        "pinky": 115.36756239143061,
+        "thumb": 172.89243830704547
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.5629,
+        "y": 0.5248,
+        "z": 0
+      },
+      {
+        "x": 0.5629,
+        "y": 0.5229,
+        "z": -0.0035
+      },
+      {
+        "x": 0.5642,
+        "y": 0.5126,
+        "z": -0.0057
+      },
+      {
+        "x": 0.5638,
+        "y": 0.4996,
+        "z": -0.0088
+      },
+      {
+        "x": 0.562,
+        "y": 0.4881,
+        "z": -0.0112
+      },
+      {
+        "x": 0.5681,
+        "y": 0.4825,
+        "z": 0.0054
+      },
+      {
+        "x": 0.5639,
+        "y": 0.463,
+        "z": -0.0002
+      },
+      {
+        "x": 0.5575,
+        "y": 0.4609,
+        "z": -0.0062
+      },
+      {
+        "x": 0.5531,
+        "y": 0.4633,
+        "z": -0.0092
+      },
+      {
+        "x": 0.565,
+        "y": 0.4744,
+        "z": 0.0046
+      },
+      {
+        "x": 0.5608,
+        "y": 0.4573,
+        "z": 0.0014
+      },
+      {
+        "x": 0.5545,
+        "y": 0.4587,
+        "z": -0.0027
+      },
+      {
+        "x": 0.5505,
+        "y": 0.4626,
+        "z": -0.0049
+      },
+      {
+        "x": 0.5615,
+        "y": 0.4701,
+        "z": 0.0025
+      },
+      {
+        "x": 0.5578,
+        "y": 0.4543,
+        "z": 0.0003
+      },
+      {
+        "x": 0.5524,
+        "y": 0.4548,
+        "z": -0.001
+      },
+      {
+        "x": 0.5488,
+        "y": 0.458,
+        "z": -0.0012
+      },
+      {
+        "x": 0.5574,
+        "y": 0.4688,
+        "z": -0.0003
+      },
+      {
+        "x": 0.5551,
+        "y": 0.4545,
+        "z": 0.0005
+      },
+      {
+        "x": 0.5517,
+        "y": 0.4516,
+        "z": 0.0024
+      },
+      {
+        "x": 0.5493,
+        "y": 0.4525,
+        "z": 0.0042
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": true,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": false,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.2481217493248376,
+      "thumbLateralPos": 0.20720839478609573,
+      "palmFacingCamera": false,
+      "palmNormalZ": 0.08106271838215898,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.15321723558766293,
+      "palmOriY": -0.9744912676611227,
+      "fingerOriY": -0.8913766460435771,
+      "fingerOriZ": -0.25531170807731207,
+      "orientationY": -0.9744912676611227,
+      "handUp": true,
+      "handDown": false,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": false,
+      "ang": {
+        "index": 156.62710895437274,
+        "middle": 152.05282510360666,
+        "ring": 143.94399671067842,
+        "pinky": 126.59260853660649,
+        "thumb": 169.21393055693932
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4514,
+        "y": 0.5439,
+        "z": 0
+      },
+      {
+        "x": 0.4579,
+        "y": 0.5276,
+        "z": 0.0001
+      },
+      {
+        "x": 0.4644,
+        "y": 0.5061,
+        "z": -0.0018
+      },
+      {
+        "x": 0.4693,
+        "y": 0.492,
+        "z": -0.0046
+      },
+      {
+        "x": 0.4742,
+        "y": 0.4827,
+        "z": -0.0078
+      },
+      {
+        "x": 0.46,
+        "y": 0.4904,
+        "z": -0.0042
+      },
+      {
+        "x": 0.4688,
+        "y": 0.473,
+        "z": -0.0121
+      },
+      {
+        "x": 0.4763,
+        "y": 0.4651,
+        "z": -0.0183
+      },
+      {
+        "x": 0.483,
+        "y": 0.4617,
+        "z": -0.0222
+      },
+      {
+        "x": 0.459,
+        "y": 0.4937,
+        "z": -0.0087
+      },
+      {
+        "x": 0.4691,
+        "y": 0.4778,
+        "z": -0.0152
+      },
+      {
+        "x": 0.4779,
+        "y": 0.4717,
+        "z": -0.0196
+      },
+      {
+        "x": 0.4858,
+        "y": 0.4689,
+        "z": -0.0228
+      },
+      {
+        "x": 0.4584,
+        "y": 0.5009,
+        "z": -0.0135
+      },
+      {
+        "x": 0.4677,
+        "y": 0.4862,
+        "z": -0.0196
+      },
+      {
+        "x": 0.4761,
+        "y": 0.4819,
+        "z": -0.0219
+      },
+      {
+        "x": 0.4837,
+        "y": 0.4802,
+        "z": -0.0234
+      },
+      {
+        "x": 0.458,
+        "y": 0.5107,
+        "z": -0.0183
+      },
+      {
+        "x": 0.4639,
+        "y": 0.5032,
+        "z": -0.0229
+      },
+      {
+        "x": 0.4692,
+        "y": 0.5021,
+        "z": -0.0231
+      },
+      {
+        "x": 0.4739,
+        "y": 0.5026,
+        "z": -0.023
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": -0.21151907407733783,
+      "thumbLateralPos": 0.19606155738630304,
+      "palmFacingCamera": true,
+      "palmNormalZ": -0.861673192123428,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.19974577129277324,
+      "palmOriY": -0.9877117327946896,
+      "fingerOriY": -0.8421127754141973,
+      "fingerOriZ": -0.4715823759338423,
+      "orientationY": -0.9877117327946896,
+      "handUp": true,
+      "handDown": false,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": true,
+      "palmFlat": false,
+      "ang": {
+        "index": 62.54639471788616,
+        "middle": 49.46792991274805,
+        "ring": 33.9092207204207,
+        "pinky": 25.714418647567527,
+        "thumb": 173.8096798774584
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4492,
+        "y": 0.5451,
+        "z": 0
+      },
+      {
+        "x": 0.4585,
+        "y": 0.5379,
+        "z": -0.0047
+      },
+      {
+        "x": 0.4673,
+        "y": 0.5244,
+        "z": -0.0096
+      },
+      {
+        "x": 0.4747,
+        "y": 0.5144,
+        "z": -0.0153
+      },
+      {
+        "x": 0.4805,
+        "y": 0.5075,
+        "z": -0.0206
+      },
+      {
+        "x": 0.461,
+        "y": 0.4923,
+        "z": -0.0046
+      },
+      {
+        "x": 0.4664,
+        "y": 0.4775,
+        "z": -0.0149
+      },
+      {
+        "x": 0.4679,
+        "y": 0.4897,
+        "z": -0.0228
+      },
+      {
+        "x": 0.4665,
+        "y": 0.5015,
+        "z": -0.0268
+      },
+      {
+        "x": 0.4544,
+        "y": 0.4917,
+        "z": -0.0066
+      },
+      {
+        "x": 0.4587,
+        "y": 0.48,
+        "z": -0.0141
+      },
+      {
+        "x": 0.4596,
+        "y": 0.4933,
+        "z": -0.0184
+      },
+      {
+        "x": 0.4582,
+        "y": 0.5042,
+        "z": -0.0206
+      },
+      {
+        "x": 0.4479,
+        "y": 0.4945,
+        "z": -0.0098
+      },
+      {
+        "x": 0.451,
+        "y": 0.4859,
+        "z": -0.0165
+      },
+      {
+        "x": 0.4523,
+        "y": 0.4981,
+        "z": -0.0153
+      },
+      {
+        "x": 0.4515,
+        "y": 0.508,
+        "z": -0.0134
+      },
+      {
+        "x": 0.4417,
+        "y": 0.5009,
+        "z": -0.0134
+      },
+      {
+        "x": 0.4444,
+        "y": 0.4932,
+        "z": -0.0173
+      },
+      {
+        "x": 0.4466,
+        "y": 0.502,
+        "z": -0.014
+      },
+      {
+        "x": 0.4469,
+        "y": 0.5106,
+        "z": -0.0105
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": true,
+      "middle": true,
+      "ring": true,
+      "pinky": true,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.38106410506095956,
+      "thumbLateralPos": 0.7442326742711279,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.8395550656548368,
+      "uvTouching": false,
+      "uvClose": false,
+      "uvSpread": true,
+      "imGap": 0.5886968253277093,
+      "palmOriY": 0.16227091626687945,
+      "fingerOriY": 0.5332564367961085,
+      "fingerOriZ": -0.2967109412521197,
+      "orientationY": 0.5332564367961085,
+      "handUp": false,
+      "handDown": true,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": true,
+      "ang": {
+        "index": 163.39809983183267,
+        "middle": 164.87132220816972,
+        "ring": 164.25161934153283,
+        "pinky": 165.52630600114608,
+        "thumb": 143.8629746667406
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4861,
+        "y": 0.6946,
+        "z": 0
+      },
+      {
+        "x": 0.5001,
+        "y": 0.6833,
+        "z": -0.0008
+      },
+      {
+        "x": 0.5153,
+        "y": 0.6832,
+        "z": -0.0039
+      },
+      {
+        "x": 0.5268,
+        "y": 0.6848,
+        "z": -0.0076
+      },
+      {
+        "x": 0.5352,
+        "y": 0.6799,
+        "z": -0.0112
+      },
+      {
+        "x": 0.5206,
+        "y": 0.6888,
+        "z": -0.008
+      },
+      {
+        "x": 0.5352,
+        "y": 0.7032,
+        "z": -0.0151
+      },
+      {
+        "x": 0.5423,
+        "y": 0.7155,
+        "z": -0.0192
+      },
+      {
+        "x": 0.5473,
+        "y": 0.7255,
+        "z": -0.0217
+      },
+      {
+        "x": 0.5169,
+        "y": 0.7001,
+        "z": -0.0126
+      },
+      {
+        "x": 0.5313,
+        "y": 0.7174,
+        "z": -0.0181
+      },
+      {
+        "x": 0.5383,
+        "y": 0.7312,
+        "z": -0.0208
+      },
+      {
+        "x": 0.5433,
+        "y": 0.7434,
+        "z": -0.0227
+      },
+      {
+        "x": 0.5106,
+        "y": 0.7121,
+        "z": -0.0173
+      },
+      {
+        "x": 0.5239,
+        "y": 0.7295,
+        "z": -0.0223
+      },
+      {
+        "x": 0.53,
+        "y": 0.7427,
+        "z": -0.0238
+      },
+      {
+        "x": 0.5343,
+        "y": 0.7539,
+        "z": -0.0247
+      },
+      {
+        "x": 0.5029,
+        "y": 0.7244,
+        "z": -0.0221
+      },
+      {
+        "x": 0.5127,
+        "y": 0.7381,
+        "z": -0.0258
+      },
+      {
+        "x": 0.5181,
+        "y": 0.7475,
+        "z": -0.0259
+      },
+      {
+        "x": 0.5224,
+        "y": 0.7564,
+        "z": -0.0258
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": true,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.6390839695111921,
+      "thumbLateralPos": 0.9029355865697712,
+      "palmFacingCamera": true,
+      "palmNormalZ": -0.9114626142150033,
+      "uvTouching": false,
+      "uvClose": false,
+      "uvSpread": true,
+      "imGap": 0.4628641334429806,
+      "palmOriY": -0.2695117564687173,
+      "fingerOriY": -0.06072436438924109,
+      "fingerOriZ": 0.30099601430739614,
+      "orientationY": -0.2695117564687173,
+      "handUp": false,
+      "handDown": false,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": false,
+      "ang": {
+        "index": 158.32172385244934,
+        "middle": 106.35946771730265,
+        "ring": 149.2859138468781,
+        "pinky": 133.08101016779457,
+        "thumb": 143.4790798772833
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4908,
+        "y": 0.72,
+        "z": 0
+      },
+      {
+        "x": 0.5051,
+        "y": 0.7267,
+        "z": 0.0071
+      },
+      {
+        "x": 0.5195,
+        "y": 0.7343,
+        "z": 0.0092
+      },
+      {
+        "x": 0.5324,
+        "y": 0.7372,
+        "z": 0.0096
+      },
+      {
+        "x": 0.5413,
+        "y": 0.7334,
+        "z": 0.0088
+      },
+      {
+        "x": 0.5178,
+        "y": 0.7235,
+        "z": 0.0116
+      },
+      {
+        "x": 0.5294,
+        "y": 0.7233,
+        "z": 0.0146
+      },
+      {
+        "x": 0.5343,
+        "y": 0.7227,
+        "z": 0.0147
+      },
+      {
+        "x": 0.5369,
+        "y": 0.7216,
+        "z": 0.014
+      },
+      {
+        "x": 0.5159,
+        "y": 0.7125,
+        "z": 0.0086
+      },
+      {
+        "x": 0.5255,
+        "y": 0.7116,
+        "z": 0.0149
+      },
+      {
+        "x": 0.5277,
+        "y": 0.7124,
+        "z": 0.0148
+      },
+      {
+        "x": 0.5286,
+        "y": 0.713,
+        "z": 0.0125
+      },
+      {
+        "x": 0.5138,
+        "y": 0.703,
+        "z": 0.006
+      },
+      {
+        "x": 0.5236,
+        "y": 0.7007,
+        "z": 0.0122
+      },
+      {
+        "x": 0.5249,
+        "y": 0.7003,
+        "z": 0.0139
+      },
+      {
+        "x": 0.5245,
+        "y": 0.7008,
+        "z": 0.0123
+      },
+      {
+        "x": 0.512,
+        "y": 0.6971,
+        "z": 0.0038
+      },
+      {
+        "x": 0.5199,
+        "y": 0.6927,
+        "z": 0.0092
+      },
+      {
+        "x": 0.5209,
+        "y": 0.6922,
+        "z": 0.0128
+      },
+      {
+        "x": 0.5205,
+        "y": 0.6918,
+        "z": 0.0136
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": false,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": false,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": true,
+      "thumbTouchMiddle": false,
+      "thumbInFist": true,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": true,
+      "thumbSideIndex": true,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.16369640267525298,
+      "thumbLateralPos": 0.6857024096480248,
+      "palmFacingCamera": true,
+      "palmNormalZ": -0.9773250942458392,
+      "uvTouching": false,
+      "uvClose": false,
+      "uvSpread": true,
+      "imGap": 0.5103555903505415,
+      "palmOriY": 0.0686010381487384,
+      "fingerOriY": -0.14966701808082616,
+      "fingerOriZ": -0.273444899296232,
+      "orientationY": 0.0686010381487384,
+      "handUp": false,
+      "handDown": false,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": true,
+      "palmFlat": false,
+      "ang": {
+        "index": 47.06838150275886,
+        "middle": 29.68162906129953,
+        "ring": 8.16756852612087,
+        "pinky": 12.142506063903227,
+        "thumb": 169.5830395122456
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.5409,
+        "y": 0.8434,
+        "z": 0
+      },
+      {
+        "x": 0.5305,
+        "y": 0.8279,
+        "z": -0.0013
+      },
+      {
+        "x": 0.5168,
+        "y": 0.8204,
+        "z": -0.0026
+      },
+      {
+        "x": 0.5089,
+        "y": 0.8217,
+        "z": -0.0051
+      },
+      {
+        "x": 0.5037,
+        "y": 0.8235,
+        "z": -0.0073
+      },
+      {
+        "x": 0.509,
+        "y": 0.8295,
+        "z": 0.0013
+      },
+      {
+        "x": 0.4978,
+        "y": 0.8376,
+        "z": -0.0053
+      },
+      {
+        "x": 0.501,
+        "y": 0.8344,
+        "z": -0.0091
+      },
+      {
+        "x": 0.5074,
+        "y": 0.8304,
+        "z": -0.01
+      },
+      {
+        "x": 0.51,
+        "y": 0.8455,
+        "z": -0.0011
+      },
+      {
+        "x": 0.4987,
+        "y": 0.855,
+        "z": -0.0062
+      },
+      {
+        "x": 0.5026,
+        "y": 0.8505,
+        "z": -0.0086
+      },
+      {
+        "x": 0.509,
+        "y": 0.8461,
+        "z": -0.0088
+      },
+      {
+        "x": 0.5132,
+        "y": 0.8605,
+        "z": -0.0043
+      },
+      {
+        "x": 0.5018,
+        "y": 0.8711,
+        "z": -0.009
+      },
+      {
+        "x": 0.5063,
+        "y": 0.8643,
+        "z": -0.0077
+      },
+      {
+        "x": 0.5124,
+        "y": 0.8585,
+        "z": -0.0053
+      },
+      {
+        "x": 0.518,
+        "y": 0.8742,
+        "z": -0.0076
+      },
+      {
+        "x": 0.5097,
+        "y": 0.8833,
+        "z": -0.0108
+      },
+      {
+        "x": 0.5127,
+        "y": 0.8775,
+        "z": -0.0085
+      },
+      {
+        "x": 0.5174,
+        "y": 0.8706,
+        "z": -0.0053
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.6137060325153655,
+      "thumbLateralPos": 2.304848111840778,
+      "palmFacingCamera": false,
+      "palmNormalZ": -0.08078358622288767,
+      "uvTouching": false,
+      "uvClose": false,
+      "uvSpread": true,
+      "imGap": 4.7259176023298775,
+      "palmOriY": 0.018609913708741488,
+      "fingerOriY": 0.24450005960833127,
+      "fingerOriZ": -0.9182634863862649,
+      "orientationY": 0.018609913708741488,
+      "handUp": false,
+      "handDown": false,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": false,
+      "ang": {
+        "index": 143.83523874649669,
+        "middle": 125.41997184722223,
+        "ring": 106.1789332385124,
+        "pinky": 93.51513171754945,
+        "thumb": 172.5274776812068
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.5222,
+        "y": 0.8479,
+        "z": 0
+      },
+      {
+        "x": 0.524,
+        "y": 0.8286,
+        "z": -0.0093
+      },
+      {
+        "x": 0.5277,
+        "y": 0.8141,
+        "z": -0.0195
+      },
+      {
+        "x": 0.5359,
+        "y": 0.8092,
+        "z": -0.0289
+      },
+      {
+        "x": 0.5466,
+        "y": 0.8014,
+        "z": -0.0393
+      },
+      {
+        "x": 0.5229,
+        "y": 0.8312,
+        "z": -0.0221
+      },
+      {
+        "x": 0.5205,
+        "y": 0.8464,
+        "z": -0.0302
+      },
+      {
+        "x": 0.5158,
+        "y": 0.8514,
+        "z": -0.0357
+      },
+      {
+        "x": 0.5123,
+        "y": 0.8532,
+        "z": -0.0396
+      },
+      {
+        "x": 0.5197,
+        "y": 0.8484,
+        "z": -0.0218
+      },
+      {
+        "x": 0.5138,
+        "y": 0.8618,
+        "z": -0.0279
+      },
+      {
+        "x": 0.5093,
+        "y": 0.863,
+        "z": -0.0308
+      },
+      {
+        "x": 0.5069,
+        "y": 0.8624,
+        "z": -0.0343
+      },
+      {
+        "x": 0.5171,
+        "y": 0.8628,
+        "z": -0.0214
+      },
+      {
+        "x": 0.5115,
+        "y": 0.8722,
+        "z": -0.0257
+      },
+      {
+        "x": 0.5075,
+        "y": 0.8714,
+        "z": -0.027
+      },
+      {
+        "x": 0.5044,
+        "y": 0.8693,
+        "z": -0.0289
+      },
+      {
+        "x": 0.5163,
+        "y": 0.8749,
+        "z": -0.0217
+      },
+      {
+        "x": 0.5112,
+        "y": 0.8804,
+        "z": -0.0244
+      },
+      {
+        "x": 0.5083,
+        "y": 0.8788,
+        "z": -0.0237
+      },
+      {
+        "x": 0.5059,
+        "y": 0.8761,
+        "z": -0.0242
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": 0.48107287985496766,
+      "thumbLateralPos": 0.9403980690383122,
+      "palmFacingCamera": false,
+      "palmNormalZ": 0.30719297008617225,
+      "uvTouching": false,
+      "uvClose": false,
+      "uvSpread": true,
+      "imGap": 1.4227743272115487,
+      "palmOriY": 0.09344869318835808,
+      "fingerOriY": 0.3224737252115936,
+      "fingerOriZ": -0.8547121513823444,
+      "orientationY": 0.09344869318835808,
+      "handUp": false,
+      "handDown": false,
+      "handForward": true,
+      "pChartPose": false,
+      "fistTight": true,
+      "palmFlat": false,
+      "ang": {
+        "index": 53.29756139527148,
+        "middle": 13.726339560077898,
+        "ring": 6.86501276122069,
+        "pinky": 2.7218137411551617,
+        "thumb": 162.80255778262807
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.5028,
+        "y": 0.8335,
+        "z": 0
+      },
+      {
+        "x": 0.5145,
+        "y": 0.8211,
+        "z": -0.0138
+      },
+      {
+        "x": 0.5268,
+        "y": 0.8145,
+        "z": -0.0283
+      },
+      {
+        "x": 0.537,
+        "y": 0.8157,
+        "z": -0.0405
+      },
+      {
+        "x": 0.5473,
+        "y": 0.8121,
+        "z": -0.0527
+      },
+      {
+        "x": 0.5234,
+        "y": 0.8223,
+        "z": -0.041
+      },
+      {
+        "x": 0.5385,
+        "y": 0.8599,
+        "z": -0.055
+      },
+      {
+        "x": 0.537,
+        "y": 0.8579,
+        "z": -0.0603
+      },
+      {
+        "x": 0.5338,
+        "y": 0.8497,
+        "z": -0.0626
+      },
+      {
+        "x": 0.5151,
+        "y": 0.8374,
+        "z": -0.0393
+      },
+      {
+        "x": 0.5324,
+        "y": 0.8753,
+        "z": -0.0498
+      },
+      {
+        "x": 0.5294,
+        "y": 0.8689,
+        "z": -0.0491
+      },
+      {
+        "x": 0.5254,
+        "y": 0.8597,
+        "z": -0.0497
+      },
+      {
+        "x": 0.5073,
+        "y": 0.8504,
+        "z": -0.0369
+      },
+      {
+        "x": 0.523,
+        "y": 0.8831,
+        "z": -0.0431
+      },
+      {
+        "x": 0.5199,
+        "y": 0.8751,
+        "z": -0.0392
+      },
+      {
+        "x": 0.5152,
+        "y": 0.865,
+        "z": -0.0374
+      },
+      {
+        "x": 0.5012,
+        "y": 0.8626,
+        "z": -0.0361
+      },
+      {
+        "x": 0.5125,
+        "y": 0.885,
+        "z": -0.0409
+      },
+      {
+        "x": 0.5105,
+        "y": 0.8798,
+        "z": -0.0394
+      },
+      {
+        "x": 0.506,
+        "y": 0.8709,
+        "z": -0.0385
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": -0.4184075755942566,
+      "thumbLateralPos": 1.1601489759810868,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.9874142229016787,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.37093139826754645,
+      "palmOriY": 0.7892624665785308,
+      "fingerOriY": 0.715782619089849,
+      "fingerOriZ": -0.14030392506123682,
+      "orientationY": 0.7892624665785308,
+      "handUp": false,
+      "handDown": true,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": false,
+      "ang": {
+        "index": 145.77378772877097,
+        "middle": 117.95631045890387,
+        "ring": 136.13016377361154,
+        "pinky": 135.23165158204978,
+        "thumb": 146.04422636296806
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4945,
+        "y": 0.8291,
+        "z": 0
+      },
+      {
+        "x": 0.5086,
+        "y": 0.8123,
+        "z": -0.0046
+      },
+      {
+        "x": 0.524,
+        "y": 0.8132,
+        "z": -0.0063
+      },
+      {
+        "x": 0.5356,
+        "y": 0.8206,
+        "z": -0.007
+      },
+      {
+        "x": 0.545,
+        "y": 0.8204,
+        "z": -0.0072
+      },
+      {
+        "x": 0.5266,
+        "y": 0.8457,
+        "z": -0.0055
+      },
+      {
+        "x": 0.5371,
+        "y": 0.8641,
+        "z": -0.0088
+      },
+      {
+        "x": 0.54,
+        "y": 0.8682,
+        "z": -0.0115
+      },
+      {
+        "x": 0.5398,
+        "y": 0.8673,
+        "z": -0.0125
+      },
+      {
+        "x": 0.5197,
+        "y": 0.8622,
+        "z": -0.0055
+      },
+      {
+        "x": 0.5298,
+        "y": 0.8793,
+        "z": -0.0047
+      },
+      {
+        "x": 0.533,
+        "y": 0.8812,
+        "z": -0.0043
+      },
+      {
+        "x": 0.5335,
+        "y": 0.8791,
+        "z": -0.0048
+      },
+      {
+        "x": 0.5119,
+        "y": 0.8724,
+        "z": -0.0059
+      },
+      {
+        "x": 0.5211,
+        "y": 0.8861,
+        "z": -0.0056
+      },
+      {
+        "x": 0.5245,
+        "y": 0.8893,
+        "z": -0.0023
+      },
+      {
+        "x": 0.5261,
+        "y": 0.8895,
+        "z": -0.0005
+      },
+      {
+        "x": 0.5044,
+        "y": 0.8782,
+        "z": -0.0067
+      },
+      {
+        "x": 0.5127,
+        "y": 0.8888,
+        "z": -0.0062
+      },
+      {
+        "x": 0.5164,
+        "y": 0.8923,
+        "z": -0.0016
+      },
+      {
+        "x": 0.5185,
+        "y": 0.8941,
+        "z": 0.0021
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": -0.5089838667958336,
+      "thumbLateralPos": 1.1905536913190837,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.9962957103197473,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.2878525087728309,
+      "palmOriY": 0.8040845751752476,
+      "fingerOriY": 0.6199969999482956,
+      "fingerOriZ": -0.041471348473065585,
+      "orientationY": 0.8040845751752476,
+      "handUp": false,
+      "handDown": true,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": true,
+      "palmFlat": false,
+      "ang": {
+        "index": 52.526024465598894,
+        "middle": 46.24512917461443,
+        "ring": 66.09739020603902,
+        "pinky": 88.66234363633069,
+        "thumb": 142.30887840999674
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.492,
+        "y": 0.8314,
+        "z": 0
+      },
+      {
+        "x": 0.507,
+        "y": 0.812,
+        "z": -0.0044
+      },
+      {
+        "x": 0.523,
+        "y": 0.8148,
+        "z": -0.0063
+      },
+      {
+        "x": 0.5351,
+        "y": 0.8214,
+        "z": -0.0076
+      },
+      {
+        "x": 0.5448,
+        "y": 0.8198,
+        "z": -0.0079
+      },
+      {
+        "x": 0.5264,
+        "y": 0.8525,
+        "z": -0.003
+      },
+      {
+        "x": 0.538,
+        "y": 0.8698,
+        "z": -0.0053
+      },
+      {
+        "x": 0.5411,
+        "y": 0.8688,
+        "z": -0.0068
+      },
+      {
+        "x": 0.5397,
+        "y": 0.8636,
+        "z": -0.0067
+      },
+      {
+        "x": 0.519,
+        "y": 0.868,
+        "z": -0.0019
+      },
+      {
+        "x": 0.5305,
+        "y": 0.8813,
+        "z": -0.0011
+      },
+      {
+        "x": 0.5328,
+        "y": 0.8752,
+        "z": 0.0006
+      },
+      {
+        "x": 0.5311,
+        "y": 0.8679,
+        "z": 0.0021
+      },
+      {
+        "x": 0.5112,
+        "y": 0.8765,
+        "z": -0.0012
+      },
+      {
+        "x": 0.522,
+        "y": 0.8849,
+        "z": -0.0004
+      },
+      {
+        "x": 0.5248,
+        "y": 0.8785,
+        "z": 0.003
+      },
+      {
+        "x": 0.524,
+        "y": 0.8726,
+        "z": 0.0054
+      },
+      {
+        "x": 0.504,
+        "y": 0.8812,
+        "z": -0.001
+      },
+      {
+        "x": 0.5137,
+        "y": 0.8856,
+        "z": 0.001
+      },
+      {
+        "x": 0.5168,
+        "y": 0.8805,
+        "z": 0.0056
+      },
+      {
+        "x": 0.5163,
+        "y": 0.8753,
+        "z": 0.0095
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": -0.4823526377869125,
+      "thumbLateralPos": 1.1427420811710933,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.9972232562608642,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.270626858461916,
+      "palmOriY": 0.8090780029715818,
+      "fingerOriY": 0.6045590496678258,
+      "fingerOriZ": -0.07015505724698645,
+      "orientationY": 0.8090780029715818,
+      "handUp": false,
+      "handDown": true,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": true,
+      "palmFlat": false,
+      "ang": {
+        "index": 25.058215663905575,
+        "middle": 31.193354509312957,
+        "ring": 45.85133415515133,
+        "pinky": 69.74613918128382,
+        "thumb": 146.31630464485778
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4912,
+        "y": 0.8298,
+        "z": 0
+      },
+      {
+        "x": 0.507,
+        "y": 0.8122,
+        "z": -0.0026
+      },
+      {
+        "x": 0.523,
+        "y": 0.8157,
+        "z": -0.0041
+      },
+      {
+        "x": 0.5353,
+        "y": 0.8217,
+        "z": -0.0055
+      },
+      {
+        "x": 0.5449,
+        "y": 0.8205,
+        "z": -0.0056
+      },
+      {
+        "x": 0.5258,
+        "y": 0.8524,
+        "z": -0.0027
+      },
+      {
+        "x": 0.5395,
+        "y": 0.8724,
+        "z": -0.0058
+      },
+      {
+        "x": 0.5403,
+        "y": 0.8657,
+        "z": -0.0072
+      },
+      {
+        "x": 0.5363,
+        "y": 0.8576,
+        "z": -0.007
+      },
+      {
+        "x": 0.5185,
+        "y": 0.8676,
+        "z": -0.0028
+      },
+      {
+        "x": 0.5318,
+        "y": 0.8826,
+        "z": -0.0031
+      },
+      {
+        "x": 0.5321,
+        "y": 0.872,
+        "z": -0.0016
+      },
+      {
+        "x": 0.5282,
+        "y": 0.8646,
+        "z": -0.0002
+      },
+      {
+        "x": 0.511,
+        "y": 0.8761,
+        "z": -0.0032
+      },
+      {
+        "x": 0.5231,
+        "y": 0.8856,
+        "z": -0.0028
+      },
+      {
+        "x": 0.5237,
+        "y": 0.8762,
+        "z": 0.0004
+      },
+      {
+        "x": 0.5203,
+        "y": 0.8703,
+        "z": 0.0026
+      },
+      {
+        "x": 0.504,
+        "y": 0.8811,
+        "z": -0.0038
+      },
+      {
+        "x": 0.5145,
+        "y": 0.8866,
+        "z": -0.0018
+      },
+      {
+        "x": 0.5159,
+        "y": 0.8792,
+        "z": 0.0031
+      },
+      {
+        "x": 0.5132,
+        "y": 0.874,
+        "z": 0.007
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": -0.45918524641992753,
+      "thumbLateralPos": 1.108366133232867,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.9967866392037785,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.283108250001961,
+      "palmOriY": 0.8017165609544181,
+      "fingerOriY": 0.6102154541816657,
+      "fingerOriZ": -0.07750087292466634,
+      "orientationY": 0.8017165609544181,
+      "handUp": false,
+      "handDown": true,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": true,
+      "palmFlat": false,
+      "ang": {
+        "index": 15.937026483272879,
+        "middle": 23.678023196889537,
+        "ring": 40.50612061511392,
+        "pinky": 65.47097578967313,
+        "thumb": 144.344481470412
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4901,
+        "y": 0.8281,
+        "z": 0
+      },
+      {
+        "x": 0.5066,
+        "y": 0.8112,
+        "z": -0.0025
+      },
+      {
+        "x": 0.5228,
+        "y": 0.8149,
+        "z": -0.0042
+      },
+      {
+        "x": 0.5353,
+        "y": 0.821,
+        "z": -0.006
+      },
+      {
+        "x": 0.5452,
+        "y": 0.8194,
+        "z": -0.0062
+      },
+      {
+        "x": 0.5259,
+        "y": 0.8514,
+        "z": -0.0025
+      },
+      {
+        "x": 0.5401,
+        "y": 0.8719,
+        "z": -0.0053
+      },
+      {
+        "x": 0.5377,
+        "y": 0.8616,
+        "z": -0.0069
+      },
+      {
+        "x": 0.532,
+        "y": 0.8529,
+        "z": -0.007
+      },
+      {
+        "x": 0.5189,
+        "y": 0.8669,
+        "z": -0.0029
+      },
+      {
+        "x": 0.5327,
+        "y": 0.8822,
+        "z": -0.0026
+      },
+      {
+        "x": 0.5312,
+        "y": 0.8709,
+        "z": -0.0015
+      },
+      {
+        "x": 0.5262,
+        "y": 0.8637,
+        "z": -0.0007
+      },
+      {
+        "x": 0.5115,
+        "y": 0.8756,
+        "z": -0.0035
+      },
+      {
+        "x": 0.5238,
+        "y": 0.8849,
+        "z": -0.0024
+      },
+      {
+        "x": 0.5231,
+        "y": 0.8757,
+        "z": 0.0008
+      },
+      {
+        "x": 0.5189,
+        "y": 0.87,
+        "z": 0.0025
+      },
+      {
+        "x": 0.5045,
+        "y": 0.8809,
+        "z": -0.0044
+      },
+      {
+        "x": 0.5154,
+        "y": 0.8863,
+        "z": -0.0017
+      },
+      {
+        "x": 0.5156,
+        "y": 0.879,
+        "z": 0.0034
+      },
+      {
+        "x": 0.512,
+        "y": 0.8738,
+        "z": 0.0072
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": -0.4463264156243794,
+      "thumbLateralPos": 1.0962342840635566,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.9950779198112714,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.28031281456707696,
+      "palmOriY": 0.797050625235063,
+      "fingerOriY": 0.618619528737758,
+      "fingerOriZ": -0.07834304220482223,
+      "orientationY": 0.797050625235063,
+      "handUp": false,
+      "handDown": true,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": true,
+      "palmFlat": false,
+      "ang": {
+        "index": 13.716790910711973,
+        "middle": 23.23851422014424,
+        "ring": 41.98335054728862,
+        "pinky": 68.659393348445,
+        "thumb": 142.05224641294214
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4897,
+        "y": 0.8259,
+        "z": 0
+      },
+      {
+        "x": 0.5067,
+        "y": 0.8109,
+        "z": -0.0016
+      },
+      {
+        "x": 0.523,
+        "y": 0.8147,
+        "z": -0.003
+      },
+      {
+        "x": 0.5352,
+        "y": 0.8201,
+        "z": -0.0044
+      },
+      {
+        "x": 0.5447,
+        "y": 0.8179,
+        "z": -0.0044
+      },
+      {
+        "x": 0.5255,
+        "y": 0.8488,
+        "z": -0.0033
+      },
+      {
+        "x": 0.54,
+        "y": 0.8709,
+        "z": -0.0062
+      },
+      {
+        "x": 0.538,
+        "y": 0.8611,
+        "z": -0.0073
+      },
+      {
+        "x": 0.5322,
+        "y": 0.852,
+        "z": -0.007
+      },
+      {
+        "x": 0.5187,
+        "y": 0.8645,
+        "z": -0.004
+      },
+      {
+        "x": 0.5331,
+        "y": 0.8819,
+        "z": -0.0037
+      },
+      {
+        "x": 0.5319,
+        "y": 0.8711,
+        "z": -0.0022
+      },
+      {
+        "x": 0.527,
+        "y": 0.863,
+        "z": -0.001
+      },
+      {
+        "x": 0.5115,
+        "y": 0.8737,
+        "z": -0.0047
+      },
+      {
+        "x": 0.5241,
+        "y": 0.8837,
+        "z": -0.003
+      },
+      {
+        "x": 0.5234,
+        "y": 0.8747,
+        "z": 0.0006
+      },
+      {
+        "x": 0.5194,
+        "y": 0.8685,
+        "z": 0.0025
+      },
+      {
+        "x": 0.5047,
+        "y": 0.8793,
+        "z": -0.0055
+      },
+      {
+        "x": 0.5156,
+        "y": 0.8846,
+        "z": -0.0024
+      },
+      {
+        "x": 0.5158,
+        "y": 0.8772,
+        "z": 0.0031
+      },
+      {
+        "x": 0.5125,
+        "y": 0.8718,
+        "z": 0.0068
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": -0.482333675343548,
+      "thumbLateralPos": 1.096085081317409,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.9979946839412022,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.2807747269687292,
+      "palmOriY": 0.8079567377038268,
+      "fingerOriY": 0.6112289991994178,
+      "fingerOriZ": -0.03425015323568429,
+      "orientationY": 0.8079567377038268,
+      "handUp": false,
+      "handDown": true,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": true,
+      "palmFlat": false,
+      "ang": {
+        "index": 17.570577012871702,
+        "middle": 31.354952012197813,
+        "ring": 48.48333903465396,
+        "pinky": 73.23339166398841,
+        "thumb": 139.13418321830272
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4899,
+        "y": 0.8259,
+        "z": 0
+      },
+      {
+        "x": 0.507,
+        "y": 0.8106,
+        "z": -0.0021
+      },
+      {
+        "x": 0.523,
+        "y": 0.8146,
+        "z": -0.0033
+      },
+      {
+        "x": 0.5352,
+        "y": 0.8202,
+        "z": -0.0043
+      },
+      {
+        "x": 0.5447,
+        "y": 0.8175,
+        "z": -0.0039
+      },
+      {
+        "x": 0.5259,
+        "y": 0.8503,
+        "z": -0.0027
+      },
+      {
+        "x": 0.5399,
+        "y": 0.8716,
+        "z": -0.0048
+      },
+      {
+        "x": 0.5392,
+        "y": 0.8617,
+        "z": -0.0056
+      },
+      {
+        "x": 0.5342,
+        "y": 0.8527,
+        "z": -0.0051
+      },
+      {
+        "x": 0.5189,
+        "y": 0.8658,
+        "z": -0.0026
+      },
+      {
+        "x": 0.5336,
+        "y": 0.8822,
+        "z": -0.0014
+      },
+      {
+        "x": 0.5336,
+        "y": 0.872,
+        "z": 0.0004
+      },
+      {
+        "x": 0.5295,
+        "y": 0.8639,
+        "z": 0.0015
+      },
+      {
+        "x": 0.5117,
+        "y": 0.8742,
+        "z": -0.0024
+      },
+      {
+        "x": 0.5246,
+        "y": 0.8839,
+        "z": -0.0003
+      },
+      {
+        "x": 0.5249,
+        "y": 0.8753,
+        "z": 0.0033
+      },
+      {
+        "x": 0.5214,
+        "y": 0.8688,
+        "z": 0.005
+      },
+      {
+        "x": 0.505,
+        "y": 0.8791,
+        "z": -0.0024
+      },
+      {
+        "x": 0.5159,
+        "y": 0.8842,
+        "z": 0.0007
+      },
+      {
+        "x": 0.5171,
+        "y": 0.8771,
+        "z": 0.0058
+      },
+      {
+        "x": 0.5143,
+        "y": 0.8716,
+        "z": 0.0094
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": -0.4750585086932849,
+      "thumbLateralPos": 1.077145818482447,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.9956014112420905,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.3452213592898714,
+      "palmOriY": 0.8108427664536528,
+      "fingerOriY": 0.6471336192080526,
+      "fingerOriZ": 0.07385677977983408,
+      "orientationY": 0.8108427664536528,
+      "handUp": false,
+      "handDown": true,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": false,
+      "palmFlat": false,
+      "ang": {
+        "index": 24.203357091303815,
+        "middle": 68.78510013626484,
+        "ring": 85.39123940589403,
+        "pinky": 107.06992325043011,
+        "thumb": 139.09726713691958
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4897,
+        "y": 0.8252,
+        "z": 0
+      },
+      {
+        "x": 0.507,
+        "y": 0.8103,
+        "z": -0.0023
+      },
+      {
+        "x": 0.5231,
+        "y": 0.8138,
+        "z": -0.0029
+      },
+      {
+        "x": 0.5355,
+        "y": 0.8202,
+        "z": -0.0031
+      },
+      {
+        "x": 0.5447,
+        "y": 0.8181,
+        "z": -0.0019
+      },
+      {
+        "x": 0.5259,
+        "y": 0.8502,
+        "z": 0.0009
+      },
+      {
+        "x": 0.5392,
+        "y": 0.8702,
+        "z": 0.0004
+      },
+      {
+        "x": 0.5401,
+        "y": 0.8646,
+        "z": -0.0001
+      },
+      {
+        "x": 0.537,
+        "y": 0.8573,
+        "z": 0.0004
+      },
+      {
+        "x": 0.5189,
+        "y": 0.8658,
+        "z": 0.0023
+      },
+      {
+        "x": 0.5317,
+        "y": 0.8808,
+        "z": 0.0063
+      },
+      {
+        "x": 0.5352,
+        "y": 0.8775,
+        "z": 0.0082
+      },
+      {
+        "x": 0.5354,
+        "y": 0.8724,
+        "z": 0.0087
+      },
+      {
+        "x": 0.5117,
+        "y": 0.8742,
+        "z": 0.0033
+      },
+      {
+        "x": 0.5228,
+        "y": 0.8832,
+        "z": 0.0076
+      },
+      {
+        "x": 0.5264,
+        "y": 0.8799,
+        "z": 0.0112
+      },
+      {
+        "x": 0.5268,
+        "y": 0.8743,
+        "z": 0.0125
+      },
+      {
+        "x": 0.5053,
+        "y": 0.879,
+        "z": 0.0041
+      },
+      {
+        "x": 0.5148,
+        "y": 0.8838,
+        "z": 0.0083
+      },
+      {
+        "x": 0.5184,
+        "y": 0.8808,
+        "z": 0.0133
+      },
+      {
+        "x": 0.5192,
+        "y": 0.8761,
+        "z": 0.0165
+      }
+    ],
+    "sign": "SORPRESA"
+  },
+  {
+    "fingerStates": {
+      "thumb": true,
+      "index": false,
+      "middle": false,
+      "ring": false,
+      "pinky": false,
+      "thumbOut": true,
+      "thumbBetween": false,
+      "kpThumbSlot": false,
+      "pThumbSlot": false,
+      "thumbTouchIndex": false,
+      "thumbTouchMiddle": false,
+      "thumbInFist": false,
+      "thumbOverTop": false,
+      "thumbBelowMcps": false,
+      "thumbAtLevel": false,
+      "thumbSideIndex": false,
+      "thumbSideMiddle": false,
+      "thumbSidePinky": false,
+      "thumbAxial": -0.4753486031006308,
+      "thumbLateralPos": 1.1173829713632928,
+      "palmFacingCamera": true,
+      "palmNormalZ": 0.9944391205930071,
+      "uvTouching": false,
+      "uvClose": true,
+      "uvSpread": false,
+      "imGap": 0.2737427285522899,
+      "palmOriY": 0.8118336692997679,
+      "fingerOriY": 0.5933984780785649,
+      "fingerOriZ": -0.09357548059694329,
+      "orientationY": 0.8118336692997679,
+      "handUp": false,
+      "handDown": true,
+      "handForward": false,
+      "pChartPose": false,
+      "fistTight": true,
+      "palmFlat": false,
+      "ang": {
+        "index": 22.586352757410662,
+        "middle": 31.2342049669546,
+        "ring": 47.50963962865767,
+        "pinky": 72.01831258427116,
+        "thumb": 142.43302650956986
+      }
+    },
+    "landmarks": [
+      {
+        "x": 0.4905,
+        "y": 0.8271,
+        "z": 0
+      },
+      {
+        "x": 0.5076,
+        "y": 0.8119,
+        "z": -0.0029
+      },
+      {
+        "x": 0.524,
+        "y": 0.8155,
+        "z": -0.0046
+      },
+      {
+        "x": 0.5364,
+        "y": 0.821,
+        "z": -0.0061
+      },
+      {
+        "x": 0.546,
+        "y": 0.8188,
+        "z": -0.0061
+      },
+      {
+        "x": 0.5262,
+        "y": 0.8515,
+        "z": -0.0045
+      },
+      {
+        "x": 0.5405,
+        "y": 0.8723,
+        "z": -0.0076
+      },
+      {
+        "x": 0.5406,
+        "y": 0.8627,
+        "z": -0.0087
+      },
+      {
+        "x": 0.5359,
+        "y": 0.8537,
+        "z": -0.0085
+      },
+      {
+        "x": 0.5189,
+        "y": 0.867,
+        "z": -0.0042
+      },
+      {
+        "x": 0.5331,
+        "y": 0.8829,
+        "z": -0.0044
+      },
+      {
+        "x": 0.5332,
+        "y": 0.8712,
+        "z": -0.0027
+      },
+      {
+        "x": 0.529,
+        "y": 0.8628,
+        "z": -0.0014
+      },
+      {
+        "x": 0.5115,
+        "y": 0.8756,
+        "z": -0.004
+      },
+      {
+        "x": 0.5242,
+        "y": 0.8849,
+        "z": -0.0028
+      },
+      {
+        "x": 0.5245,
+        "y": 0.8753,
+        "z": 0.0009
+      },
+      {
+        "x": 0.5208,
+        "y": 0.8686,
+        "z": 0.0029
+      },
+      {
+        "x": 0.5048,
+        "y": 0.8806,
+        "z": -0.0039
+      },
+      {
+        "x": 0.5154,
+        "y": 0.8853,
+        "z": -0.0015
+      },
+      {
+        "x": 0.5165,
+        "y": 0.8777,
+        "z": 0.0034
+      },
+      {
+        "x": 0.5139,
+        "y": 0.8722,
+        "z": 0.0069
+      }
+    ],
+    "sign": "SORPRESA"
+  }
+]

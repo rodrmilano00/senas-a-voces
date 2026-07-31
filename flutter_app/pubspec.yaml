@@ -1,0 +1,55 @@
+name: senas_a_voces
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # BLE
+  flutter_blue_plus: ^1.32.0
+  permission_handler: ^11.3.0
+
+  # State management & DI
+  flutter_riverpod: ^2.5.1
+
+  # ML / TFLite
+  tflite_flutter: ^0.12.1
+
+  # Audio / TTS / HTTP / cache
+  http: ^1.2.0
+  path_provider: ^2.1.2
+  just_audio: ^0.9.36
+  shared_preferences: ^2.2.2
+
+  # Utilities
+  collection: ^1.18.0
+  tuple: ^2.0.2
+  speech_to_text: ^7.4.0
+  flutter_tts: ^4.2.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/models/
+    - assets/images/
+    - assets/training_data/
+    - assets/training_data/numeros/
+    - assets/training_data/palabras/
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/images/app-icon.png
+  adaptive_icon_background: "#F7FAFC"
+  adaptive_icon_foreground: assets/images/app-icon.png
+  adaptive_icon_foreground_inset: 12

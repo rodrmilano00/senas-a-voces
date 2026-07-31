@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Señas a Voces — QR de descarga</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg: #FAF7ED; --surface: #FFFFFF; --fg: #1A2E35;
+      --muted: #5A7A82; --border: #D4E4E8; --primary: #0D5C6F; --accent: #EC9960;
+    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--fg);
+      min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+    .card { background: var(--surface); border: 1px solid var(--border);
+      border-radius: 24px; padding: 32px; max-width: 420px; width: 100%;
+      text-align: center; }
+    h1 { color: var(--primary); font-size: 22px; margin: 0 0 4px; }
+    p { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+    input { width: 100%; padding: 12px 14px; border: 1px solid var(--border);
+      border-radius: 14px; font-size: 14px; margin-bottom: 12px; }
+    button { width: 100%; padding: 12px; border: 0; border-radius: 14px;
+      background: var(--primary); color: #fff; font-weight: 700; font-size: 15px;
+      cursor: pointer; }
+    button:hover { background: #0a4a5a; }
+    #qr { margin: 24px auto 0; display: inline-block; padding: 16px;
+      background: #fff; border-radius: 16px; }
+    .hint { margin-top: 16px; font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Señas a Voces</h1>
+    <p>Genera el QR para descargar la app. Pega la URL pública del APK.</p>
+    <input id="url" type="url"
+      placeholder="https://.../app-release.apk"
+      value="" />
+    <button onclick="gen()">Generar QR</button>
+    <div id="qr"></div>
+    <div class="hint">Escanea con la cámara del teléfono para descargar e instalar.</div>
+  </div>
+  <script>
+    let qr;
+    function gen() {
+      const url = document.getElementById('url').value.trim();
+      if (!url) { alert('Escribe la URL del APK'); return; }
+      const box = document.getElementById('qr');
+      box.innerHTML = '';
+      qr = new QRCode(box, {
+        text: url, width: 256, height: 256,
+        colorDark: '#0D5C6F', colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+  </script>
+</body>
+</html>
