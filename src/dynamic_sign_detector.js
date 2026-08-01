@@ -2,6 +2,8 @@
 // Detector de señas dinámicas usando DTW sobre secuencias de vectores de características.
 // El "modelo entrenado" es una colección de secuencias JSON en public/training_data/.
 
+import { fingerStates as computeFingerStates } from "./lsm_detector.js";
+
 export const WRIST_WEIGHT = 4;
 
 // ── Vector de características invariante (forma de mano) ──
@@ -100,9 +102,11 @@ export class DynamicSignDetector {
   }
 
   // Cargar un patrón desde JSON de training_data. Acumula ejemplos por nombre.
+  // Los patrones generados desde video solo traen `landmarks`; en ese caso
+  // recalculamos `fingerStates` igual que hace el loader de Flutter.
   loadPattern(name, frames) {
     const infos = frames
-      .map(f => frameInfo(f.fingerStates, f.landmarks))
+      .map(f => frameInfo(f.fingerStates ?? computeFingerStates(f.landmarks), f.landmarks))
       .filter(Boolean);
     const seq = buildSequence(infos);
     if (seq.length === 0) return;

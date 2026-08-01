@@ -22,14 +22,40 @@ class HandOverlayPainter extends CustomPainter {
 
   HandOverlayPainter(this.frame);
 
-  Offset _landmarkToOffset(Landmark p, Size size) {
-    final nx = frame.mirror ? (1.0 - p.x) : p.x;
-    return Offset(nx * size.width, p.y * size.height);
+  /// Calcula el rect donde el video se muestra realmente dentro del widget.
+  /// El Texture esta envuelto en AspectRatio(3:4) + Center, asi que el rect
+  /// es el sub-rect 3:4 centrado dentro del canvas.
+  Rect _computeDisplayRect(Size canvas) {
+    const imgAspect = 3.0 / 4.0; // portrait 3:4
+    final canvasAspect = canvas.width / canvas.height;
+
+    double w, h;
+    if (imgAspect > canvasAspect) {
+      w = canvas.width;
+      h = w / imgAspect;
+    } else {
+      h = canvas.height;
+      w = h * imgAspect;
+    }
+
+    final x = (canvas.width - w) / 2;
+    final y = (canvas.height - h) / 2;
+    return Rect.fromLTWH(x, y, w, h);
+  }
+
+  Offset _landmarkToOffset(Landmark p, Rect rect) {
+    // Espejo X -> rot -90° -> espejo X -> flip Y
+    // (1-y, x) -> (1-y, 1-x)
+    final nx = 1.0 - p.y;
+    final ny = 1.0 - p.x;
+    return Offset(nx * rect.width + rect.left, ny * rect.height + rect.top);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     if (frame.hands.isEmpty) return;
+
+    final rect = _computeDisplayRect(size);
 
     final linePaint = Paint()
       ..color = const Color(0xFF2AABB8)
@@ -49,15 +75,15 @@ class HandOverlayPainter extends CustomPainter {
         final a = hand[c[0]];
         final b = hand[c[1]];
         canvas.drawLine(
-          _landmarkToOffset(a, size),
-          _landmarkToOffset(b, size),
+          _landmarkToOffset(a, rect),
+          _landmarkToOffset(b, rect),
           linePaint,
         );
       }
 
       for (var i = 0; i < hand.length; i++) {
         final p = hand[i];
-        final offset = _landmarkToOffset(p, size);
+        final offset = _landmarkToOffset(p, rect);
         canvas.drawCircle(
           offset,
           tipIndices.contains(i) ? 6 : 4,

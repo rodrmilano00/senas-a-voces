@@ -152,13 +152,14 @@ class _LiveTranslationPageState extends State<LiveTranslationPage> {
         fit: StackFit.expand,
         children: [
           if (_textureId != null)
-            _isFrontCamera
-              ? Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.identity()..scale(-1.0, 1.0),
+            Center(
+              child: AspectRatio(
+                aspectRatio: 3.0 / 4.0,
+                child: ClipRect(
                   child: Texture(textureId: _textureId!),
-                )
-              : Texture(textureId: _textureId!),
+                ),
+              ),
+            ),
           Positioned.fill(
             child: RepaintBoundary(
               child: ValueListenableBuilder<VisionFrame?>(

@@ -208,13 +208,15 @@ class DynamicSignDetector {
       }
     }
     final margin = secondScore - bestScore;
-    final confidence = ((1 - bestScore) * 100).round().clamp(0, 100);
+    final confidence = bestScore.isFinite
+        ? ((1 - bestScore) * 100).round().clamp(0, 100)
+        : 0;
     return DetectResult(
       matched: bestMatch,
       score: bestScore,
       confidence: confidence,
-      margin: margin,
-      accepted: bestScore <= threshold && margin >= minMargin,
+      margin: margin.isFinite ? margin : double.infinity,
+      accepted: bestScore.isFinite && bestScore <= threshold && margin >= minMargin,
     );
   }
 

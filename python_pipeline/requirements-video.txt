@@ -1,0 +1,6 @@
+# Dependencias para extract_from_videos.py (MP4 -> patrones DTW).
+# Separado de requirements.txt para no instalar TensorFlow si solo
+# quieres procesar videos.
+mediapipe>=0.10.9
+opencv-python>=4.9.0
+numpy>=1.24.0

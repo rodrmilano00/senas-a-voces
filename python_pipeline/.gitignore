@@ -8,3 +8,7 @@ dataset/processed/*
 !dataset/processed/.gitkeep
 *.h5
 *.keras
+
+# Modelo MediaPipe descargado por extract_from_videos.py
+models/
+_tmp_test/

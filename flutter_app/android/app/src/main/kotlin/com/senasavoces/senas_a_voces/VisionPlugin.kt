@@ -139,7 +139,7 @@ class VisionPlugin(
             val options = HandLandmarker.HandLandmarkerOptions.builder()
                 .setBaseOptions(base)
                 .setRunningMode(RunningMode.LIVE_STREAM)
-                .setNumHands(1)
+                .setNumHands(2)
                 .setMinHandDetectionConfidence(0.5f)
                 .setMinTrackingConfidence(0.5f)
                 .setMinHandPresenceConfidence(0.5f)
