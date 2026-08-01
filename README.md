@@ -260,8 +260,22 @@ python evaluate.py --model ../flutter_app/assets/models/static.tflite --data dat
 
 ## Notas para colaboradores
 
+- **Guía completa:** `docs/GUIA_COLABORADORES.md` — Cómo usar los modelos entrenados, probar, añadir señas y colaborar.
 - Cada subproyecto tiene su propio `README.md` con instrucciones detalladas.
 - `docs/` contiene especificaciones de producto y branding.
 - `_archive/` contiene proyectos de prueba obsoletos (no usar en producción).
 - Los colores y la identidad visual están en `docs/brand-spec.md`.
 - Para añadir señas nuevas, ver la sección "Entrenar señas nuevas" en cada proyecto.
+
+### Resumen del modelo actual (227 señas)
+
+| Categoría  | Señas |
+|------------|-------|
+| `numeros`  | 40    |
+| `palabras` | 159   |
+| `familia`  | 18    |
+| `colores`  | 10    |
+
+Los patrones DTW están en `public/training_data/` (web) y
+`flutter_app/assets/training_data/` (Flutter), con `manifest.json`
+listando las señas disponibles por categoría.
