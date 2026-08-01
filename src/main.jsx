@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AuthPage from "./components/AuthPage";
 import EmailConfirmationPage from "./components/EmailConfirmationPage";
 import { updateSignProgress, updateModuleProgress, updateStreak, recordVideoView, updateWeeklyActivity, updatePracticeDays, getRecommendations } from "./services/progressService";
+import { Analytics } from "@vercel/analytics/react";
 
 const navItems = [
   { path: "/", label: "Acceso" },
@@ -1359,5 +1360,6 @@ function App() {
 createRoot(document.getElementById("root")).render(
   <AuthProvider>
     <App />
+    <Analytics />
   </AuthProvider>
 );
