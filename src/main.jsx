@@ -10,6 +10,7 @@ import { GLOSARIO_LESSONS, ALPHABET_LESSON } from "./lessons_glosario.js";
 
 import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR, scoreLetter, LSM_ALPHABET, NUMBER_TEMPLATES } from "./lsm_detector.js";
 import { dynamicDetector, featureFromFingerStates, frameInfo, buildSequence } from "./dynamic_sign_detector.js";
+import ModelTestPage from "./model_test_page.jsx";
 
 
 
@@ -23,7 +24,9 @@ const navItems = [
 
   { path: "/practice", label: "Práctica" },
 
-  { path: "/video-test", label: "Videos" }
+  { path: "/video-test", label: "Videos" },
+
+  { path: "/model-test", label: "Probar modelo" }
 
 ];
 
@@ -3385,6 +3388,22 @@ function App() {
   if (path === "/debug")   return <DebugPage isDark={isDark} navigate={navigate} />;
 
   if (path === "/video-test") return <DebugPage isDark={isDark} navigate={navigate} videoOnly />;
+
+  if (path === "/model-test") return (
+
+    <ModelTestPage
+
+      isDark={isDark}
+
+      navigate={navigate}
+
+      useCameraMediaPipe={useCameraMediaPipe}
+
+      reloadDynamicPatterns={reloadDynamicPatterns}
+
+    />
+
+  );
 
 
 

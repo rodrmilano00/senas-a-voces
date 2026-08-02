@@ -154,37 +154,46 @@ export class DynamicSignDetector {
     }
   }
 
-  // Detectar la mejor seña comparando sub-ventanas del buffer.
-  detect() {
-    if (this.buffer.length < this.minBufferSize) return null;
-    let bestMatch = null, bestScore = Infinity, secondScore = Infinity;
+  // Mejor distancia DTW del buffer actual contra CADA seña, ordenada de mejor a peor.
+  // Devuelve la distancia minima por seña (no por ventana), que es lo que permite
+  // comparar señas distintas entre si.
+  detectRanking() {
+    if (this.buffer.length < this.minBufferSize) return [];
+    const ranking = [];
     for (const pattern of this.patterns) {
+      let best = Infinity;
       for (const seq of pattern.sequences) {
         const L = seq.length;
         const minW = Math.max(this.minBufferSize, L - 2);
         const maxW = Math.min(this.buffer.length, L + 8);
         for (let winLen = minW; winLen <= maxW; winLen++) {
           for (let start = 0; start + winLen <= this.buffer.length; start++) {
-            const window = this.buffer.slice(start, start + winLen);
-            const score = dtw(window, seq);
-            if (score < bestScore) {
-              secondScore = bestScore;
-              bestScore = score;
-              bestMatch = pattern.name;
-            } else if (score < secondScore) {
-              secondScore = score;
-            }
+            const score = dtw(this.buffer.slice(start, start + winLen), seq);
+            if (score < best) best = score;
           }
         }
       }
+      if (best !== Infinity) ranking.push({ name: pattern.name, score: best });
     }
-    const margin = secondScore - bestScore;
+    ranking.sort((a, b) => a.score - b.score);
+    return ranking;
+  }
+
+  // Detectar la mejor seña comparando sub-ventanas del buffer.
+  // El margen se mide contra la SIGUIENTE seña distinta: comparar contra otra
+  // ventana del mismo patron daria un margen casi cero siempre.
+  detect() {
+    const ranking = this.detectRanking();
+    if (ranking.length === 0) return null;
+    const bestScore = ranking[0].score;
+    const margin = ranking.length > 1 ? ranking[1].score - bestScore : Infinity;
     const confidence = Math.max(0, Math.min(100, Math.round((1 - bestScore) * 100)));
     return {
-      matched: bestMatch,
+      matched: ranking[0].name,
       score: bestScore,
       confidence,
       margin,
+      ranking,
       accepted: bestScore <= this.threshold && margin >= this.minMargin,
     };
   }
