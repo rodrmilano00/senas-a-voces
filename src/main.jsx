@@ -2554,18 +2554,9 @@ async function reloadDynamicPatterns() {
       }
     }
     const results = await Promise.all(tasks);
-    let loadedCount = 0;
     for (const r of results) {
-      if (r) {
-        const before = dynamicDetector.patterns.length;
-        dynamicDetector.loadPattern(r.sign, r.data);
-        const after = dynamicDetector.patterns.length;
-        if (after > before || dynamicDetector.patterns.find(p => p.name === r.sign)) {
-          loadedCount++;
-        }
-      }
+      if (r) dynamicDetector.loadPattern(r.sign, r.data);
     }
-    console.log('[DYNAMIC] Loaded patterns:', dynamicDetector.getStatus().patternsLoaded);
   } catch (e) { console.warn('[DYNAMIC] reload error:', e); }
   return dynamicDetector.getStatus().patternsLoaded;
 }

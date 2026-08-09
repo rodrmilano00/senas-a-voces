@@ -4,48 +4,16 @@
 
 import { fingerStates as computeFingerStates } from "./lsm_detector.js";
 
-export const WRIST_WEIGHT = 2.5;
-const ACCEL_WEIGHT = 1.5;
-const TOP_K = 3;
-const PRE_FILTER_N = 20; // solo DTW en los top-20 candidatos del pre-filtro
+export const WRIST_WEIGHT = 4;
 
-const HAND_DIM = 21;
-const ZERO_HAND = new Array(HAND_DIM).fill(0);
-
-// ── Utilidades ──
-// Voltea horizontalmente una lista de landmarks: x -> 1 - x.
-function flipHand(landmarks) {
-  if (!landmarks) return null;
-  return landmarks.map(lm => ({ x: 1 - lm.x, y: lm.y, z: lm.z }));
-}
-
-// ── Vector de características enriquecido (forma de mano + orientación 3D) ──
-// Describe UNA sola mano. La mayoría de las señas de LSM usan dos manos, así
-// que frameInfo/buildSequence combinan dos llamadas a esta función (Right + Left).
-export function featureFromFingerStates(fs, lms) {
+// ── Vector de características invariante (forma de mano) ──
+export function featureFromFingerStates(fs) {
   if (!fs) return null;
   const ang = fs.ang || {};
   const norm = (v) => {
     if (typeof v !== "number") return 0;
     return v / 180.0;
   };
-
-  // Features geométricos derivados de landmarks
-  let thumbIndexDist = 0, indexWristDist = 0, handSpread = 0, pinkyWristDist = 0;
-  let thumbMidDist = 0, midWristDist = 0, palmWidth = 0;
-  if (lms && lms.length >= 21) {
-    const w = lms[0];
-    const palmScale = Math.hypot(lms[9].x - w.x, lms[9].y - w.y) || 1e-9;
-    const d = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, (a.z||0) - (b.z||0)) / palmScale;
-    thumbIndexDist = d(lms[4], lms[8]);
-    indexWristDist = d(lms[8], lms[0]);
-    handSpread     = d(lms[4], lms[20]);
-    pinkyWristDist = d(lms[20], lms[0]);
-    thumbMidDist   = d(lms[4], lms[12]);
-    midWristDist   = d(lms[12], lms[0]);
-    palmWidth      = d(lms[5], lms[17]);
-  }
-
   return [
     norm(ang.index),
     norm(ang.middle),
@@ -59,126 +27,33 @@ export function featureFromFingerStates(fs, lms) {
     fs.pinky  ? 1 : 0,
     ((fs.palmOriY || 0) + 1) / 2,
     ((fs.fingerOriY || 0) + 1) / 2,
-    // Features adicionales para mejor diferenciación
-    ((fs.fingerOriZ || 0) + 1) / 2,   // orientación de dedos en Z (hacia adelante/atrás)
-    (fs.palmNormalZ || 0),             // normal de la palma en Z
-    (fs.imGap || 0),                   // separación índice-medio
-    // Features geométricos (normalizados por palmScale)
-    thumbIndexDist,                    // distancia pulgar-índice (pinza)
-    indexWristDist,                    // distancia índice-muñeca (extensión)
-    handSpread,                        // spread total pulgar-meñique
-    pinkyWristDist,                    // distancia meñique-muñeca
-    thumbMidDist,                      // distancia pulgar-medio
-    midWristDist,                      // distancia medio-muñeca
   ];
 }
 
-// Separa el resultado crudo de HandLandmarker ({landmarks, handedness}) en
-// mano derecha/izquierda según la categoría reportada por MediaPipe.
-export function splitHands(handRes) {
-  const lmsList = handRes?.landmarks || [];
-  const handedness = handRes?.handedness || [];
-  let right = null, left = null;
-  for (let i = 0; i < lmsList.length; i++) {
-    const cat = handedness[i]?.[0]?.categoryName;
-    if (cat === "Left") left = lmsList[i];
-    else if (cat === "Right") right = lmsList[i];
-    else if (!right) right = lmsList[i];
-    else if (!left) left = lmsList[i];
-  }
-  return { right, left };
-}
-
-// Extrae información por frame para hasta dos manos: vectores de características,
-// muñecas y escala. `landmarksLeft` es opcional (señas de una sola mano).
-export function frameInfo(landmarksRight, landmarksLeft) {
-  const fsR = (landmarksRight && landmarksRight.length >= 21) ? computeFingerStates(landmarksRight) : null;
-  const fsL = (landmarksLeft && landmarksLeft.length >= 21) ? computeFingerStates(landmarksLeft) : null;
-  const ffR = featureFromFingerStates(fsR, landmarksRight);
-  const ffL = featureFromFingerStates(fsL, landmarksLeft);
-  if (!ffR && !ffL) return null;
-
-  // Si solo hay una mano, duplicar sus features al otro slot para que
-  // el vector sea invariante a si la mano está en Right o Left.
-  // Para una mano, palmNormalZ se hace simétrica con abs() para que el
-  // espejo (x invertido) no cambie el signo de la normal.
-  if (ffR && !ffL) {
-    const wrist = landmarksRight[0];
-    const m = landmarksRight[9];
-    const scale = Math.hypot(m.x - wrist.x, m.y - wrist.y) || 1e-9;
-    const ffSym = [...ffR];
-    ffSym[13] = Math.abs(ffSym[13]); // palmNormalZ mirror-symmetric
-    return {
-      ffR: ffSym, presentR: 1, wristR: wrist,
-      ffL: ffSym, presentL: 1, wristL: wrist,
-      scale,
-    };
-  }
-  if (ffL && !ffR) {
-    const wrist = landmarksLeft[0];
-    const m = landmarksLeft[9];
-    const scale = Math.hypot(m.x - wrist.x, m.y - wrist.y) || 1e-9;
-    const ffSym = [...ffL];
-    ffSym[13] = Math.abs(ffSym[13]); // palmNormalZ mirror-symmetric
-    return {
-      ffR: ffSym, presentR: 1, wristR: wrist,
-      ffL: ffSym, presentL: 1, wristL: wrist,
-      scale,
-    };
-  }
-
-  const refLms = (ffR ? landmarksRight : landmarksLeft);
-  const wrist = refLms[0];
-  const m = refLms[9];
+// Extrae información por frame: vector de características, muñeca y escala de la mano.
+export function frameInfo(fingerStates, landmarks) {
+  const ff = featureFromFingerStates(fingerStates);
+  if (!ff || !landmarks || landmarks.length < 21) return null;
+  const wrist = landmarks[0];
+  const m = landmarks[9];
   const scale = Math.hypot(m.x - wrist.x, m.y - wrist.y) || 1e-9;
-  return {
-    ffR: ffR || ZERO_HAND,
-    presentR: ffR ? 1 : 0,
-    wristR: ffR ? landmarksRight[0] : null,
-    ffL: ffL || ZERO_HAND,
-    presentL: ffL ? 1 : 0,
-    wristL: ffL ? landmarksLeft[0] : null,
-    scale,
-  };
+  return { ff, wrist, scale };
 }
 
-function handVelocity(curWrist, prevWrist, scale) {
-  if (!curWrist || !prevWrist) return [0, 0];
-  return [(curWrist.x - prevWrist.x) / scale, (curWrist.y - prevWrist.y) / scale];
-}
-
-// Construye una secuencia de vectores DTW a partir de infos {ffR, ffL, wristR, wristL, scale}.
-// A cada frame le añade velocidad/aceleración de cada muñeca y la posición
-// relativa entre ambas manos (clave para señas de dos manos).
+// Construye una secuencia de vectores DTW a partir de infos {ff, wrist, scale}.
+// A cada frame le añade la velocidad de la muñeca (dx, dy) normalizada por escala.
 export function buildSequence(infos) {
   const seq = [];
-  let prevWristR = null, prevWristL = null;
-  let prevVxR = 0, prevVyR = 0, prevVxL = 0, prevVyL = 0;
   for (let i = 0; i < infos.length; i++) {
     const cur = infos[i];
     if (!cur) continue;
-    const [vxR, vyR] = handVelocity(cur.wristR, prevWristR, cur.scale);
-    const [vxL, vyL] = handVelocity(cur.wristL, prevWristL, cur.scale);
-    const axR = vxR - prevVxR, ayR = vyR - prevVyR;
-    const axL = vxL - prevVxL, ayL = vyL - prevVyL;
-    prevVxR = vxR; prevVyR = vyR; prevVxL = vxL; prevVyL = vyL;
-    if (cur.wristR) prevWristR = cur.wristR;
-    if (cur.wristL) prevWristL = cur.wristL;
-
-    let relDx = 0, relDy = 0, relPresent = 0;
-    if (cur.wristR && cur.wristL) {
-      relDx = (cur.wristL.x - cur.wristR.x) / cur.scale;
-      relDy = (cur.wristL.y - cur.wristR.y) / cur.scale;
-      relPresent = 1;
+    let vx = 0, vy = 0;
+    if (i > 0 && cur.wrist && infos[i - 1] && infos[i - 1].wrist) {
+      const prev = infos[i - 1];
+      vx = (cur.wrist.x - prev.wrist.x) / cur.scale;
+      vy = (cur.wrist.y - prev.wrist.y) / cur.scale;
     }
-
-    seq.push([
-      ...cur.ffR, cur.presentR,
-      ...cur.ffL, cur.presentL,
-      relDx, relDy, relPresent,
-      vxR * WRIST_WEIGHT, vyR * WRIST_WEIGHT, axR * ACCEL_WEIGHT, ayR * ACCEL_WEIGHT,
-      vxL * WRIST_WEIGHT, vyL * WRIST_WEIGHT, axL * ACCEL_WEIGHT, ayL * ACCEL_WEIGHT,
-    ]);
+    seq.push([...cur.ff, vx * WRIST_WEIGHT, vy * WRIST_WEIGHT]);
   }
   return seq;
 }
@@ -194,68 +69,24 @@ function landmarkDistance(a, b) {
   return Math.sqrt(sum);
 }
 
-// Sakoe-Chiba band: limita cuánto puede deformar el tiempo el DTW.
-// window = fracción de la longitud del patrón (0.3 = ±30%).
-// Esto evita que un frame se alinee con uno muy lejano temporalmente,
-// reduciendo falsos positivos entre señas similares pero de distinta duración.
-const SAKOE_CHIBA_RATIO = 0.3;
-
 // DTW entre dos secuencias de vectores de características
-// con Sakoe-Chiba band para limitar warping excesivo.
 function dtw(seqA, seqB) {
   const n = seqA.length;
   const m = seqB.length;
   if (n === 0 || m === 0) return Infinity;
-  const w = Math.max(1, Math.floor(Math.max(n, m) * SAKOE_CHIBA_RATIO));
   let prev = new Array(m + 1).fill(Infinity);
   let curr = new Array(m + 1).fill(Infinity);
   prev[0] = 0;
   for (let i = 1; i <= n; i++) {
     curr[0] = Infinity;
-    const jStart = Math.max(1, i - w);
-    const jEnd = Math.min(m, i + w);
-    // Llenar fuera de banda con Infinity
-    for (let j = 1; j < jStart; j++) curr[j] = Infinity;
-    for (let j = jStart; j <= jEnd; j++) {
+    for (let j = 1; j <= m; j++) {
       const cost = landmarkDistance(seqA[i - 1], seqB[j - 1]);
       curr[j] = cost + Math.min(prev[j], curr[j - 1], prev[j - 1]);
     }
-    for (let j = jEnd + 1; j <= m; j++) curr[j] = Infinity;
     [prev, curr] = [curr, prev];
     curr.fill(Infinity);
   }
-  return prev[m] / Math.max(n, m);
-}
-
-// Subsequence DTW con Sakoe-Chiba band: encuentra la mejor subsecuencia
-// del buffer que coincide con el patrón completo. Permite que el gesto
-// comience en cualquier punto del buffer (frames idle al inicio no contaminan).
-// La banda limita el warping para reducir falsos positivos.
-function dtwSubseq(buffer, pattern) {
-  const n = buffer.length;
-  const m = pattern.length;
-  if (n === 0 || m === 0) return Infinity;
-  const w = Math.max(1, Math.floor(m * SAKOE_CHIBA_RATIO));
-  // Inicializar primera fila a 0: el patrón puede empezar en cualquier frame
-  let prev = new Array(m + 1).fill(0);
-  let curr = new Array(m + 1).fill(Infinity);
-  let bestEnd = Infinity;
-  for (let i = 1; i <= n; i++) {
-    curr[0] = Infinity;
-    const jStart = Math.max(1, i - w);
-    const jEnd = Math.min(m, i + w);
-    for (let j = 1; j < jStart; j++) curr[j] = Infinity;
-    for (let j = jStart; j <= jEnd; j++) {
-      const cost = landmarkDistance(buffer[i - 1], pattern[j - 1]);
-      curr[j] = cost + Math.min(prev[j], curr[j - 1], prev[j - 1]);
-    }
-    for (let j = jEnd + 1; j <= m; j++) curr[j] = Infinity;
-    // Trackear el menor costo en la última columna (patrón completamente alineado)
-    if (curr[m] < bestEnd) bestEnd = curr[m];
-    [prev, curr] = [curr, prev];
-    curr.fill(Infinity);
-  }
-  return bestEnd / m;
+  return prev[m] / (n + m);
 }
 
 // ── Clase principal ──
@@ -264,95 +95,29 @@ export class DynamicSignDetector {
     this.patterns = [];
     this.buffer = [];
     this.previousInfo = null;
-    this.maxBufferSize = 260;
+    this.maxBufferSize = 30;
     this.minBufferSize = 4;
-    this.threshold = 0.75;
-    this.minMargin = 0.10;
+    this.threshold = 0.80;
+    this.minMargin = 0.08;
   }
 
   // Cargar un patrón desde JSON de training_data. Acumula ejemplos por nombre.
-  // Soporta el formato nuevo (landmarksRight/landmarksLeft, dos manos) y el
-  // formato antiguo de una sola mano (`landmarks`), que se trata como mano derecha.
-  // Normaliza manos: si la mayoría de frames tienen solo landmarksLeft, los
-  // mueve a landmarksRight para que coincidan con la detección en vivo.
+  // Los patrones generados desde video solo traen `landmarks`; en ese caso
+  // recalculamos `fingerStates` igual que hace el loader de Flutter.
   loadPattern(name, frames) {
-    // Detectar si hay desbalance de manos (todo en Left, nada en Right)
-    let rightCount = 0, leftOnlyCount = 0;
-    for (const f of frames) {
-      const hasR = (f.landmarksRight && f.landmarksRight.length >= 21);
-      const hasL = (f.landmarksLeft && f.landmarksLeft.length >= 21);
-      if (hasR) rightCount++;
-      if (hasL && !hasR) leftOnlyCount++;
-    }
-    // Si la mayoría de frames tienen solo Left (sin Right), intercambiar manos
-    const leftTotal = leftOnlyCount + frames.filter(f => {
-      const hasR = (f.landmarksRight && f.landmarksRight.length >= 21);
-      const hasL = (f.landmarksLeft && f.landmarksLeft.length >= 21);
-      return hasR && hasL;
-    }).length;
-    const shouldSwap = leftTotal > frames.length * 0.7 && rightCount < frames.length * 0.15;
-
-    const normalizedFrames = shouldSwap
-      ? frames.map(f => ({
-          ...f,
-          landmarksRight: flipHand(f.landmarksLeft),
-          landmarksLeft: f.landmarksRight ?? null,
-        }))
-      : frames;
-
-    // Determinar si es seña de una sola mano. Si lo es, generar también
-    // una versión espejo para soportar la otra mano (ambidiestro).
-    const anyHand = normalizedFrames.length;
-    const oneHandedFrames = normalizedFrames.filter(f => {
-      const hasR = (f.landmarksRight && f.landmarksRight.length >= 21);
-      const hasL = (f.landmarksLeft && f.landmarksLeft.length >= 21);
-      return (hasR && !hasL) || (!hasR && hasL);
-    }).length;
-    // Umbral relajado: si >60% de frames son de una mano, tratar como
-    // seña de una mano (las señas de dos manos tienen ~0% frames one-handed).
-    const oneHanded = oneHandedFrames > anyHand * 0.6;
-
-    const build = (frames) => {
-      const infos = frames
-        .map(f => frameInfo(f.landmarksRight ?? f.landmarks ?? null, f.landmarksLeft ?? null))
-        .filter(Boolean);
-      return buildSequence(infos);
-    };
-
-    const seq = build(normalizedFrames);
+    const infos = frames
+      .map(f => frameInfo(f.fingerStates ?? computeFingerStates(f.landmarks), f.landmarks))
+      .filter(Boolean);
+    const seq = buildSequence(infos);
     if (seq.length === 0) return;
-
     let existing = this.patterns.find(p => p.name === name);
     if (!existing) {
-      existing = { name, sequences: [], oneHanded };
+      existing = { name, sequences: [] };
       this.patterns.push(existing);
     }
-
-    const addSeq = (s) => {
-      if (s.length === 0) return;
-      const isDup = existing.sequences.some(es => es.length === s.length && dtw(es, s) < 1e-6);
-      if (!isDup) existing.sequences.push(s);
-    };
-
-    addSeq(seq);
-
-    // Para señas de una mano, agregar versión espejo (x invertido) para
-    // soportar la otra mano. Como frameInfo duplica features a ambos slots
-    // cuando solo hay una mano, solo necesitamos invertir x para que la
-    // velocidad horizontal sea correcta.
-    if (oneHanded) {
-      const mirroredFrames = normalizedFrames.map(f => {
-        const hand = f.landmarksRight || f.landmarksLeft;
-        const flipped = flipHand(hand);
-        return {
-          ...f,
-          landmarksRight: f.landmarksRight ? flipped : null,
-          landmarksLeft: f.landmarksLeft ? flipped : null,
-        };
-      });
-      const mirrorSeq = build(mirroredFrames);
-      addSeq(mirrorSeq);
-    }
+    // Evita ejemplos duplicados que sesgan la clasificación hacia una seña.
+    const isDuplicate = existing.sequences.some(s => s.length === seq.length && dtw(s, seq) < 1e-6);
+    if (!isDuplicate) existing.sequences.push(seq);
   }
 
   loadPatterns(patternsObj) {
@@ -368,36 +133,17 @@ export class DynamicSignDetector {
   clearBuffer() {
     this.buffer = [];
     this.previousInfo = null;
-    this.prevVxR = 0;
-    this.prevVyR = 0;
-    this.prevVxL = 0;
-    this.prevVyL = 0;
   }
 
   pushFrameInfo(info) {
     if (!info) return;
-    const prev = this.previousInfo;
-    const [vxR, vyR] = handVelocity(info.wristR, prev?.wristR, info.scale);
-    const [vxL, vyL] = handVelocity(info.wristL, prev?.wristL, info.scale);
-    const axR = vxR - (this.prevVxR || 0), ayR = vyR - (this.prevVyR || 0);
-    const axL = vxL - (this.prevVxL || 0), ayL = vyL - (this.prevVyL || 0);
-    this.prevVxR = vxR; this.prevVyR = vyR; this.prevVxL = vxL; this.prevVyL = vyL;
-    this.previousInfo = info;
-
-    let relDx = 0, relDy = 0, relPresent = 0;
-    if (info.wristR && info.wristL) {
-      relDx = (info.wristL.x - info.wristR.x) / info.scale;
-      relDy = (info.wristL.y - info.wristR.y) / info.scale;
-      relPresent = 1;
+    let vx = 0, vy = 0;
+    if (this.previousInfo?.wrist) {
+      vx = (info.wrist.x - this.previousInfo.wrist.x) / info.scale;
+      vy = (info.wrist.y - this.previousInfo.wrist.y) / info.scale;
     }
-
-    this.pushFrame([
-      ...info.ffR, info.presentR,
-      ...info.ffL, info.presentL,
-      relDx, relDy, relPresent,
-      vxR * WRIST_WEIGHT, vyR * WRIST_WEIGHT, axR * ACCEL_WEIGHT, ayR * ACCEL_WEIGHT,
-      vxL * WRIST_WEIGHT, vyL * WRIST_WEIGHT, axL * ACCEL_WEIGHT, ayL * ACCEL_WEIGHT,
-    ]);
+    this.previousInfo = info;
+    this.pushFrame([...info.ff, vx * WRIST_WEIGHT, vy * WRIST_WEIGHT]);
   }
 
   pushFrame(featureVector) {
@@ -408,69 +154,26 @@ export class DynamicSignDetector {
     }
   }
 
-  // Pre-filtro: calcula el centroide (vector medio) de cada patrón y
-  // compara contra el centroide del buffer. Solo los top-N más cercanos
-  // pasan a DTW completo. Esto reduce de ~1362 DTW a ~150 por frame.
-  _computeCentroid(seq) {
-    if (!seq || seq.length === 0) return null;
-    const dim = seq[0].length;
-    const c = new Array(dim).fill(0);
-    for (const v of seq) {
-      for (let i = 0; i < dim; i++) c[i] += v[i];
-    }
-    for (let i = 0; i < dim; i++) c[i] /= seq.length;
-    return c;
-  }
-
-  _bufferCentroid() {
-    if (this.buffer.length === 0) return null;
-    const dim = this.buffer[0].length;
-    const c = new Array(dim).fill(0);
-    for (const v of this.buffer) {
-      for (let i = 0; i < dim; i++) c[i] += v[i];
-    }
-    for (let i = 0; i < dim; i++) c[i] /= this.buffer.length;
-    return c;
-  }
-
+  // Mejor distancia DTW del buffer actual contra CADA seña, ordenada de mejor a peor.
+  // Devuelve la distancia minima por seña (no por ventana), que es lo que permite
+  // comparar señas distintas entre si.
   detectRanking() {
     if (this.buffer.length < this.minBufferSize) return [];
-    const buf = this.buffer;
-
-    // Etapa 1: pre-filtro por centroide (barato) → top-N candidatos
-    const bufCentroid = this._bufferCentroid();
-    const candidates = [];
-    for (const pattern of this.patterns) {
-      let bestCentDist = Infinity;
-      for (const seq of pattern.sequences) {
-        if (!pattern._centroids) pattern._centroids = new Map();
-        let c = pattern._centroids.get(seq);
-        if (!c) {
-          c = this._computeCentroid(seq);
-          pattern._centroids.set(seq, c);
-        }
-        if (c) {
-          const d = landmarkDistance(bufCentroid, c);
-          if (d < bestCentDist) bestCentDist = d;
-        }
-      }
-      candidates.push({ pattern, centDist: bestCentDist });
-    }
-    candidates.sort((a, b) => a.centDist - b.centDist);
-    const topCandidates = candidates.slice(0, PRE_FILTER_N);
-
-    // Etapa 2: DTW solo en los top-N candidatos.
-    // Usa subsequence DTW: encuentra la mejor alineación del patrón completo
-    // dentro del buffer, permitiendo que el gesto comience en cualquier punto.
     const ranking = [];
-    for (const { pattern } of topCandidates) {
+    for (const pattern of this.patterns) {
       let best = Infinity;
       for (const seq of pattern.sequences) {
-        const score = dtwSubseq(buf, seq);
-        if (score < best) best = score;
+        const L = seq.length;
+        const minW = Math.max(this.minBufferSize, L - 2);
+        const maxW = Math.min(this.buffer.length, L + 8);
+        for (let winLen = minW; winLen <= maxW; winLen++) {
+          for (let start = 0; start + winLen <= this.buffer.length; start++) {
+            const score = dtw(this.buffer.slice(start, start + winLen), seq);
+            if (score < best) best = score;
+          }
+        }
       }
-      if (best === Infinity) continue;
-      ranking.push({ name: pattern.name, score: best });
+      if (best !== Infinity) ranking.push({ name: pattern.name, score: best });
     }
     ranking.sort((a, b) => a.score - b.score);
     return ranking;
