@@ -1,45 +1,65 @@
 import 'dart:async';
-import 'dart:math' as math;
-import '../engine/hand_shape_detector.dart';
+import 'package:flutter/foundation.dart';
 import '../engine/dynamic_sign_detector.dart';
 import '../engine/landmark.dart';
 import 'expression_detector.dart';
 import 'vision_service.dart';
 
 /// Estado de traduccion emitido continuamente hacia la UI.
+/// Una sena confirmada, con la marca de tiempo y confianza con que se capto.
+class DetectedGloss {
+  final String gloss; // p. ej. "CAFE"
+  final double confidence; // 0..1
+  final DateTime at;
+
+  const DetectedGloss(this.gloss, this.confidence, this.at);
+
+  String get label => gloss.replaceAll('_', ' ');
+}
+
 class TranslationState {
-  final String? currentSign; // letra/numero estatico o palabra dinamica
+  final String? currentSign; // palabra dinamica recien confirmada
   final double confidence; // 0..1
   final bool handVisible;
+  final int handCount; // cuantas manos ve la camara
   final FacialExpression expression;
-  final String phrase; // frase acumulada
+  final String phrase; // frase acumulada (glosas separadas por espacio)
   final bool isDynamic;
+
+  /// Historial ordenado de senas confirmadas en esta sesion.
+  final List<DetectedGloss> glosses;
 
   const TranslationState({
     this.currentSign,
     this.confidence = 0,
     this.handVisible = false,
+    this.handCount = 0,
     this.expression = FacialExpression.neutral,
     this.phrase = '',
     this.isDynamic = false,
+    this.glosses = const [],
   });
 
   TranslationState copyWith({
     String? currentSign,
     double? confidence,
     bool? handVisible,
+    int? handCount,
     FacialExpression? expression,
     String? phrase,
     bool? isDynamic,
+    List<DetectedGloss>? glosses,
     bool clearSign = false,
   }) {
     return TranslationState(
       currentSign: clearSign ? null : (currentSign ?? this.currentSign),
       confidence: confidence ?? this.confidence,
       handVisible: handVisible ?? this.handVisible,
+      handCount: handCount ?? this.handCount,
       expression: expression ?? this.expression,
       phrase: phrase ?? this.phrase,
       isDynamic: isDynamic ?? this.isDynamic,
+      glosses: glosses ?? this.glosses,
     );
   }
 }
@@ -59,22 +79,13 @@ class SignTranslationService {
   StreamSubscription<VisionFrame>? _sub;
   TranslationState _state = const TranslationState();
 
-  // Debounce para senas estaticas.
-  String? _candidateStatic;
-  int _candidateCount = 0;
-  static const int _staticStableFrames = 8;
-  static const double _staticMinScore = 0.60;
-
   // Control para no repetir la misma palabra dinamica.
   String? _lastCommitted;
   int _cooldown = 0;
 
-  Landmark? _prevWrist;
-  FingerStates? _lastFingerStates;
-
   // El DTW dinamico es costoso: se evalua 1 de cada N frames en vez de
   // en todos, para mantener la UI fluida.
-  static const int _dynamicEveryNFrames = 4;
+  static const int _dynamicEveryNFrames = 6;
   int _frameCounter = 0;
   DetectResult? _lastDynResult;
 
@@ -90,15 +101,19 @@ class SignTranslationService {
     if (s.currentSign != _lastEmittedSign ||
         s.confidence != _lastEmittedConfidence ||
         s.handVisible != _lastEmittedHandVisible ||
+        s.handCount != _lastEmittedHandCount ||
         s.expression != _lastEmittedExpression ||
         s.phrase != _lastEmittedPhrase ||
-        s.isDynamic != _lastEmittedIsDynamic) {
+        s.isDynamic != _lastEmittedIsDynamic ||
+        s.glosses.length != _lastEmittedGlossCount) {
       _lastEmittedSign = s.currentSign;
       _lastEmittedConfidence = s.confidence;
       _lastEmittedHandVisible = s.handVisible;
+      _lastEmittedHandCount = s.handCount;
       _lastEmittedExpression = s.expression;
       _lastEmittedPhrase = s.phrase;
       _lastEmittedIsDynamic = s.isDynamic;
+      _lastEmittedGlossCount = s.glosses.length;
       _controller.add(s);
     }
   }
@@ -106,9 +121,11 @@ class SignTranslationService {
   String? _lastEmittedSign;
   double _lastEmittedConfidence = -1;
   bool _lastEmittedHandVisible = false;
+  int _lastEmittedHandCount = -1;
   FacialExpression _lastEmittedExpression = FacialExpression.neutral;
   String _lastEmittedPhrase = '';
   bool _lastEmittedIsDynamic = false;
+  int _lastEmittedGlossCount = 0;
 
   void _onFrame(VisionFrame frame) {
     _frameCounter++;
@@ -121,35 +138,29 @@ class SignTranslationService {
     }
 
     if (!frame.hasHand) {
-      _state = _state.copyWith(handVisible: false, confidence: 0, clearSign: true);
-      _candidateStatic = null;
-      _candidateCount = 0;
-      _prevWrist = null;
+      _state = _state.copyWith(
+        handVisible: false,
+        handCount: 0,
+        confidence: 0,
+        clearSign: true,
+      );
+      // NO limpiar el buffer DTW aqui: MediaPipe puede perder la mano por
+      // 1-2 frames durante el gesto y eso borraria todo el progreso.
+      // Solo reseteamos el anti-repeticion.
+      _lastCommitted = null;
       _emitIfChanged();
       return;
     }
 
-    final hand = frame.primaryHand!;
-    // computeFingerStates es costoso: se ejecuta 1 de cada 2 frames
-    // para reducir carga de CPU sin perder precision de tracking.
-    FingerStates? states;
-    if (_frameCounter % 2 == 0) {
-      states = computeFingerStates(hand);
-      _lastFingerStates = states;
-    } else {
-      states = _lastFingerStates ?? computeFingerStates(hand);
-    }
-    final info = frameInfo(states, hand);
-    dynamicDetector.pushFrameInfo(info);
+    final rightHand = frame.rightHand;
+    final leftHand = frame.leftHand;
+    final hand = rightHand ?? leftHand ?? frame.primaryHand!;
 
-    // Estimacion de movimiento (velocidad de muneca)
-    final wrist = hand[0];
-    double speed = 0;
-    if (_prevWrist != null) {
-      speed = _dist(wrist, _prevWrist!);
-    }
-    _prevWrist = wrist;
-    final hasMotion = speed > 0.015;
+    // Los features del DTW (ángulos de dedos, extensión, gaps) son
+    // rotación-invariantes. palmNormalZ se hace abs() para una mano.
+    // No se necesita rotación 180° para el DTW.
+    final info = frameInfo(hand, leftHand);
+    dynamicDetector.pushFrameInfo(info);
 
     if (_cooldown > 0) _cooldown--;
 
@@ -157,18 +168,26 @@ class SignTranslationService {
     // patrones x secuencias x ventanas, asi que no se corre cada frame.
     if (_frameCounter % _dynamicEveryNFrames == 0) {
       _lastDynResult = dynamicDetector.detect();
+      // Logging temporal para diagnostico.
+      final r = dynamicDetector.detectRanking();
+      if (r.isNotEmpty) {
+        debugPrint('DTW: ${r.map((e) => "${e.key}=${e.value.toStringAsFixed(3)}").join(", ")} | buf=${dynamicDetector.getStatus()["bufferSize"]} | accepted=${_lastDynResult?.accepted ?? false}');
+      }
     }
     final dyn = _lastDynResult;
     if (dyn != null && dyn.accepted && dyn.matched != null && _cooldown == 0) {
       if (dyn.matched != _lastCommitted) {
-        _commit(dyn.matched!, isDynamic: true);
+        final conf = (dyn.confidence / 100.0).clamp(0.0, 1.0);
+        _commit(dyn.matched!, conf);
         _lastCommitted = dyn.matched;
-        _cooldown = 15;
+        _cooldown = 40;
         _lastDynResult = null;
+        dynamicDetector.clearBuffer();
         _state = _state.copyWith(
           currentSign: dyn.matched,
-          confidence: dyn.confidence / 100.0,
+          confidence: conf,
           handVisible: true,
+          handCount: frame.hands.length,
           isDynamic: true,
         );
         _emitIfChanged();
@@ -176,66 +195,42 @@ class SignTranslationService {
       }
     }
 
-    // 2) Estatico (letras / numeros) cuando la mano esta quieta
-    if (!hasMotion) {
-      final res = detectBestLetter(states, hasMotion: hasMotion);
-      final letter = res[0] as String?;
-      final score = (res[1] as num).toDouble();
-      _state = _state.copyWith(
-        currentSign: letter,
-        confidence: score.clamp(0.0, 1.0),
-        handVisible: true,
-        isDynamic: false,
-      );
-      if (letter != null && score >= _staticMinScore) {
-        if (letter == _candidateStatic) {
-          _candidateCount++;
-        } else {
-          _candidateStatic = letter;
-          _candidateCount = 1;
-        }
-        if (_candidateCount == _staticStableFrames) {
-          _commit(letter, isDynamic: false);
-          _lastCommitted = null; // permite repetir letras distintas
-        }
-      } else {
-        _candidateStatic = null;
-        _candidateCount = 0;
-      }
-    } else {
-      _state = _state.copyWith(handVisible: true);
-    }
+    // Clasificacion estatica de letras/numeros (alfabeto) deshabilitada:
+    // la app solo debe reconocer las palabras dinamicas entrenadas.
+    _state = _state.copyWith(
+      handVisible: true,
+      handCount: frame.hands.length,
+    );
     _emitIfChanged();
   }
 
-  void _commit(String sign, {required bool isDynamic}) {
-    final token = _humanize(sign, isDynamic);
-    final sep = _state.phrase.isEmpty ? '' : (isDynamic ? ' ' : '');
-    _state = _state.copyWith(phrase: '${_state.phrase}$sep$token');
-  }
-
-  String _humanize(String sign, bool isDynamic) {
-    if (!isDynamic) return sign; // letras/numeros: se concatenan
-    return sign.replaceAll('_', ' ').toLowerCase();
+  void _commit(String sign, double confidence) {
+    final entry = DetectedGloss(sign, confidence, DateTime.now());
+    final glosses = [..._state.glosses, entry];
+    _state = _state.copyWith(
+      glosses: glosses,
+      phrase: glosses.map((g) => g.gloss).join(' '),
+    );
   }
 
   void clearPhrase() {
-    _state = _state.copyWith(phrase: '');
+    _state = _state.copyWith(phrase: '', glosses: const [], clearSign: true);
     _lastCommitted = null;
+    dynamicDetector.clearBuffer();
+    _lastDynResult = null;
     _emit();
   }
 
   void backspace() {
-    if (_state.phrase.isEmpty) return;
-    final p = _state.phrase.trimRight();
-    final idx = p.lastIndexOf(' ');
-    final newPhrase = idx <= 0 ? '' : p.substring(0, idx);
-    _state = _state.copyWith(phrase: newPhrase);
+    if (_state.glosses.isEmpty) return;
+    final glosses = _state.glosses.sublist(0, _state.glosses.length - 1);
+    _state = _state.copyWith(
+      glosses: glosses,
+      phrase: glosses.map((g) => g.gloss).join(' '),
+    );
+    _lastCommitted = null;
     _emit();
   }
-
-  double _dist(Landmark a, Landmark b) =>
-      math.sqrt(math.pow(a.x - b.x, 2) + math.pow(a.y - b.y, 2)).toDouble();
 
   void dispose() {
     _sub?.cancel();

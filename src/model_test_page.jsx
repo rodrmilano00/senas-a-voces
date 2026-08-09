@@ -7,8 +7,7 @@
 // senas entre si, viendo el ranking completo en vivo.
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fingerStates } from "./lsm_detector.js";
-import { dynamicDetector, frameInfo } from "./dynamic_sign_detector.js";
+import { dynamicDetector, frameInfo, splitHands } from "./dynamic_sign_detector.js";
 
 function cx(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -24,28 +23,29 @@ const CATEGORY_LABELS = {
   expresiones: "Expresiones",
 };
 
-// Cuantos frames sin mano antes de dar por terminado el intento.
-const IDLE_FRAMES_TO_STOP = 12;
-// Minimo de frames con mano para considerar que hubo un intento real.
-const MIN_FRAMES_FOR_ATTEMPT = 6;
-
-function pickRandom(list, exclude) {
-  if (list.length === 0) return null;
-  if (list.length === 1) return list[0];
-  let choice = exclude;
-  while (choice === exclude) {
-    choice = list[Math.floor(Math.random() * list.length)];
-  }
-  return choice;
-}
+// Cuantos frames sin mano antes de resetear el buffer.
+const IDLE_FRAMES_TO_RESET = 8;
+// Mínimo de frames en buffer antes de poder evaluar.
+const MIN_FRAMES_TO_EVAL = 15;
+// Máximo de frames en buffer antes de forzar evaluación.
+const MAX_FRAMES_TO_EVAL = 260;
+// Score máximo para aceptar una detección (menor = más estricto).
+const DETECT_SCORE_THRESHOLD = 0.65;
+// Margen mínimo entre #1 y #2 para aceptar detección.
+const DETECT_MARGIN_THRESHOLD = 0.10;
+// Cuántos frames consecutivos debe mantenerse una detección estable antes de aceptarla.
+const STABLE_FRAMES_TO_ACCEPT = 3;
+// Cada cuántos frames evaluar el ranking.
+const EVAL_EVERY_N_FRAMES = 3;
 
 export default function ModelTestPage({ isDark, navigate, useCameraMediaPipe, reloadDynamicPatterns }) {
   const [manifest, setManifest] = useState(null);
+  const [signMeta, setSignMeta] = useState({});
   const [loadError, setLoadError] = useState(null);
   const [loadingMsg, setLoadingMsg] = useState("Cargando patrones entrenados…");
 
   const [activeCats, setActiveCats] = useState(() => new Set(["numeros", "palabras", "familia", "colores"]));
-  const [target, setTarget] = useState(null);
+  const [targetIndex, setTargetIndex] = useState(0);
 
   const [ranking, setRanking] = useState([]);
   const [handDetected, setHandDetected] = useState(false);
@@ -58,16 +58,27 @@ export default function ModelTestPage({ isDark, navigate, useCameraMediaPipe, re
   const activeFramesRef = useRef(0);
   const targetRef = useRef(null);
   const evaluatingRef = useRef(false);
-  targetRef.current = target;
+  const frameCounterRef = useRef(0);
+  // Reconocimiento continuo
+  const stableGuessRef = useRef(null);  // { name, score } que se mantiene estable
+  const stableCountRef = useRef(0);     // frames consecutivos con el mismo #1
+  const lastDetectedRef = useRef(null); // última seña detectada (para evitar duplicados)
 
   // ── Carga de patrones ────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`/api/training-data/manifest?t=${Date.now()}`);
-        if (!res.ok) throw new Error(`manifest HTTP ${res.status}`);
-        const man = await res.json();
+        const [manRes, metaRes] = await Promise.all([
+          fetch(`/api/training-data/manifest?t=${Date.now()}`),
+          fetch(`/api/training-data/sign_metadata.json?t=${Date.now()}`),
+        ]);
+        if (!manRes.ok) throw new Error(`manifest HTTP ${manRes.status}`);
+        const man = await manRes.json();
+        if (metaRes.ok) {
+          const meta = await metaRes.json();
+          if (!cancelled) setSignMeta(meta);
+        }
         if (cancelled) return;
         setManifest(man);
         setLoadingMsg("Cargando secuencias DTW…");
@@ -84,7 +95,8 @@ export default function ModelTestPage({ isDark, navigate, useCameraMediaPipe, re
     return () => { cancelled = true; };
   }, [reloadDynamicPatterns]);
 
-  // Señas disponibles segun las categorias activas.
+  // Señas disponibles segun las categorias activas, en orden de secciones
+  // (orden del manifest: categoría por categoría, seña por seña).
   const pool = useMemo(() => {
     if (!manifest) return [];
     const out = [];
@@ -95,38 +107,52 @@ export default function ModelTestPage({ isDark, navigate, useCameraMediaPipe, re
     return out;
   }, [manifest, activeCats]);
 
-  const nextTarget = useCallback(() => {
+  const target = pool.length > 0 ? pool[Math.min(targetIndex, pool.length - 1)] : null;
+  const targetMeta = target ? signMeta[target.name] : null;
+  targetRef.current = target;
+
+  const resetAttemptState = useCallback(() => {
     setRanking([]);
     setLastResult(null);
     dynamicDetector.clearBuffer();
     idleRef.current = 0;
     activeFramesRef.current = 0;
     evaluatingRef.current = false;
-    setTarget(prev => pickRandom(pool, prev?.name ? pool.find(p => p.name === prev.name) : null));
-  }, [pool]);
+    stableGuessRef.current = null;
+    stableCountRef.current = 0;
+    lastDetectedRef.current = null;
+  }, []);
 
-  // Primera seña en cuanto haya pool.
-  useEffect(() => {
-    if (pool.length > 0 && !target) setTarget(pickRandom(pool, null));
-  }, [pool, target]);
+  const nextTarget = useCallback(() => {
+    resetAttemptState();
+    setTargetIndex(i => (pool.length === 0 ? 0 : (i + 1) % pool.length));
+  }, [pool.length, resetAttemptState]);
+
+  const prevTarget = useCallback(() => {
+    resetAttemptState();
+    setTargetIndex(i => (pool.length === 0 ? 0 : (i - 1 + pool.length) % pool.length));
+  }, [pool.length, resetAttemptState]);
+
+  const goToIndex = useCallback((idx) => {
+    resetAttemptState();
+    setTargetIndex(idx);
+  }, [resetAttemptState]);
 
   // ── Evaluacion de un intento ─────────────────────────────────────────
-  const evaluateAttempt = useCallback(() => {
+  const evaluateAttempt = useCallback((guess, margin) => {
     const tgt = targetRef.current;
     if (!tgt || evaluatingRef.current) return;
     evaluatingRef.current = true;
+    stableGuessRef.current = null;
+    stableCountRef.current = 0;
+    lastDetectedRef.current = guess.name;
 
-    const full = dynamicDetector.detectRanking();
     dynamicDetector.clearBuffer();
     activeFramesRef.current = 0;
 
-    if (full.length === 0) { evaluatingRef.current = false; return; }
-
-    const guess = full[0];
-    const margin = full.length > 1 ? full[1].score - guess.score : Infinity;
-    const position = full.findIndex(r => r.name === tgt.name);
+    const position = 0; // ya sabemos que guess es #1
     const correct = guess.name === tgt.name;
-    const inTop3 = position >= 0 && position < 3;
+    const inTop3 = correct;
 
     const result = {
       target: tgt.name,
@@ -135,8 +161,8 @@ export default function ModelTestPage({ isDark, navigate, useCameraMediaPipe, re
       margin,
       correct,
       inTop3,
-      position: position >= 0 ? position + 1 : null,
-      targetScore: position >= 0 ? full[position].score : null,
+      position: 1,
+      targetScore: guess.score,
     };
 
     setLastResult(result);
@@ -150,30 +176,91 @@ export default function ModelTestPage({ isDark, navigate, useCameraMediaPipe, re
 
   // ── Loop de MediaPipe ────────────────────────────────────────────────
   const handleResults = useCallback(({ handRes }) => {
-    const lms = handRes?.landmarks?.[0] ?? null;
+    const { right, left } = splitHands(handRes);
+    const lms = right || left;
     setHandDetected(!!lms);
 
     if (!lms) {
       idleRef.current += 1;
-      // Al soltar la mano tras un intento valido, evaluamos.
-      if (idleRef.current === IDLE_FRAMES_TO_STOP && activeFramesRef.current >= MIN_FRAMES_FOR_ATTEMPT) {
-        evaluateAttempt();
+      // Reset buffer cuando no hay mano
+      if (idleRef.current >= IDLE_FRAMES_TO_RESET) {
+        dynamicDetector.clearBuffer();
+        evaluatingRef.current = false;
+        stableGuessRef.current = null;
+        stableCountRef.current = 0;
+        activeFramesRef.current = 0;
       }
       return;
     }
 
-    // Mano de vuelta: empieza un intento nuevo.
-    if (idleRef.current >= IDLE_FRAMES_TO_STOP) {
+    // Mano de vuelta: reset si hubo pausa larga
+    if (idleRef.current >= IDLE_FRAMES_TO_RESET) {
       evaluatingRef.current = false;
       setLastResult(null);
+      dynamicDetector.clearBuffer();
+      stableGuessRef.current = null;
+      stableCountRef.current = 0;
     }
     idleRef.current = 0;
     activeFramesRef.current += 1;
 
-    const fs = fingerStates(lms);
-    dynamicDetector.pushFrameInfo(frameInfo(fs, lms));
-    setBufferSize(dynamicDetector.buffer.length);
-    setRanking(dynamicDetector.detectRanking().slice(0, 5));
+    const info = frameInfo(right, left);
+
+    // ── Reconocimiento continuo ──
+    // Siempre acumular frames en el buffer
+    dynamicDetector.pushFrameInfo(info);
+    const bufLen = dynamicDetector.buffer.length;
+    setBufferSize(bufLen);
+
+    // Evaluar cada N frames si tenemos suficientes
+    frameCounterRef.current++;
+    if (bufLen >= MIN_FRAMES_TO_EVAL && frameCounterRef.current % EVAL_EVERY_N_FRAMES === 0) {
+      const full = dynamicDetector.detectRanking();
+      if (full.length > 0) {
+        const guess = full[0];
+        const margin = full.length > 1 ? full[1].score - guess.score : Infinity;
+        setRanking(full.slice(0, 5));
+
+        // Si el score es muy alto, el buffer no coincide con nada.
+        // Resetear para eliminar frames idle y empezar fresco.
+        if (guess.score > 2.5) {
+          dynamicDetector.clearBuffer();
+          stableGuessRef.current = null;
+          stableCountRef.current = 0;
+          setRanking([]);
+          return;
+        }
+
+        // Detectar: score bajo + margen bueno + estable por N frames
+        if (guess.score < DETECT_SCORE_THRESHOLD && margin > DETECT_MARGIN_THRESHOLD) {
+          if (stableGuessRef.current?.name === guess.name) {
+            stableCountRef.current++;
+          } else {
+            stableGuessRef.current = { name: guess.name, score: guess.score };
+            stableCountRef.current = 1;
+          }
+
+          // Aceptar detección si es estable y no es duplicado de la última
+          if (stableCountRef.current >= STABLE_FRAMES_TO_ACCEPT && lastDetectedRef.current !== guess.name) {
+            evaluateAttempt(guess, margin);
+          }
+        } else {
+          stableGuessRef.current = null;
+          stableCountRef.current = 0;
+        }
+
+        // Si el buffer está lleno y no hay detección clara, resetear
+        if (bufLen >= MAX_FRAMES_TO_EVAL && !evaluatingRef.current) {
+          if (guess.score < DETECT_SCORE_THRESHOLD && lastDetectedRef.current !== guess.name) {
+            evaluateAttempt(guess, margin);
+          } else {
+            dynamicDetector.clearBuffer();
+            stableGuessRef.current = null;
+            stableCountRef.current = 0;
+          }
+        }
+      }
+    }
   }, [evaluateAttempt]);
 
   const { videoRef, canvasRef, camReady, camError } = useCameraMediaPipe({ onResults: handleResults });
@@ -185,7 +272,8 @@ export default function ModelTestPage({ isDark, navigate, useCameraMediaPipe, re
       // Nunca dejar el pool vacio.
       return next.size === 0 ? prev : next;
     });
-    setTarget(null);
+    resetAttemptState();
+    setTargetIndex(0);
   };
 
   const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
@@ -262,7 +350,7 @@ export default function ModelTestPage({ isDark, navigate, useCameraMediaPipe, re
       <div className="grid gap-4 p-4 lg:grid-cols-[1fr_360px]">
         {/* ── Camara + video de referencia ── */}
         <div className="relative overflow-hidden rounded-xl bg-black" style={{ minHeight: 420 }}>
-          <video ref={videoRef} className="absolute opacity-0 pointer-events-none" playsInline muted />
+          <video ref={videoRef} className="absolute inset-0 h-full w-full object-cover" playsInline muted />
           <canvas ref={canvasRef} className="absolute inset-0 h-full w-full object-cover" />
 
           {loadingMsg && (
@@ -292,7 +380,19 @@ export default function ModelTestPage({ isDark, navigate, useCameraMediaPipe, re
               <div className="text-[10px] font-semibold uppercase tracking-wide text-[#8AA8B0]">
                 Haz esta seña
               </div>
-              <div className="text-2xl font-bold leading-tight text-white">{target.name}</div>
+              <div className="flex items-center gap-2">
+                <div className="text-2xl font-bold leading-tight text-white">{target.name}</div>
+                {targetMeta && (
+                  <span className={cx(
+                    "rounded px-1.5 py-0.5 text-[10px] font-bold",
+                    targetMeta.oneHanded
+                      ? "bg-[#2AABB8]/30 text-[#2AABB8]"
+                      : "bg-[#F0A500]/30 text-[#F0A500]"
+                  )}>
+                    {targetMeta.oneHanded ? "🖐 1 mano" : "🙌 2 manos"}
+                  </span>
+                )}
+              </div>
               <div className="text-[10px] font-semibold text-[#2AABB8]">
                 {CATEGORY_LABELS[target.category] || target.category}
               </div>
@@ -303,13 +403,15 @@ export default function ModelTestPage({ isDark, navigate, useCameraMediaPipe, re
           <div className="absolute bottom-4 left-4 z-10 flex items-center gap-2">
             <span className={cx(
               "rounded-full px-3 py-1 text-[11px] font-bold backdrop-blur-sm",
-              handDetected ? "bg-[#1A6B4A]/90 text-[#D4F5E4]" : "bg-black/60 text-[#8AA8B0]"
+              handDetected
+                ? "bg-[#1A6B4A]/90 text-[#D4F5E4]"
+                : "bg-black/60 text-[#8AA8B0]"
             )}>
-              {handDetected ? `Capturando · ${bufferSize} frames` : "Sin mano"}
+              {handDetected ? `Buffer · ${bufferSize} frames` : "Sin mano"}
             </span>
-            {!handDetected && activeFramesRef.current === 0 && (
+            {!handDetected && (
               <span className="rounded-full bg-black/60 px-3 py-1 text-[11px] font-semibold text-[#8AA8B0]">
-                Haz la seña y baja la mano para evaluar
+                Sube la mano y haz la seña
               </span>
             )}
           </div>
@@ -357,7 +459,23 @@ export default function ModelTestPage({ isDark, navigate, useCameraMediaPipe, re
 
         {/* ── Panel lateral ── */}
         <div className="flex flex-col gap-4">
+          {target && (
+            <div className={cx("flex items-center justify-between rounded-xl border px-3 py-2", panel)}>
+              <span className={cx("text-[11px] font-bold uppercase tracking-wide", textSoft)}>
+                {CATEGORY_LABELS[target.category] || target.category}
+              </span>
+              <span className={cx("text-[11px] font-mono font-semibold", textSoft)}>
+                {targetIndex + 1} / {pool.length}
+              </span>
+            </div>
+          )}
           <div className="flex gap-2">
+            <button
+              onClick={prevTarget}
+              className={cx("rounded-xl px-4 py-2.5 text-sm font-bold", isDark ? "bg-[#1A2C33] text-[#8AA8B0]" : "bg-[#EDF3F4] text-[#5B7883]")}
+            >
+              ← Anterior
+            </button>
             <button
               onClick={nextTarget}
               className="flex-1 rounded-xl bg-[#2AABB8] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#238E99]"

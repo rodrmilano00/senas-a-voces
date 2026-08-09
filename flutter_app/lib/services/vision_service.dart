@@ -8,6 +8,9 @@ class VisionFrame {
   /// Manos detectadas: lista de manos, cada una con 21 landmarks.
   final List<List<Landmark>> hands;
 
+  /// Etiqueta de lateralidad ("Right"/"Left") por mano, mismo orden que [hands].
+  final List<String> handedness;
+
   /// Blendshapes faciales (nombre -> score 0..1) para expresiones.
   /// Vacio cuando el frame no trae un resultado facial nuevo (la cara se
   /// infiere 1 de cada N frames por rendimiento).
@@ -22,6 +25,7 @@ class VisionFrame {
 
   const VisionFrame({
     required this.hands,
+    this.handedness = const [],
     required this.faceBlendshapes,
     this.mirror = false,
     this.imgW = 1,
@@ -30,6 +34,20 @@ class VisionFrame {
 
   bool get hasHand => hands.isNotEmpty;
   List<Landmark>? get primaryHand => hands.isNotEmpty ? hands.first : null;
+
+  List<Landmark>? _handWithLabel(String label) {
+    for (var i = 0; i < hands.length; i++) {
+      if (i < handedness.length && handedness[i] == label) return hands[i];
+    }
+    return null;
+  }
+
+  /// Mano derecha segun la clasificacion de MediaPipe. Si no hay etiqueta
+  /// disponible, cae a la primera mano detectada.
+  List<Landmark>? get rightHand => _handWithLabel('Right') ?? (handedness.isEmpty ? primaryHand : null);
+
+  /// Mano izquierda segun la clasificacion de MediaPipe.
+  List<Landmark>? get leftHand => _handWithLabel('Left');
 }
 
 /// Puente con el codigo nativo (CameraX + MediaPipe Tasks Vision).
@@ -97,10 +115,25 @@ class VisionService {
       });
     }
 
+    final handedness = <String>[];
+    final rawHandedness = map['handedness'];
+    if (rawHandedness is List) {
+      for (final h in rawHandedness) {
+        handedness.add(h.toString());
+      }
+    }
+
     final mirror = (map['mirror'] as bool?) ?? false;
     final imgW = (map['imgW'] as num?)?.toInt() ?? 1;
     final imgH = (map['imgH'] as num?)?.toInt() ?? 1;
 
-    return VisionFrame(hands: hands, faceBlendshapes: blend, mirror: mirror, imgW: imgW, imgH: imgH);
+    return VisionFrame(
+      hands: hands,
+      handedness: handedness,
+      faceBlendshapes: blend,
+      mirror: mirror,
+      imgW: imgW,
+      imgH: imgH,
+    );
   }
 }

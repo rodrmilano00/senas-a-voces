@@ -71,8 +71,10 @@ class VisionPlugin(
     companion object {
         private const val TAG = "VisionPlugin"
 
-        // Resolucion de analisis minima para maxima fluidez.
+        // Resolucion de analisis baja: MediaPipe no necesita mas, asi el CPU no se satura.
         private val ANALYSIS_SIZE = android.util.Size(256, 192)
+        // Preview en 1080p: alta calidad sin saturar el GPU/CPU.
+        private val PREVIEW_SIZE = android.util.Size(1920, 1080)
     }
 
     init {
@@ -203,7 +205,7 @@ class VisionPlugin(
                 ResolutionSelector.Builder()
                     .setResolutionStrategy(
                         ResolutionStrategy(
-                            android.util.Size(640, 480),
+                            PREVIEW_SIZE,
                             ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
                         )
                     )
@@ -276,8 +278,10 @@ class VisionPlugin(
         // en vez de 21 HashMaps: mucho mas rapido de serializar por el
         // canal de plataforma.
         val handsList = ArrayList<DoubleArray>()
+        val handednessList = ArrayList<String>()
         if (hands != null) {
-            for (hand in hands.landmarks()) {
+            val handednessCategories = hands.handedness()
+            for ((idx, hand) in hands.landmarks().withIndex()) {
                 val flat = DoubleArray(hand.size * 3)
                 var i = 0
                 for (lm in hand) {
@@ -286,6 +290,8 @@ class VisionPlugin(
                     flat[i++] = lm.z().toDouble()
                 }
                 handsList.add(flat)
+                val label = handednessCategories.getOrNull(idx)?.firstOrNull()?.categoryName() ?: "Right"
+                handednessList.add(label)
             }
         }
 
@@ -310,6 +316,7 @@ class VisionPlugin(
 
         val payload = HashMap<String, Any>()
         payload["hands"] = handsList
+        payload["handedness"] = handednessList
         payload["mirror"] = lensFront
         payload["imgW"] = lastImgW
         payload["imgH"] = lastImgH

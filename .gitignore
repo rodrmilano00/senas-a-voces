@@ -3,3 +3,16 @@ dist/
 .env
 .env.local
 npm-debug.log*
+
+# Flutter app (mobile, not part of web deploy)
+flutter_app/
+
+# Scripts and tools
+scripts/
+check_duplicates.py
+check_training.cjs
+test_*.mjs
+
+# OS files
+.DS_Store
+Thumbs.db

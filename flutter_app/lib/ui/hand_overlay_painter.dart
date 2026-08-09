@@ -44,9 +44,11 @@ class HandOverlayPainter extends CustomPainter {
   }
 
   Offset _landmarkToOffset(Landmark p, Rect rect) {
-    // Espejo X -> rot -90° -> espejo X -> flip Y
-    // (1-y, x) -> (1-y, 1-x)
-    final nx = 1.0 - p.y;
+    // Los landmarks llegan en el espacio de la imagen rotada 90°.
+    // Mapeo base (sin espejo): nx = p.y, ny = 1 - p.x
+    // La cámara frontal (selfie) espeja el preview, así que espejamos también.
+    // La cámara trasera NO espeja → usamos el mapeo directo.
+    final nx = frame.mirror ? (1.0 - p.y) : p.y;
     final ny = 1.0 - p.x;
     return Offset(nx * rect.width + rect.left, ny * rect.height + rect.top);
   }
@@ -86,7 +88,7 @@ class HandOverlayPainter extends CustomPainter {
         final offset = _landmarkToOffset(p, rect);
         canvas.drawCircle(
           offset,
-          tipIndices.contains(i) ? 6 : 4,
+          tipIndices.contains(i) ? 4 : 2.5,
           tipIndices.contains(i) ? tipPaint : jointPaint,
         );
       }

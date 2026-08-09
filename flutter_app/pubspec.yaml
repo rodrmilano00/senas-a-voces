@@ -42,9 +42,8 @@ flutter:
   assets:
     - assets/models/
     - assets/images/
-    - assets/training_data/
-    - assets/training_data/numeros/
-    - assets/training_data/palabras/
+    - assets/app_movil_de_traduccion/
+    - assets/app_movil_de_traduccion/palabras/
 
 flutter_launcher_icons:
   android: true

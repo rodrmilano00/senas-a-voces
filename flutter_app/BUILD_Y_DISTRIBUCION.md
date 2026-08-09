@@ -51,12 +51,12 @@ adb install -r build/app/outputs/flutter-apk/app-release.apk
 
 ## 5. Entrenar señas nuevas (después)
 
-Las señas viven en `assets/training_data/<categoria>/<SEÑA>_<n>.json` y se
-listan en `assets/training_data/manifest.json`. Para añadir una seña:
+Las señas viven en `assets/app_movil_de_traduccion/<categoria>/<SEÑA>_<n>.json` y se
+listan en `assets/app_movil_de_traduccion/manifest.json`. Para añadir una seña:
 
 1. Graba ejemplos (con la herramienta web existente en `/src`) y exporta el JSON
    de frames (array con `landmarks` de 21 puntos por frame).
-2. Copia el archivo a `assets/training_data/<categoria>/NOMBRE_1.json`,
+2. Copia el archivo a `assets/app_movil_de_traduccion/<categoria>/NOMBRE_1.json`,
    `NOMBRE_2.json`, etc.
 3. Añade `"NOMBRE"` a la categoría correspondiente en `manifest.json`.
 4. Recompila. La app carga automáticamente todos los patrones al abrir.

@@ -4,11 +4,13 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../engine/dynamic_sign_detector.dart';
 import '../services/expression_detector.dart';
+import '../services/gloss_interpreter_service.dart';
 import '../services/sign_translation_service.dart';
 import '../services/training_data_loader.dart';
 import '../services/tts_service.dart';
 import '../services/vision_service.dart';
 import '../theme/brand.dart';
+import 'conversation_page.dart';
 import 'hand_overlay_painter.dart';
 
 /// Pantalla principal: traduccion de LSM en vivo por camara.
@@ -20,8 +22,15 @@ class LiveTranslationPage extends StatefulWidget {
 }
 
 class _LiveTranslationPageState extends State<LiveTranslationPage> {
+  static const String _openAiKey =
+      String.fromEnvironment('OPENAI_API_KEY', defaultValue: '');
+  static const String _elevenKey =
+      String.fromEnvironment('ELEVENLABS_API_KEY', defaultValue: '');
+
   final VisionService _vision = VisionService();
-  final TtsService _tts = TtsService();
+  final TtsService _tts = TtsService(apiKey: _elevenKey);
+  final GlossInterpreterService _interpreter =
+      GlossInterpreterService(apiKey: _openAiKey);
   late final DynamicSignDetector _dynamic;
   late final SignTranslationService _translator;
 
@@ -30,12 +39,19 @@ class _LiveTranslationPageState extends State<LiveTranslationPage> {
   String _status = 'Iniciando...';
   bool _ready = false;
   bool _isFrontCamera = true;
+
+  // Reconstruccion a espanol natural.
+  final ScrollController _logScroll = ScrollController();
+  String _naturalPhrase = '';
+  bool _interpreting = false;
+  int _interpretedCount = 0;
+  Timer? _autoInterpretTimer;
   // El overlay se repinta via ValueNotifier para no reconstruir toda la
   // pantalla (AppBar, panel de frase, botones) en cada frame de camara.
   final ValueNotifier<VisionFrame?> _liveFrame = ValueNotifier(null);
   StreamSubscription<VisionFrame>? _frameSub;
   int _overlayFrameCount = 0;
-  static const int _overlayEveryN = 2; // actualizar overlay 1 de cada 2 frames
+  static const int _overlayEveryN = 1; // actualizar overlay cada frame
 
   @override
   void initState() {
@@ -57,7 +73,8 @@ class _LiveTranslationPageState extends State<LiveTranslationPage> {
 
     _translator.attach(_vision.frames);
     _translator.stream.listen((s) {
-      if (mounted) setState(() => _state = s);
+      if (!mounted) return;
+      setState(() => _state = s);
     });
     _frameSub = _vision.frames.listen((f) {
       _overlayFrameCount++;
@@ -90,13 +107,74 @@ class _LiveTranslationPageState extends State<LiveTranslationPage> {
     }
   }
 
+  void _scrollLogToEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_logScroll.hasClients) return;
+      _logScroll.animateTo(
+        _logScroll.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  /// Tras 1.8 s sin nuevas senas, reconstruye la frase automaticamente.
+  void _scheduleAutoInterpret() {
+    _autoInterpretTimer?.cancel();
+    _autoInterpretTimer = Timer(
+      const Duration(milliseconds: 1800),
+      () => _interpret(speak: false),
+    );
+  }
+
+  Future<void> _interpret({bool speak = false}) async {
+    final glosses = _state.glosses.map((g) => g.gloss).toList();
+    if (glosses.isEmpty || _interpreting) return;
+
+    setState(() => _interpreting = true);
+    final phrase = await _interpreter.interpret(
+      glosses,
+      onError: (e) => debugPrint('Interprete falló: $e'),
+    );
+    if (!mounted) return;
+    setState(() {
+      _naturalPhrase = phrase;
+      _interpretedCount = glosses.length;
+      _interpreting = false;
+    });
+    if (speak && phrase.isNotEmpty) await _tts.speak(phrase);
+  }
+
   Future<void> _speak() async {
-    final text = _state.phrase.trim();
-    if (text.isNotEmpty) await _tts.speak(text);
+    if (_naturalPhrase.isEmpty || _interpretedCount != _state.glosses.length) {
+      await _interpret(speak: true);
+      return;
+    }
+    await _tts.speak(_naturalPhrase);
+  }
+
+  void _clearAll() {
+    _autoInterpretTimer?.cancel();
+    _translator.clearPhrase();
+    setState(() {
+      _naturalPhrase = '';
+      _interpretedCount = 0;
+    });
+  }
+
+  void _backspace() {
+    _translator.backspace();
+    setState(() {
+      _naturalPhrase = '';
+      _interpretedCount = 0;
+    });
+    _scheduleAutoInterpret();
   }
 
   @override
   void dispose() {
+    _autoInterpretTimer?.cancel();
+    _logScroll.dispose();
     _frameSub?.cancel();
     _liveFrame.dispose();
     _translator.dispose();
@@ -124,6 +202,13 @@ class _LiveTranslationPageState extends State<LiveTranslationPage> {
         ),
         actions: [
           IconButton(
+            tooltip: 'Escuchar a la otra persona',
+            icon: const Icon(Icons.hearing, color: Brand.primary),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const ConversationPage()),
+            ),
+          ),
+          IconButton(
             tooltip: 'Cambiar camara',
             icon: const Icon(Icons.cameraswitch, color: Brand.primary),
             onPressed: _ready ? _switchCamera : null,
@@ -132,7 +217,8 @@ class _LiveTranslationPageState extends State<LiveTranslationPage> {
       ),
       body: Column(
         children: [
-          Expanded(child: _buildCameraArea()),
+          Expanded(flex: 5, child: _buildCameraArea()),
+          _buildGlossLog(),
           _buildResultPanel(),
         ],
       ),
@@ -194,7 +280,11 @@ class _LiveTranslationPageState extends State<LiveTranslationPage> {
             top: 12,
             right: 12,
             child: _pill(
-              _state.handVisible ? 'Mano detectada' : 'Sin mano',
+              _state.handVisible
+                  ? (_state.handCount > 1
+                      ? '${_state.handCount} manos detectadas'
+                      : 'Mano detectada')
+                  : 'Sin mano',
               _state.handVisible ? Brand.success : Brand.danger,
             ),
           ),
@@ -251,7 +341,89 @@ class _LiveTranslationPageState extends State<LiveTranslationPage> {
     );
   }
 
+  /// Log en vivo: cada sena captada aparece aqui en orden, con su confianza.
+  Widget _buildGlossLog() {
+    final glosses = _state.glosses;
+    return Container(
+      width: double.infinity,
+      height: 78,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Brand.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Brand.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('Senas captadas',
+                  style: TextStyle(
+                      color: Brand.muted,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12)),
+              const SizedBox(width: 6),
+              Text('(${glosses.length})',
+                  style: const TextStyle(color: Brand.muted, fontSize: 12)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Expanded(
+            child: glosses.isEmpty
+                ? const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Esperando senas...',
+                        style: TextStyle(color: Brand.muted, fontSize: 13)),
+                  )
+                : ListView.separated(
+                    controller: _logScroll,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: glosses.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 6),
+                    itemBuilder: (_, i) => _glossChip(glosses[i], i + 1),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _glossChip(DetectedGloss g, int order) {
+    final pct = (g.confidence * 100).round();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Brand.primary.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Brand.primary.withOpacity(0.30)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('$order.',
+              style: const TextStyle(
+                  color: Brand.muted,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600)),
+          const SizedBox(width: 5),
+          Text(g.label,
+              style: const TextStyle(
+                  color: Brand.primary,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14)),
+          const SizedBox(width: 5),
+          Text('$pct%',
+              style: const TextStyle(color: Brand.muted, fontSize: 11)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildResultPanel() {
+    final hasGlosses = _state.glosses.isNotEmpty;
+    final stale = hasGlosses && _interpretedCount != _state.glosses.length;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -264,30 +436,47 @@ class _LiveTranslationPageState extends State<LiveTranslationPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Frase',
-              style: TextStyle(color: Brand.muted, fontWeight: FontWeight.w600)),
+          Row(
+            children: [
+              const Text('En espanol',
+                  style: TextStyle(
+                      color: Brand.muted, fontWeight: FontWeight.w600)),
+              const SizedBox(width: 8),
+              if (_interpreting)
+                const SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 1.52, color: Brand.accent),
+                ),
+            ],
+          ),
           const SizedBox(height: 6),
           ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 44),
+            constraints: const BoxConstraints(minHeight: 48),
             child: Text(
-              _state.phrase.isEmpty ? 'Empieza a senar...' : _state.phrase,
+              _naturalPhrase.isEmpty
+                  ? (hasGlosses
+                      ? 'Presiona Traducir para reconstruir'
+                      : 'Empieza a senar...')
+                  : _naturalPhrase,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: _state.phrase.isEmpty ? Brand.muted : Brand.fg,
+                color: _naturalPhrase.isEmpty ? Brand.muted : Brand.fg,
               ),
             ),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
+              _actionBtn(Icons.translate, 'Traducir', Brand.accent, () => _interpret(speak: false)),
+              const SizedBox(width: 8),
               _actionBtn(Icons.volume_up, 'Hablar', Brand.primary, _speak),
               const SizedBox(width: 8),
-              _actionBtn(Icons.backspace, 'Borrar', Brand.accent,
-                  _translator.backspace),
+              _actionBtn(Icons.backspace, 'Borrar', Brand.muted, _backspace),
               const SizedBox(width: 8),
-              _actionBtn(Icons.clear_all, 'Limpiar', Brand.danger,
-                  _translator.clearPhrase),
+              _actionBtn(Icons.clear_all, 'Limpiar', Brand.danger, _clearAll),
             ],
           ),
         ],

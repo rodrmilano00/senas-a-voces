@@ -9,8 +9,11 @@ import "./styles.css";
 import { GLOSARIO_LESSONS, ALPHABET_LESSON } from "./lessons_glosario.js";
 
 import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR, scoreLetter, LSM_ALPHABET, NUMBER_TEMPLATES } from "./lsm_detector.js";
-import { dynamicDetector, featureFromFingerStates, frameInfo, buildSequence } from "./dynamic_sign_detector.js";
+import { dynamicDetector, featureFromFingerStates, frameInfo, buildSequence, splitHands } from "./dynamic_sign_detector.js";
 import ModelTestPage from "./model_test_page.jsx";
+import TrainPage from "./train_page.jsx";
+import TrainingViewerPage from "./training_viewer_page.jsx";
+import RetrainPage from "./retrain_page.jsx";
 
 
 
@@ -26,7 +29,12 @@ const navItems = [
 
   { path: "/video-test", label: "Videos" },
 
-  { path: "/model-test", label: "Probar modelo" }
+  { path: "/model-test", label: "Probar modelo" },
+
+  { path: "/train", label: "Entrenar" },
+  { path: "/retrain", label: "Re-entrenar" },
+
+  { path: "/training-viewer", label: "Ver entrenamiento" }
 
 ];
 
@@ -1396,7 +1404,7 @@ function useCameraMediaPipe({ onResults, enabled = true }) {
 
         const stream = await navigator.mediaDevices.getUserMedia({
 
-          video: { width: 640, height: 480, facingMode: "user" },
+          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
 
         });
 
@@ -1778,9 +1786,9 @@ function PracticePage({ isDark, setIsDark, navigate }) {
 
           <div className="relative h-full overflow-hidden rounded-xl bg-black">
 
-            {/* Video oculto — solo usado como fuente para MediaPipe */}
+            {/* Video visible — fuente para MediaPipe */}
 
-            <video ref={videoRef} className="absolute opacity-0 pointer-events-none" playsInline muted />
+            <video ref={videoRef} className="absolute inset-0 h-full w-full object-cover" playsInline muted />
 
             {/* Canvas con video espejado + landmarks */}
 
@@ -2529,17 +2537,35 @@ async function reloadDynamicPatterns() {
     const manifestRes = await fetch('/api/training-data/manifest' + bust);
     if (!manifestRes.ok) throw new Error(`No se pudo cargar manifest (${manifestRes.status})`);
     const man = await manifestRes.json();
+
+    // Cargar todas las señas en paralelo: cada seña intenta _1.._20
+    // simultaneamente y descarta los 404.
+    const tasks = [];
     for (const [cat, signs] of Object.entries(man)) {
       if (!Array.isArray(signs)) continue;
       for (const sign of signs) {
         for (let n = 1; n <= 20; n++) {
-          const res = await fetch(`/api/training-data/${cat}/${sign}_${n}.json${bust}`);
-          if (res.status === 404) break;
-          if (!res.ok) throw new Error(`No se pudo cargar ${cat}/${sign}_${n}.json (${res.status})`);
-          dynamicDetector.loadPattern(sign, await res.json());
+          tasks.push(
+            fetch(`/api/training-data/${cat}/${sign}_${n}.json${bust}`)
+              .then(res => res.ok ? res.json().then(data => ({ sign, data })) : null)
+              .catch(() => null)
+          );
         }
       }
     }
+    const results = await Promise.all(tasks);
+    let loadedCount = 0;
+    for (const r of results) {
+      if (r) {
+        const before = dynamicDetector.patterns.length;
+        dynamicDetector.loadPattern(r.sign, r.data);
+        const after = dynamicDetector.patterns.length;
+        if (after > before || dynamicDetector.patterns.find(p => p.name === r.sign)) {
+          loadedCount++;
+        }
+      }
+    }
+    console.log('[DYNAMIC] Loaded patterns:', dynamicDetector.getStatus().patternsLoaded);
   } catch (e) { console.warn('[DYNAMIC] reload error:', e); }
   return dynamicDetector.getStatus().patternsLoaded;
 }
@@ -2770,7 +2796,8 @@ function DebugPage({ isDark, navigate, videoOnly = false }) {
 
   const handleResults = useCallback(({ handRes }) => {
 
-    const lms = handRes?.landmarks?.[0] ?? null;
+    const { right, left } = splitHands(handRes);
+    const lms = right || left;
 
     if (!lms) { setStates(null); setScores([]); setBest(null); return; }
 
@@ -2794,13 +2821,14 @@ function DebugPage({ isDark, navigate, videoOnly = false }) {
     if ((autoTrainRef.current && trainInfoRef.current) || videoOnly) {
       autoFramesRef.current.push({
         fingerStates: s,
-        landmarks: lms.map(p => ({ x: +p.x.toFixed(4), y: +p.y.toFixed(4), z: +p.z.toFixed(4) })),
+        landmarksRight: right ? right.map(p => ({ x: +p.x.toFixed(4), y: +p.y.toFixed(4), z: +p.z.toFixed(4) })) : null,
+        landmarksLeft: left ? left.map(p => ({ x: +p.x.toFixed(4), y: +p.y.toFixed(4), z: +p.z.toFixed(4) })) : null,
       });
     }
 
     // Detección dinámica en vivo (solo cámara / diagnóstico).
     if (!videoOnly) {
-      dynamicDetector.pushFrameInfo(frameInfo(s, lms));
+      dynamicDetector.pushFrameInfo(frameInfo(right, left));
       const dyn = dynamicDetector.detect();
       if (dyn?.accepted) dynamicCandidateRef.current = { name: dyn.matched, score: dyn.score };
       setDynamicSign(dyn?.matched || null);
@@ -2850,7 +2878,7 @@ function DebugPage({ isDark, navigate, videoOnly = false }) {
     if (!frames || frames.length === 0) { setDynamicSign(null); return; }
     const segments = segmentFrames(frames);
     const sequences = segments
-      .map(seg => buildSequence(seg.map(f => frameInfo(f.fingerStates, f.landmarks)).filter(Boolean)))
+      .map(seg => buildSequence(seg.map(f => frameInfo(f.landmarksRight, f.landmarksLeft)).filter(Boolean)))
       .filter(seq => seq.length > 0);
     const result = dynamicDetector.classifySequences(sequences);
     setDynamicSign(result?.accepted ? result.matched : 'No estoy seguro: entrena más ejemplos');
@@ -3403,6 +3431,23 @@ function App() {
 
     />
 
+  );
+
+  if (path === "/train") return (
+    <TrainPage
+      isDark={isDark}
+      navigate={navigate}
+      useCameraMediaPipe={useCameraMediaPipe}
+      reloadDynamicPatterns={reloadDynamicPatterns}
+    />
+  );
+
+  if (path === "/training-viewer") return (
+    <TrainingViewerPage isDark={isDark} navigate={navigate} />
+  );
+
+  if (path === "/retrain") return (
+    <RetrainPage isDark={isDark} navigate={navigate} />
   );
 
 
