@@ -1,52 +1,39 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../engine/landmark.dart';
 import '../engine/dynamic_sign_detector.dart';
 
 /// Carga los patrones de senas entrenadas (JSON) empaquetados en
-/// assets/app_movil_de_traduccion/ hacia un DynamicSignDetector.
+/// assets/training_data/ hacia un DynamicSignDetector.
 ///
 /// Estructura esperada:
-///   assets/app_movil_de_traduccion/manifest.json  -> { categoria: [SIGN, ...], ... }
-///   assets/app_movil_de_traduccion/<categoria>/<SIGN>_<n>.json  (array de frames)
+///   assets/training_data/manifest.json  -> { categoria: [SIGN, ...], ... }
+///   assets/training_data/<categoria>/<SIGN>_<n>.json  (array de frames)
 class TrainingDataLoader {
-  static const String _base = 'assets/app_movil_de_traduccion';
+  static const String _base = 'assets/training_data';
 
   /// Devuelve el numero de patrones (senas) cargados.
   Future<int> loadInto(DynamicSignDetector detector) async {
     final manifest = await _readManifest();
     if (manifest.isEmpty) return 0;
 
-    // Solo cargar estas señas.
-    const allowed = {'CAFE', 'PAN'};
+    // Lista de todos los assets disponibles para descubrir los _n.json.
+    final assetPaths = await _listAssets();
+
     var loaded = 0;
     for (final entry in manifest.entries) {
       final category = entry.key;
       final signs = entry.value;
       for (final sign in signs) {
-        if (!allowed.contains(sign)) continue;
-        // Probar hasta 10 archivos numerados por seña.
-        final files = <String>[];
-        for (var n = 1; n <= 10; n++) {
-          final path = '$_base/$category/${sign}_$n.json';
-          try {
-            await rootBundle.loadString(path);
-            files.add(path);
-          } catch (_) {}
-        }
-        // También probar sin número.
-        final basePath = '$_base/$category/$sign.json';
-        try {
-          await rootBundle.loadString(basePath);
-          files.add(basePath);
-        } catch (_) {}
-        files.sort();
-        debugPrint('Loader: sign=$sign files=${files.length} paths=$files');
+        final files = assetPaths
+            .where((p) =>
+                p.startsWith('$_base/$category/') &&
+                _matchesSign(p, category, sign))
+            .toList()
+          ..sort();
         var any = false;
         for (final path in files) {
           final frames = await _loadFrames(path);
-          debugPrint('Loader: $path -> ${frames.length} frames');
           if (frames.isNotEmpty) {
             detector.loadPatternFromLandmarks(sign, frames);
             any = true;
@@ -55,7 +42,6 @@ class TrainingDataLoader {
         if (any) loaded++;
       }
     }
-    debugPrint('Loader: total loaded=$loaded patterns=${detector.getStatus()}');
     return loaded;
   }
 
@@ -69,14 +55,11 @@ class TrainingDataLoader {
     try {
       final raw = await rootBundle.loadString('$_base/manifest.json');
       final obj = jsonDecode(raw) as Map<String, dynamic>;
-      final result = obj.map((k, v) => MapEntry(
+      return obj.map((k, v) => MapEntry(
             k,
             (v as List).map((e) => e.toString()).toList(),
           ));
-      debugPrint('Loader: manifest=$result');
-      return result;
-    } catch (e) {
-      debugPrint('Loader: manifest error: $e');
+    } catch (_) {
       return {};
     }
   }
@@ -103,6 +86,8 @@ class TrainingDataLoader {
       final frames = <TrainingFrame>[];
       for (final f in arr) {
         final m = f as Map<String, dynamic>;
+        // Formato nuevo: landmarksRight/landmarksLeft. Formato viejo (legacy):
+        // `landmarks` unico, tratado como mano derecha.
         final right = _parseHand(m['landmarksRight'] ?? m['landmarks']);
         final left = _parseHand(m['landmarksLeft']);
         if (right != null || left != null) {
@@ -110,8 +95,7 @@ class TrainingDataLoader {
         }
       }
       return frames;
-    } catch (e) {
-      debugPrint('Loader: error reading $path: $e');
+    } catch (_) {
       return [];
     }
   }

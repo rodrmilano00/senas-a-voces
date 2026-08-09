@@ -5,10 +5,10 @@ import 'hand_shape_detector.dart';
 /// Puerto Dart de `dynamic_sign_detector.js`.
 /// Detecta senas dinamicas (palabras/movimientos) usando DTW sobre secuencias
 /// de vectores de caracteristicas. El "modelo entrenado" es una coleccion de
-/// secuencias JSON en assets/app_movil_de_traduccion/.
+/// secuencias JSON en assets/training_data/.
 
-const double wristWeight = 2.5;
-const double accelWeight = 1.5;
+const double wristWeight = 4.0;
+const double accelWeight = 2.5;
 const int topK = 3;
 const int handDim = 15;
 final List<double> zeroHand = List<double>.filled(handDim, 0);
@@ -22,7 +22,8 @@ class FrameInfo {
   final int presentL;
   final Landmark? wristL;
   final double scale;
-  const FrameInfo(this.ffR, this.presentR, this.wristR, this.ffL, this.presentL, this.wristL, this.scale);
+  final bool oneHanded;
+  const FrameInfo(this.ffR, this.presentR, this.wristR, this.ffL, this.presentL, this.wristL, this.scale, {this.oneHanded = false});
 }
 
 /// Vector de caracteristicas invariante (forma de UNA mano) desde FingerStates.
@@ -85,7 +86,7 @@ FrameInfo? frameInfo(List<Landmark>? landmarksRight, List<Landmark>? landmarksLe
     final scale = _nz(_hypot(m.x - wrist.x, m.y - wrist.y), 1e-9);
     final ffSym = List<double>.from(ffR);
     ffSym[13] = ffSym[13].abs(); // palmNormalZ mirror-symmetric
-    return FrameInfo(ffSym, 1, wrist, ffSym, 1, wrist, scale);
+    return FrameInfo(ffSym, 1, wrist, ffSym, 1, wrist, scale, oneHanded: true);
   }
   if (ffL != null && ffR == null) {
     final wrist = landmarksLeft![0];
@@ -93,7 +94,7 @@ FrameInfo? frameInfo(List<Landmark>? landmarksRight, List<Landmark>? landmarksLe
     final scale = _nz(_hypot(m.x - wrist.x, m.y - wrist.y), 1e-9);
     final ffSym = List<double>.from(ffL);
     ffSym[13] = ffSym[13].abs(); // palmNormalZ mirror-symmetric
-    return FrameInfo(ffSym, 1, wrist, ffSym, 1, wrist, scale);
+    return FrameInfo(ffSym, 1, wrist, ffSym, 1, wrist, scale, oneHanded: true);
   }
 
   final refLms = ffR != null ? landmarksRight! : landmarksLeft!;
@@ -127,7 +128,13 @@ List<List<double>> buildSequence(List<FrameInfo?> infos) {
     if (cur == null) continue;
     final velR = _handVelocity(cur.wristR, prevWristR, cur.scale);
     final velL = _handVelocity(cur.wristL, prevWristL, cur.scale);
-    final vxR = velR[0], vyR = velR[1], vxL = velL[0], vyL = velL[1];
+    double vxR = velR[0], vyR = velR[1], vxL = velL[0], vyL = velL[1];
+    // Para señas de una mano, usar abs(vx) para que el espejo (x invertido)
+    // no cambie el signo de la velocidad horizontal.
+    if (cur.oneHanded) {
+      vxR = vxR.abs();
+      vxL = vxL.abs();
+    }
     final axR = vxR - prevVxR, ayR = vyR - prevVyR;
     final axL = vxL - prevVxL, ayL = vyL - prevVyL;
     prevVxR = vxR; prevVyR = vyR; prevVxL = vxL; prevVyL = vyL;
@@ -162,10 +169,7 @@ double _vecDistance(List<double> a, List<double> b) {
     final d = a[i] - b[i];
     sum += d * d;
   }
-  // Normalizar por la dimension para que la distancia no crezca con el
-  // numero de features. Asi un vector de 35 dims da valores comparables
-  // a uno de 12 dims.
-  return math.sqrt(sum) / math.sqrt(n.toDouble());
+  return math.sqrt(sum);
 }
 
 double _dtw(List<List<double>> seqA, List<List<double>> seqB) {
@@ -185,71 +189,35 @@ double _dtw(List<List<double>> seqA, List<List<double>> seqB) {
     curr = tmp;
     curr.fillRange(0, curr.length, double.infinity);
   }
-  return prev[m] / math.max(n, m);
+  return prev[m] / (n + m);
 }
 
 /// Subsequence DTW: encuentra la mejor subsecuencia del buffer que coincide
 /// con el patrón completo, ignorando frames idle al inicio.
-/// Normaliza por la longitud del match real (no por m) para que un buffer
-/// corto no produzca distancias artificialmente bajas.
 double _dtwSubseq(List<List<double>> buffer, List<List<double>> pattern) {
   final n = buffer.length, m = pattern.length;
   if (n == 0 || m == 0) return double.infinity;
-  // No intentar si el buffer es mucho más corto que el patrón:
-  // el subsequence DTW necesita al menos el 60% del patrón para ser fiable.
-  if (n < m * 0.6) return double.infinity;
-
   var prev = List<double>.filled(m + 1, 0);
   var curr = List<double>.filled(m + 1, double.infinity);
   var bestEnd = double.infinity;
-  var bestLen = 0;
-  // Track de longitud del camino para normalización correcta.
-  var prevLen = List<int>.filled(m + 1, 0);
-  var currLen = List<int>.filled(m + 1, 0);
-
   for (var i = 1; i <= n; i++) {
     curr[0] = double.infinity;
-    currLen[0] = 0;
     for (var j = 1; j <= m; j++) {
       final cost = _vecDistance(buffer[i - 1], pattern[j - 1]);
-      // Elegir el camino minimo y trackear su longitud.
-      final candidates = [
-        (prev[j], prevLen[j]),
-        (curr[j - 1], currLen[j - 1]),
-        (prev[j - 1], prevLen[j - 1]),
-      ];
-      var bestCost = candidates[0].$1;
-      var bestL = candidates[0].$2;
-      for (var c = 1; c < candidates.length; c++) {
-        if (candidates[c].$1 < bestCost) {
-          bestCost = candidates[c].$1;
-          bestL = candidates[c].$2;
-        }
-      }
-      curr[j] = cost + bestCost;
-      currLen[j] = bestL + 1;
+      curr[j] = cost + math.min(prev[j], math.min(curr[j - 1], prev[j - 1]));
     }
-    if (curr[m] < bestEnd) {
-      bestEnd = curr[m];
-      bestLen = currLen[m];
-    }
+    if (curr[m] < bestEnd) bestEnd = curr[m];
     final tmp = prev;
     prev = curr;
     curr = tmp;
     curr.fillRange(0, curr.length, double.infinity);
-    final tmpL = prevLen;
-    prevLen = currLen;
-    currLen = tmpL;
-    currLen.fillRange(0, currLen.length, 0);
   }
-  final normLen = bestLen > 0 ? bestLen : m;
-  return bestEnd / normLen;
+  return bestEnd / m;
 }
 
 class _Pattern {
   final String name;
   final List<List<List<double>>> sequences = [];
-  bool oneHanded = false;
   _Pattern(this.name);
 }
 
@@ -279,13 +247,12 @@ class DynamicSignDetector {
   final List<_Pattern> _patterns = [];
   final List<List<double>> _buffer = [];
   FrameInfo? _previousInfo;
-  bool _twoHandsNow = false;
   double _prevVxR = 0, _prevVyR = 0, _prevVxL = 0, _prevVyL = 0;
 
-  int maxBufferSize = 150;
-  int minBufferSize = 30;
-  double threshold = 0.25;
-  double minMargin = 0.0;
+  int maxBufferSize = 260;
+  int minBufferSize = 4;
+  double threshold = 0.85;
+  double minMargin = 0.06;
 
   void loadPattern(String name, List<TrainingFrame> frames) {
     // Detectar si hay desbalance de manos (todo en Left, nada en Right)
@@ -304,37 +271,15 @@ class DynamicSignDetector {
         ? frames.map((f) => TrainingFrame(flipHand(f.landmarksLeft), f.landmarksRight)).toList()
         : frames;
 
-    // Detectar señas de una sola mano: o bien solo una mano presente,
-    // o bien una mano tiene mucho menos movimiento que la otra.
+    // Detectar señas de una sola mano y generar versión espejo.
     final anyHand = normalizedFrames.length;
     int oneHandedCount = 0;
-    double totalRightMotion = 0, totalLeftMotion = 0;
-    Landmark? prevWR, prevWL;
     for (final f in normalizedFrames) {
       final hasR = f.landmarksRight != null && f.landmarksRight!.length >= 21;
       final hasL = f.landmarksLeft != null && f.landmarksLeft!.length >= 21;
       if ((hasR && !hasL) || (!hasR && hasL)) oneHandedCount++;
-      if (hasR && f.landmarksRight!.isNotEmpty) {
-        final w = f.landmarksRight![0];
-        if (prevWR != null) {
-          totalRightMotion += (w.x - prevWR!.x).abs() + (w.y - prevWR!.y).abs();
-        }
-        prevWR = w;
-      }
-      if (hasL && f.landmarksLeft!.isNotEmpty) {
-        final w = f.landmarksLeft![0];
-        if (prevWL != null) {
-          totalLeftMotion += (w.x - prevWL!.x).abs() + (w.y - prevWL!.y).abs();
-        }
-        prevWL = w;
-      }
     }
-    final oneHandedByPresence = anyHand > 0 && oneHandedCount > anyHand * 0.6;
-    // Si una mano tiene >5x mas movimiento que la otra, es seña de una mano.
-    final maxMotion = math.max(totalRightMotion, totalLeftMotion);
-    final minMotion = math.min(totalRightMotion, totalLeftMotion);
-    final oneHandedByMotion = maxMotion > 0 && minMotion / maxMotion < 0.2;
-    final isOneHanded = oneHandedByPresence || oneHandedByMotion;
+    final oneHanded = anyHand > 0 && oneHandedCount > anyHand * 0.6;
 
     List<List<double>> build(List<TrainingFrame> fs) {
       final infos = fs
@@ -346,10 +291,11 @@ class DynamicSignDetector {
 
     final seq = build(normalizedFrames);
     if (seq.isEmpty) return;
-    final found = _patterns.where((p) => p.name == name).firstOrNull;
-    final existing = found ?? _Pattern(name);
-    if (found == null) _patterns.add(existing);
-    existing.oneHanded = isOneHanded;
+    var existing = _patterns.where((p) => p.name == name).firstOrNull;
+    if (existing == null) {
+      existing = _Pattern(name);
+      _patterns.add(existing);
+    }
 
     void addSeq(List<List<double>> s) {
       if (s.isEmpty) return;
@@ -360,7 +306,7 @@ class DynamicSignDetector {
 
     addSeq(seq);
 
-    if (isOneHanded) {
+    if (oneHanded) {
       final mirroredFrames = normalizedFrames.map((f) {
         final hand = f.landmarksRight ?? f.landmarksLeft;
         final flipped = flipHand(hand);
@@ -395,7 +341,12 @@ class DynamicSignDetector {
     final prev = _previousInfo;
     final velR = _handVelocity(info.wristR, prev?.wristR, info.scale);
     final velL = _handVelocity(info.wristL, prev?.wristL, info.scale);
-    final vxR = velR[0], vyR = velR[1], vxL = velL[0], vyL = velL[1];
+    double vxR = velR[0], vyR = velR[1], vxL = velL[0], vyL = velL[1];
+    // Para señas de una mano, usar abs(vx) para coincidir con buildSequence
+    if (info.oneHanded) {
+      vxR = vxR.abs();
+      vxL = vxL.abs();
+    }
     final axR = vxR - _prevVxR, ayR = vyR - _prevVyR;
     final axL = vxL - _prevVxL, ayL = vyL - _prevVyL;
     _prevVxR = vxR; _prevVyR = vyR; _prevVxL = vxL; _prevVyL = vyL;
@@ -415,7 +366,6 @@ class DynamicSignDetector {
       vxR * wristWeight, vyR * wristWeight, axR * accelWeight, ayR * accelWeight,
       vxL * wristWeight, vyL * wristWeight, axL * accelWeight, ayL * accelWeight,
     ]);
-    _twoHandsNow = info.presentR == 1 && info.presentL == 1;
   }
 
   void _pushFrame(List<double> featureVector) {
@@ -424,25 +374,23 @@ class DynamicSignDetector {
   }
 
   /// Ranking de todas las señas ordenadas por distancia DTW (menor = mejor).
-  /// Usa DTW completo: compara todo el buffer contra todo el patrón.
-  /// Solo evalua patrones cuya longitud es similar al buffer (+/- 50%).
+  /// Usa ventana final del buffer del mismo tamaño que el patrón.
   List<MapEntry<String, double>> detectRanking() {
     if (_buffer.length < minBufferSize) return [];
     final buf = _buffer;
-    final bufLen = buf.length;
     final ranking = <MapEntry<String, double>>[];
     for (final pattern in _patterns) {
-      // Solo comparar señas del mismo tipo de mano (una vs dos).
-      if (pattern.oneHanded && _twoHandsNow) continue;
-      if (!pattern.oneHanded && !_twoHandsNow) continue;
       var best = double.infinity;
       for (final seq in pattern.sequences) {
-        // Solo comparar si el buffer y el patron tienen longitudes similares.
-        // Ratio 0.7-1.3: el buffer debe ser 70%-130% del patron.
-        final ratio = bufLen / seq.length;
-        if (ratio < 0.7 || ratio > 1.3) continue;
-        final score = _dtw(buf, seq);
-        if (score < best) best = score;
+        final seqLen = seq.length;
+        if (buf.length >= seqLen) {
+          final subBuf = buf.sublist(buf.length - seqLen);
+          final score = _dtw(subBuf, seq);
+          if (score < best) best = score;
+        } else {
+          final score = _dtw(buf, seq);
+          if (score < best) best = score;
+        }
       }
       if (best == double.infinity) continue;
       ranking.add(MapEntry(pattern.name, best));
@@ -457,9 +405,8 @@ class DynamicSignDetector {
     final bestScore = ranking.first.value;
     final bestMatch = ranking.first.key;
     final margin = ranking.length > 1 ? ranking[1].value - bestScore : double.infinity;
-    // Confianza: 0% en threshold, 100% en score 0.
     final confidence = bestScore.isFinite
-        ? ((1 - bestScore / threshold) * 100).round().clamp(0, 100)
+        ? ((1 - bestScore) * 100).round().clamp(0, 100)
         : 0;
     return DetectResult(
       matched: bestMatch,

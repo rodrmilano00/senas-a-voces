@@ -47,24 +47,6 @@ flutter pub get
 flutter run
 ```
 
-## Corrección gramatical con OpenAI (pantalla "Voz a texto")
-
-`ConversationPage` (`lib/ui/conversation_page.dart`) escucha por micrófono
-(`speech_to_text`, reconocimiento en la nube para mejor precisión), corrige
-la gramática/puntuación del texto transcrito con la API de OpenAI
-(`lib/services/grammar_service.dart`), y puede repetir el texto por voz
-(`TtsService`). Si no se provee `OPENAI_API_KEY`, la corrección se omite y
-se usa el texto transcrito tal cual (sin errores).
-
-Para habilitar la corrección, pasa la key como variable de entorno en tiempo
-de compilación (**nunca la hardcodees ni la subas al repo**):
-
-```bash
-flutter run --dart-define=OPENAI_API_KEY=sk-... --dart-define=ELEVENLABS_API_KEY=...
-```
-
-o en `flutter build apk --release --dart-define=OPENAI_API_KEY=sk-...`.
-
 ## Flujo de uso
 
 1. Encender el guante (LED parpadeando).

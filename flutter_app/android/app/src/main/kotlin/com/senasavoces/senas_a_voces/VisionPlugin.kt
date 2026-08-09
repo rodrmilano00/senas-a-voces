@@ -71,10 +71,8 @@ class VisionPlugin(
     companion object {
         private const val TAG = "VisionPlugin"
 
-        // Resolucion de analisis baja: MediaPipe no necesita mas, asi el CPU no se satura.
+        // Resolucion de analisis minima para maxima fluidez.
         private val ANALYSIS_SIZE = android.util.Size(256, 192)
-        // Preview en 1080p: alta calidad sin saturar el GPU/CPU.
-        private val PREVIEW_SIZE = android.util.Size(1920, 1080)
     }
 
     init {
@@ -205,7 +203,7 @@ class VisionPlugin(
                 ResolutionSelector.Builder()
                     .setResolutionStrategy(
                         ResolutionStrategy(
-                            PREVIEW_SIZE,
+                            android.util.Size(640, 480),
                             ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
                         )
                     )

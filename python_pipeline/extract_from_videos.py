@@ -51,7 +51,7 @@ DEFAULT_TARGET_FRAMES = 24
 # Raices donde viven los patrones (web y app Flutter comparten formato).
 DEFAULT_OUT_ROOTS = [
     Path(__file__).parent.parent / "public" / "training_data",
-    Path(__file__).parent.parent / "flutter_app" / "assets" / "app_movil_de_traduccion",
+    Path(__file__).parent.parent / "flutter_app" / "assets" / "training_data",
 ]
 
 

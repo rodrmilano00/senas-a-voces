@@ -27,12 +27,3 @@ List<Landmark>? flipHand(List<Landmark>? landmarks) {
   if (landmarks == null) return null;
   return landmarks.map((lm) => Landmark(1 - lm.x, lm.y, lm.z)).toList();
 }
-
-/// Rota 180° una lista de landmarks: x -> 1-x, y -> 1-y (z igual).
-/// Necesario porque la cámara trasera produce landmarks rotados 180°
-/// respecto a la frontal, y los datos de entrenamiento se grabaron
-/// con cámara frontal/selfie.
-List<Landmark>? rotate180Hand(List<Landmark>? landmarks) {
-  if (landmarks == null) return null;
-  return landmarks.map((lm) => Landmark(1 - lm.x, 1 - lm.y, lm.z)).toList();
-}

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import '../services/grammar_service.dart';
 import '../services/tts_service.dart';
 
 class ConversationPage extends StatefulWidget {
@@ -17,14 +16,9 @@ class _ConversationPageState extends State<ConversationPage> {
   final TtsService _tts = TtsService(
     apiKey: const String.fromEnvironment('ELEVENLABS_API_KEY'),
   );
-  final GrammarService _grammar = GrammarService(
-    apiKey: const String.fromEnvironment('OPENAI_API_KEY'),
-  );
   String _transcript = '';
-  String _correctedTranscript = '';
   String _status = 'Pulsa el micrófono para escuchar';
   bool _isListening = false;
-  bool _correcting = false;
 
   Future<void> _toggleListening() async {
     if (_isListening) {
@@ -74,8 +68,6 @@ class _ConversationPageState extends State<ConversationPage> {
 
     setState(() {
       _isListening = true;
-      _transcript = '';
-      _correctedTranscript = '';
       _status = 'Escuchando…';
     });
     await _speech.listen(
@@ -84,13 +76,6 @@ class _ConversationPageState extends State<ConversationPage> {
         localeId: 'es_MX',
         partialResults: true,
         listenMode: ListenMode.dictation,
-        // onDevice: false -> usa reconocimiento en la nube (mayor precisión
-        // que el reconocimiento local del dispositivo).
-        onDevice: false,
-        cancelOnError: false,
-        // Da más tiempo para frases completas antes de cortar por silencio.
-        pauseFor: const Duration(seconds: 4),
-        listenFor: const Duration(seconds: 30),
       ),
     );
   }
@@ -99,42 +84,16 @@ class _ConversationPageState extends State<ConversationPage> {
     if (!mounted) return;
     setState(() {
       _transcript = result.recognizedWords;
-      _correctedTranscript = '';
       if (result.finalResult) {
         _isListening = false;
         _status = _transcript.isEmpty ? 'No se reconoció voz' : 'Mensaje listo';
       }
     });
-    if (result.finalResult && _transcript.trim().isNotEmpty) {
-      _correctTranscript();
-    }
   }
-
-  Future<void> _correctTranscript() async {
-    if (!_grammar.isEnabled || _transcript.trim().isEmpty) return;
-    setState(() {
-      _correcting = true;
-      _status = 'Corrigiendo gramática…';
-    });
-    final corrected = await _grammar.correct(
-      _transcript,
-      onError: (e) => debugPrint('[GrammarService] error: $e'),
-    );
-    if (!mounted) return;
-    setState(() {
-      _correcting = false;
-      _correctedTranscript = corrected;
-      _status = 'Mensaje listo';
-    });
-  }
-
-  String get _displayText =>
-      _correctedTranscript.isNotEmpty ? _correctedTranscript : _transcript;
 
   Future<void> _speakTranscript() async {
-    final text = _displayText.trim();
-    if (text.isEmpty) return;
-    await _tts.speak(text);
+    if (_transcript.trim().isEmpty) return;
+    await _tts.speak(_transcript);
   }
 
   @override
@@ -194,44 +153,15 @@ class _ConversationPageState extends State<ConversationPage> {
                   ),
                   child: Center(
                     child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _displayText.isEmpty
-                                ? 'Aquí aparecerá lo que diga la persona oyente.'
-                                : _displayText,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.25,
-                                ),
-                          ),
-                          if (_correcting) ...[
-                            const SizedBox(height: 12),
-                            const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                      child: Text(
+                        _transcript.isEmpty
+                            ? 'Aquí aparecerá lo que diga la persona oyente.'
+                            : _transcript,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              height: 1.25,
                             ),
-                          ],
-                          if (!_grammar.isEnabled && _transcript.isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            Text(
-                              'Corrección gramatical desactivada (falta OPENAI_API_KEY).',
-                              style: Theme.of(context).textTheme.bodySmall,
-                              textAlign: TextAlign.center,
-                            ),
-                          ] else if (_correctedTranscript.isNotEmpty &&
-                              _correctedTranscript != _transcript) ...[
-                            const SizedBox(height: 12),
-                            Text(
-                              'Original: "$_transcript"',
-                              style: Theme.of(context).textTheme.bodySmall,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ],
                       ),
                     ),
                   ),
@@ -246,7 +176,6 @@ class _ConversationPageState extends State<ConversationPage> {
                           ? null
                           : () => setState(() {
                                 _transcript = '';
-                                _correctedTranscript = '';
                                 _status = 'Pulsa el micrófono para escuchar';
                               }),
                       icon: const Icon(Icons.delete_outline),
@@ -256,7 +185,7 @@ class _ConversationPageState extends State<ConversationPage> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: _displayText.isEmpty ? null : _speakTranscript,
+                      onPressed: _transcript.isEmpty ? null : _speakTranscript,
                       icon: const Icon(Icons.volume_up_outlined),
                       label: const Text('Repetir'),
                     ),

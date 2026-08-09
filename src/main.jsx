@@ -2538,39 +2538,24 @@ async function reloadDynamicPatterns() {
     if (!manifestRes.ok) throw new Error(`No se pudo cargar manifest (${manifestRes.status})`);
     const man = await manifestRes.json();
 
-    // Fase 1: fetch solo _1.json por seña para ver cuáles existen
-    const allSigns = [];
+    // Cargar todas las señas en paralelo: cada seña intenta _1.._20
+    // simultaneamente y descarta los 404.
+    const tasks = [];
     for (const [cat, signs] of Object.entries(man)) {
       if (!Array.isArray(signs)) continue;
       for (const sign of signs) {
-        allSigns.push({ sign, cat });
+        for (let n = 1; n <= 20; n++) {
+          tasks.push(
+            fetch(`/api/training-data/${cat}/${sign}_${n}.json${bust}`)
+              .then(res => res.ok ? res.json().then(data => ({ sign, data })) : null)
+              .catch(() => null)
+          );
+        }
       }
     }
-    const phase1 = await Promise.all(
-      allSigns.map(({ sign, cat }) =>
-        fetch(`/api/training-data/${cat}/${sign}_1.json${bust}`)
-          .then(res => res.ok ? res.json().then(data => ({ sign, cat, data })) : null)
-          .catch(() => null)
-      )
-    );
-
-    // Cargar los que existieron y lanzar _2.._6 solo para esos
-    const found = phase1.filter(Boolean);
-    const extraTasks = [];
-    for (const { sign, cat } of found) {
-      for (let n = 2; n <= 6; n++) {
-        extraTasks.push(
-          fetch(`/api/training-data/${cat}/${sign}_${n}.json${bust}`)
-            .then(res => res.ok ? res.json().then(data => ({ sign, data })) : null)
-            .catch(() => null)
-        );
-      }
-    }
-    const extra = await Promise.all(extraTasks);
-
-    // Cargar todo
-    for (const r of [...found, ...extra]) {
-      if (r && r.data) dynamicDetector.loadPattern(r.sign, r.data);
+    const results = await Promise.all(tasks);
+    for (const r of results) {
+      if (r) dynamicDetector.loadPattern(r.sign, r.data);
     }
   } catch (e) { console.warn('[DYNAMIC] reload error:', e); }
   return dynamicDetector.getStatus().patternsLoaded;

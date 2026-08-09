@@ -1,0 +1,1160 @@
+[
+  {
+    "cat": "numeros",
+    "sign": "20",
+    "frames": 90,
+    "dupRatio": 0.23333333333333334
+  },
+  {
+    "cat": "numeros",
+    "sign": "100",
+    "frames": 66,
+    "dupRatio": 0.16666666666666666
+  },
+  {
+    "cat": "numeros",
+    "sign": "500",
+    "frames": 69,
+    "dupRatio": 0.15942028985507245
+  },
+  {
+    "cat": "numeros",
+    "sign": "80",
+    "frames": 73,
+    "dupRatio": 0.1506849315068493
+  },
+  {
+    "cat": "numeros",
+    "sign": "70",
+    "frames": 69,
+    "dupRatio": 0.14492753623188406
+  },
+  {
+    "cat": "numeros",
+    "sign": "300",
+    "frames": 71,
+    "dupRatio": 0.14084507042253522
+  },
+  {
+    "cat": "numeros",
+    "sign": "50",
+    "frames": 76,
+    "dupRatio": 0.13157894736842105
+  },
+  {
+    "cat": "numeros",
+    "sign": "200",
+    "frames": 73,
+    "dupRatio": 0.1095890410958904
+  },
+  {
+    "cat": "numeros",
+    "sign": "60",
+    "frames": 68,
+    "dupRatio": 0.10294117647058823
+  },
+  {
+    "cat": "palabras",
+    "sign": "PEZ_ABC",
+    "frames": 110,
+    "dupRatio": 0.09090909090909091
+  },
+  {
+    "cat": "numeros",
+    "sign": "13",
+    "frames": 107,
+    "dupRatio": 0.08411214953271028
+  },
+  {
+    "cat": "numeros",
+    "sign": "12",
+    "frames": 108,
+    "dupRatio": 0.07407407407407407
+  },
+  {
+    "cat": "palabras",
+    "sign": "NERVIOSO",
+    "frames": 138,
+    "dupRatio": 0.07246376811594203
+  },
+  {
+    "cat": "numeros",
+    "sign": "400",
+    "frames": 59,
+    "dupRatio": 0.06779661016949153
+  },
+  {
+    "cat": "palabras",
+    "sign": "DESIERTO_ABC",
+    "frames": 236,
+    "dupRatio": 0.0423728813559322
+  },
+  {
+    "cat": "palabras",
+    "sign": "ASUSTADO",
+    "frames": 80,
+    "dupRatio": 0.0375
+  },
+  {
+    "cat": "palabras",
+    "sign": "TODOS",
+    "frames": 63,
+    "dupRatio": 0.015873015873015872
+  },
+  {
+    "cat": "numeros",
+    "sign": "90",
+    "frames": 65,
+    "dupRatio": 0.015384615384615385
+  },
+  {
+    "cat": "familia",
+    "sign": "PAPA",
+    "frames": 70,
+    "dupRatio": 0.014285714285714285
+  },
+  {
+    "cat": "palabras",
+    "sign": "ABRIR_PUERTA",
+    "frames": 161,
+    "dupRatio": 0.012422360248447204
+  },
+  {
+    "cat": "numeros",
+    "sign": "14",
+    "frames": 102,
+    "dupRatio": 0.00980392156862745
+  },
+  {
+    "cat": "palabras",
+    "sign": "PLATANO",
+    "frames": 116,
+    "dupRatio": 0.008620689655172414
+  },
+  {
+    "cat": "numeros",
+    "sign": "11",
+    "frames": 121,
+    "dupRatio": 0.008264462809917356
+  },
+  {
+    "cat": "palabras",
+    "sign": "PERRO_ABC",
+    "frames": 136,
+    "dupRatio": 0.007352941176470588
+  },
+  {
+    "cat": "colores",
+    "sign": "AMARILLO",
+    "frames": 109,
+    "dupRatio": 0
+  },
+  {
+    "cat": "colores",
+    "sign": "AZUL",
+    "frames": 118,
+    "dupRatio": 0
+  },
+  {
+    "cat": "colores",
+    "sign": "BLANCO",
+    "frames": 101,
+    "dupRatio": 0
+  },
+  {
+    "cat": "colores",
+    "sign": "COLOR",
+    "frames": 119,
+    "dupRatio": 0
+  },
+  {
+    "cat": "colores",
+    "sign": "GRIS",
+    "frames": 103,
+    "dupRatio": 0
+  },
+  {
+    "cat": "colores",
+    "sign": "MORADO",
+    "frames": 123,
+    "dupRatio": 0
+  },
+  {
+    "cat": "colores",
+    "sign": "NEGRO",
+    "frames": 101,
+    "dupRatio": 0
+  },
+  {
+    "cat": "colores",
+    "sign": "ROJO",
+    "frames": 112,
+    "dupRatio": 0
+  },
+  {
+    "cat": "colores",
+    "sign": "ROSA",
+    "frames": 120,
+    "dupRatio": 0
+  },
+  {
+    "cat": "colores",
+    "sign": "VERDE",
+    "frames": 116,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "ABUELA",
+    "frames": 83,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "ABUELO",
+    "frames": 112,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "BEBE",
+    "frames": 95,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "CUNADA",
+    "frames": 103,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "CUNADO",
+    "frames": 94,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "FAMILIA",
+    "frames": 103,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "HERMANA",
+    "frames": 130,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "HERMANO",
+    "frames": 120,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "MAMA",
+    "frames": 71,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "NIETA",
+    "frames": 88,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "PRIMA",
+    "frames": 114,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "PRIMO",
+    "frames": 93,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "SOBRINA",
+    "frames": 108,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "SOBRINO",
+    "frames": 79,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "SUEGRA",
+    "frames": 71,
+    "dupRatio": 0
+  },
+  {
+    "cat": "familia",
+    "sign": "SUEGRO",
+    "frames": 92,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "10",
+    "frames": 137,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "15",
+    "frames": 98,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "17",
+    "frames": 119,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "18",
+    "frames": 106,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "19",
+    "frames": 117,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "21",
+    "frames": 113,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "22",
+    "frames": 105,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "23",
+    "frames": 119,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "24",
+    "frames": 121,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "25",
+    "frames": 105,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "26",
+    "frames": 115,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "27",
+    "frames": 125,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "29",
+    "frames": 98,
+    "dupRatio": 0
+  },
+  {
+    "cat": "numeros",
+    "sign": "30",
+    "frames": 82,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ABRIR_LIBRO",
+    "frames": 100,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ADIOS",
+    "frames": 97,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ADJETIVO",
+    "frames": 87,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "AGOSTO",
+    "frames": 72,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "AGUA",
+    "frames": 119,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "AHORITA",
+    "frames": 111,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ALBERCAA",
+    "frames": 104,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ALGUNOS",
+    "frames": 31,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ALTO",
+    "frames": 90,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "AMIGO",
+    "frames": 101,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ARROZ",
+    "frames": 81,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "AYER",
+    "frames": 92,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "AYUDAR",
+    "frames": 110,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "BAILAR",
+    "frames": 31,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "BAJO",
+    "frames": 100,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "BAR",
+    "frames": 31,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "BEBER",
+    "frames": 114,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "BIENVENIDO",
+    "frames": 93,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "BIEN",
+    "frames": 31,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "BOMBERO",
+    "frames": 108,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "BONITO",
+    "frames": 102,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "BUENAS_NOCHES",
+    "frames": 129,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "BUENOS_DIAS",
+    "frames": 112,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "CANTAR",
+    "frames": 99,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "CARPINTERIA",
+    "frames": 111,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "CASA",
+    "frames": 111,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "CERDO_O_COCHINO",
+    "frames": 146,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "CLARO",
+    "frames": 112,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "COCINAR",
+    "frames": 121,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "COMER",
+    "frames": 104,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "COMO",
+    "frames": 92,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "COMO_ESTAS",
+    "frames": 77,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "COMPLETO",
+    "frames": 73,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "COMPRAR",
+    "frames": 109,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "CORRER",
+    "frames": 82,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "CUAL",
+    "frames": 77,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "CUANTO",
+    "frames": 94,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "CUERPO",
+    "frames": 114,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "CUIDAR",
+    "frames": 103,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "DEBIL",
+    "frames": 79,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "DIABLO",
+    "frames": 43,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "DIA",
+    "frames": 106,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "DICIEMBRE",
+    "frames": 79,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "DINOSAURIO_ABC",
+    "frames": 160,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "DOMINGO",
+    "frames": 68,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "DONDE",
+    "frames": 92,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "DORMIR",
+    "frames": 95,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "DURAZNO",
+    "frames": 146,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ELLOS",
+    "frames": 86,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "EL",
+    "frames": 89,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ENCANTADO_DE_CONOCERTE",
+    "frames": 135,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ENERO",
+    "frames": 77,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ENFERMERA",
+    "frames": 115,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ENOJADO",
+    "frames": 100,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "EQUIPO",
+    "frames": 59,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "FEBRERO",
+    "frames": 82,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "FELIZ",
+    "frames": 61,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "FILA",
+    "frames": 44,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "FLACO_O_DELGADO",
+    "frames": 99,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "FRESA",
+    "frames": 111,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "FRUTA",
+    "frames": 111,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "FUEGO",
+    "frames": 31,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "FUERTE",
+    "frames": 63,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "FUTURO",
+    "frames": 86,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "GRAMATICA",
+    "frames": 31,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "GRANDE",
+    "frames": 90,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "GRUPO",
+    "frames": 67,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "GUAPO",
+    "frames": 42,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "HOY",
+    "frames": 90,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "IMPRESORA_ABC",
+    "frames": 179,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "IR",
+    "frames": 108,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "JUEVES",
+    "frames": 103,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "JUGAR",
+    "frames": 82,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "JUNIO",
+    "frames": 83,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "LAMPARA_ABC",
+    "frames": 186,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "LECHUGA",
+    "frames": 97,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "LEER",
+    "frames": 103,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "LENTO",
+    "frames": 98,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "LISTA",
+    "frames": 31,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "LOGRO",
+    "frames": 83,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "LUNES",
+    "frames": 95,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "MAL",
+    "frames": 71,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "MANANA",
+    "frames": 95,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "MANOS",
+    "frames": 113,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "MARTES",
+    "frames": 89,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "MAS_O_MENOS",
+    "frames": 31,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "MAYO",
+    "frames": 77,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "MERCADO",
+    "frames": 114,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "MUCHO_GUSTO",
+    "frames": 133,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "MUJER",
+    "frames": 57,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "NADAR",
+    "frames": 106,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "NOCHE",
+    "frames": 104,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "NOSOTROS",
+    "frames": 87,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "NOS_VEMOS",
+    "frames": 87,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "NOVIEMBRE",
+    "frames": 115,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "NUESTRO",
+    "frames": 85,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "OCTUBRE",
+    "frames": 96,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "OJOS",
+    "frames": 115,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "PAN",
+    "frames": 95,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "PARQUE",
+    "frames": 91,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "PEQUENO",
+    "frames": 117,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "PIERNA",
+    "frames": 100,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "PIE",
+    "frames": 96,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "PISTA",
+    "frames": 65,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "PLOMERO_ABC",
+    "frames": 181,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "PLURAL",
+    "frames": 67,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "POLICIA",
+    "frames": 107,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "POLLO_ANIMAL",
+    "frames": 94,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "POR_QUE",
+    "frames": 84,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "QUE",
+    "frames": 92,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "QUIEN",
+    "frames": 97,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "RAPIDO",
+    "frames": 94,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "SALUDOS",
+    "frames": 127,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "SANDIA",
+    "frames": 99,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "SEMANA",
+    "frames": 115,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "SOLIDARIDAD_ABC",
+    "frames": 163,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "SUYO",
+    "frames": 87,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "TIEMPO",
+    "frames": 74,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "TRISTE",
+    "frames": 91,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "TUYO",
+    "frames": 107,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "TU",
+    "frames": 71,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "VENDER",
+    "frames": 90,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "VENTANA",
+    "frames": 104,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "VERBO",
+    "frames": 95,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "VERDURAS",
+    "frames": 94,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "VER",
+    "frames": 77,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "VIERNES",
+    "frames": 121,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "YO",
+    "frames": 90,
+    "dupRatio": 0
+  },
+  {
+    "cat": "palabras",
+    "sign": "ZANAHORIA",
+    "frames": 90,
+    "dupRatio": 0
+  }
+]
