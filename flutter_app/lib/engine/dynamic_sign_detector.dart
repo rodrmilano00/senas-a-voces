@@ -9,6 +9,7 @@ import 'hand_shape_detector.dart';
 
 const double wristWeight = 4.0;
 const double accelWeight = 2.5;
+const double wristPosWeight = 3.0;
 const int topK = 3;
 const int handDim = 15;
 final List<double> zeroHand = List<double>.filled(handDim, 0);
@@ -148,12 +149,26 @@ List<List<double>> buildSequence(List<FrameInfo?> infos) {
       relPresent = 1;
     }
 
+    // Posición absoluta de muñeca — clave para distinguir signos
+    // en distintas partes del cuerpo. abs(x-0.5) para one-handed mirror.
+    double wrx = 0, wry = 0, wlx = 0, wly = 0;
+    if (cur.wristR != null) {
+      wrx = cur.oneHanded ? (cur.wristR!.x - 0.5).abs() : cur.wristR!.x;
+      wry = cur.wristR!.y;
+    }
+    if (cur.wristL != null) {
+      wlx = cur.oneHanded ? (cur.wristL!.x - 0.5).abs() : cur.wristL!.x;
+      wly = cur.wristL!.y;
+    }
+
     seq.add([
       ...cur.ffR, cur.presentR.toDouble(),
       ...cur.ffL, cur.presentL.toDouble(),
       relDx, relDy, relPresent,
       vxR * wristWeight, vyR * wristWeight, axR * accelWeight, ayR * accelWeight,
       vxL * wristWeight, vyL * wristWeight, axL * accelWeight, ayL * accelWeight,
+      wrx * wristPosWeight, wry * wristPosWeight,
+      wlx * wristPosWeight, wly * wristPosWeight,
     ]);
   }
   return seq;
@@ -359,12 +374,25 @@ class DynamicSignDetector {
       relPresent = 1;
     }
 
+    // Posición absoluta de muñeca — debe coincidir con buildSequence
+    double wrx = 0, wry = 0, wlx = 0, wly = 0;
+    if (info.wristR != null) {
+      wrx = info.oneHanded ? (info.wristR!.x - 0.5).abs() : info.wristR!.x;
+      wry = info.wristR!.y;
+    }
+    if (info.wristL != null) {
+      wlx = info.oneHanded ? (info.wristL!.x - 0.5).abs() : info.wristL!.x;
+      wly = info.wristL!.y;
+    }
+
     _pushFrame([
       ...info.ffR, info.presentR.toDouble(),
       ...info.ffL, info.presentL.toDouble(),
       relDx, relDy, relPresent,
       vxR * wristWeight, vyR * wristWeight, axR * accelWeight, ayR * accelWeight,
       vxL * wristWeight, vyL * wristWeight, axL * accelWeight, ayL * accelWeight,
+      wrx * wristPosWeight, wry * wristPosWeight,
+      wlx * wristPosWeight, wly * wristPosWeight,
     ]);
   }
 

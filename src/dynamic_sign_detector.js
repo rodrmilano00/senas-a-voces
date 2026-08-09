@@ -6,6 +6,7 @@ import { fingerStates as computeFingerStates } from "./lsm_detector.js";
 
 export const WRIST_WEIGHT = 4.0;
 const ACCEL_WEIGHT = 2.5;
+const WRIST_POS_WEIGHT = 3.0; // peso posición absoluta de muñeca
 const TOP_K = 3;
 const PRE_FILTER_N = 40; // solo DTW en los top-40 candidatos del pre-filtro
 
@@ -154,12 +155,22 @@ export function buildSequence(infos) {
       relPresent = 1;
     }
 
+    // Posición absoluta de muñeca (normalizada) — clave para distinguir
+    // signos hechos en distintas partes del cuerpo (frente vs pecho vs cara).
+    // Para one-handed, abs(x-0.5) para mirror invariance.
+    const wrx = cur.wristR ? (cur.oneHanded ? Math.abs(cur.wristR.x - 0.5) : cur.wristR.x) : 0;
+    const wry = cur.wristR ? cur.wristR.y : 0;
+    const wlx = cur.wristL ? (cur.oneHanded ? Math.abs(cur.wristL.x - 0.5) : cur.wristL.x) : 0;
+    const wly = cur.wristL ? cur.wristL.y : 0;
+
     seq.push([
       ...cur.ffR, cur.presentR,
       ...cur.ffL, cur.presentL,
       relDx, relDy, relPresent,
       vxR * WRIST_WEIGHT, vyR * WRIST_WEIGHT, axR * ACCEL_WEIGHT, ayR * ACCEL_WEIGHT,
       vxL * WRIST_WEIGHT, vyL * WRIST_WEIGHT, axL * ACCEL_WEIGHT, ayL * ACCEL_WEIGHT,
+      wrx * WRIST_POS_WEIGHT, wry * WRIST_POS_WEIGHT,
+      wlx * WRIST_POS_WEIGHT, wly * WRIST_POS_WEIGHT,
     ]);
   }
   return seq;
@@ -359,12 +370,20 @@ export class DynamicSignDetector {
       relPresent = 1;
     }
 
+    // Posición absoluta de muñeca — debe coincidir con buildSequence
+    const wrx = info.wristR ? (info.oneHanded ? Math.abs(info.wristR.x - 0.5) : info.wristR.x) : 0;
+    const wry = info.wristR ? info.wristR.y : 0;
+    const wlx = info.wristL ? (info.oneHanded ? Math.abs(info.wristL.x - 0.5) : info.wristL.x) : 0;
+    const wly = info.wristL ? info.wristL.y : 0;
+
     this.pushFrame([
       ...info.ffR, info.presentR,
       ...info.ffL, info.presentL,
       relDx, relDy, relPresent,
       vxR * WRIST_WEIGHT, vyR * WRIST_WEIGHT, axR * ACCEL_WEIGHT, ayR * ACCEL_WEIGHT,
       vxL * WRIST_WEIGHT, vyL * WRIST_WEIGHT, axL * ACCEL_WEIGHT, ayL * ACCEL_WEIGHT,
+      wrx * WRIST_POS_WEIGHT, wry * WRIST_POS_WEIGHT,
+      wlx * WRIST_POS_WEIGHT, wly * WRIST_POS_WEIGHT,
     ]);
   }
 
