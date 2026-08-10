@@ -545,6 +545,15 @@ function LearnPage({ isDark }) {
   const [activeSign, setActiveSign] = useState(null);
   const [search, setSearch] = useState("");
 
+  // Auto-advance to next sign in current module
+  const handleNextSign = () => {
+    if (!selected || !activeSign) return;
+    const currentIndex = selected.items.findIndex(item => item.label === activeSign.label);
+    if (currentIndex !== -1 && currentIndex < selected.items.length - 1) {
+      setActiveSign(selected.items[currentIndex + 1]);
+    }
+  };
+
   // Merge module data with progress from database
   const modulesWithProgress = useMemo(() => {
     return modules.map((module, index) => {
@@ -622,13 +631,18 @@ function LearnPage({ isDark }) {
               <p className={cx("mt-2 text-[10px]", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{completedSigns} de {totalSigns} señas</p>
             </Card>
           </div>
-          {activeSign ? (
-            <SignVideoPanel sign={activeSign} isDark={isDark} onClose={() => setActiveSign(null)} moduleId={selected.id} />
-          ) : (
-            <ModuleDetail
-              module={selected} isDark={isDark}
-              items={filteredItems} search={search}
-              onSearch={setSearch} onSelect={setActiveSign}
+          <ModuleDetail
+            module={selected} isDark={isDark}
+            items={filteredItems} search={search}
+            onSearch={setSearch} onSelect={(item) => { setActiveSign(item); }}
+          />
+          {activeSign && (
+            <SignVideoModal
+              sign={activeSign}
+              isDark={isDark}
+              onClose={() => setActiveSign(null)}
+              moduleId={selected.id}
+              onNextSign={handleNextSign}
             />
           )}
         </section>
@@ -675,7 +689,8 @@ function ModuleDetail({ module, isDark, items, search, onSearch, onSelect }) {
       <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto sm:max-h-72 sm:grid-cols-3">
         {items.map((item) => (
           <button
-            key={item.label} onClick={() => onSelect(item)}
+            key={item.label} 
+            onClick={() => onSelect(item)}
             className={cx("btn-press group flex flex-col items-center gap-2 rounded-xl border p-2 sm:p-3 text-center transition",
               isDark ? "border-brand-line bg-brand-deep/40 hover:border-brand-cyan/40 hover:bg-brand-card" : "border-brand-mist bg-brand-cream hover:border-brand-teal/30 hover:bg-white hover:shadow-sm"
             )}
@@ -724,6 +739,273 @@ function SignVideoPanel({ sign, isDark, onClose, moduleId }) {
   );
 }
 
+function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
+  const { user } = useAuth();
+  const [viewRecorded, setViewRecorded] = useState(false);
+  const modalRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const previousActiveElementRef = useRef(null);
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const [handDetected, setHandDetected] = useState(false);
+  const [gestureState, setGestureState] = useState("waiting");
+  const [matchScore, setMatchScore] = useState(0);
+  const [practiceSuccess, setPracticeSuccess] = useState(false);
+  const holdStartRef = useRef(null);
+  const HOLD_MS = 600;
+
+  // Extract YouTube video ID from URL
+  const getYouTubeVideoId = (url) => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url?.match(regex);
+    return match ? match[1] : null;
+  };
+
+  const videoId = getYouTubeVideoId(sign?.video_ref || sign?.video_ref);
+
+  // Record video view once on open
+  useEffect(() => {
+    if (!viewRecorded && user && sign) {
+      recordVideoView(user.id, sign.label || sign.name, moduleId, sign.lessonId || moduleId);
+      setViewRecorded(true);
+    }
+  }, [user, sign, moduleId, viewRecorded]);
+
+  // Block body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  // Focus management: capture previous active element and focus close button
+  useEffect(() => {
+    previousActiveElementRef.current = document.activeElement;
+    if (closeButtonRef.current) {
+      closeButtonRef.current.focus();
+    }
+    return () => {
+      if (previousActiveElementRef.current) {
+        previousActiveElementRef.current.focus();
+      }
+    };
+  }, []);
+
+  // Focus trap within modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Tab') {
+        if (!modalRef.current) return;
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  // Simplified practice handler for modal
+  const handlePracticeResults = useCallback(({ handRes }) => {
+    const lms = handRes?.landmarks?.[0] ?? null;
+    setHandDetected(!!lms);
+
+    if (!lms || practiceSuccess) {
+      holdStartRef.current = null;
+      if (!practiceSuccess) setGestureState("waiting");
+      setMatchScore(0);
+      return;
+    }
+
+    const states = fingerStates(lms);
+    const sc = sign.template
+      ? scoreTarget(states, sign.label || sign.name, sign.template)
+      : 0;
+
+    setMatchScore(sc);
+
+    if (sc >= MATCH_THR) {
+      if (!holdStartRef.current) holdStartRef.current = performance.now();
+      const held = performance.now() - holdStartRef.current;
+      const pct = Math.min(1, held / HOLD_MS);
+      setGestureState(pct >= 1 ? "match" : "partial");
+
+      if (held >= HOLD_MS) {
+        setPracticeSuccess(true);
+        setGestureState("confirmed");
+        
+        // Save progress
+        if (user) {
+          updateSignProgress(user.id, sign.label || sign.name, moduleId, sc, 0);
+          updateStreak(user.id);
+        }
+        
+        setTimeout(() => {
+          setPracticeSuccess(false);
+          holdStartRef.current = null;
+          setGestureState("waiting");
+          setMatchScore(0);
+          // Auto-advance to next sign
+          if (onNextSign) onNextSign();
+        }, 1500);
+      }
+    } else {
+      holdStartRef.current = null;
+      setGestureState(sc > 0.45 ? "partial" : "waiting");
+    }
+  }, [sign, user, moduleId, practiceSuccess]);
+
+  const { videoRef, canvasRef, camReady, camError } = useSimpleCamera({ 
+    onResults: handlePracticeResults 
+  });
+
+  if (!sign || !videoId) return null;
+
+  // Use autoplay with mute to prevent freezing, loop enabled for continuous playback
+  const iframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0`;
+
+  return (
+    <div
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Video de seña: ${sign.label || sign.name}`}
+      className={cx(
+        "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50",
+        prefersReducedMotion ? "" : "animate-fade"
+      )}
+      onClick={handleOverlayClick}
+    >
+      <div
+        className={cx(
+          "relative w-full max-w-4xl rounded-2xl shadow-2xl",
+          isDark ? "bg-brand-card border border-brand-line" : "bg-white border border-gray-200"
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between p-4 sm:p-6">
+          <div>
+            <h3 className={cx("text-lg font-extrabold sm:text-xl", isDark ? "text-white" : "text-brand-ink")}>
+              {sign.label || sign.name}
+            </h3>
+            <p className={cx("text-xs sm:text-sm", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>
+              {sign.hint || sign.desc}
+            </p>
+          </div>
+          <button
+            ref={closeButtonRef}
+            onClick={onClose}
+            className={cx(
+              "btn-press rounded-lg p-2 transition",
+              isDark ? "bg-brand-deep text-brand-soft hover:text-white" : "bg-brand-cream text-brand-muted hover:text-brand-ink"
+            )}
+            aria-label="Cerrar video"
+          >
+            <Icon name="x" className="h-5 w-5" />
+          </button>
+        </div>
+        
+        {/* Split view: Video on left (larger), Camera on right */}
+        <div className="grid grid-cols-1 gap-4 rounded-b-2xl p-4 sm:grid-cols-3">
+          {/* YouTube Video - 2 columns wide */}
+          <div className="relative overflow-hidden rounded-xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%", position: "relative" }}>
+            <iframe
+              key={videoId}
+              src={iframeSrc}
+              title={sign.label || sign.name}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 h-full w-full border-0"
+            />
+          </div>
+          
+          {/* Camera with hand detection - 1 column */}
+          <div className="relative overflow-hidden rounded-xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
+            <video
+              ref={videoRef}
+              className="absolute inset-0 h-full w-full object-cover"
+              playsInline
+              muted
+              style={{ transform: "scaleX(-1)" }}
+            />
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{ transform: "scaleX(-1)" }}
+            />
+            {!camReady && !camError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                <div className="text-sm font-semibold text-white">
+                  Iniciando cámara...
+                </div>
+              </div>
+            )}
+            {camError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                <div className="text-center">
+                  <div className="text-sm font-semibold text-red-400">{camError}</div>
+                </div>
+              </div>
+            )}
+            {camReady && (
+              <div className="absolute bottom-2 left-2 right-2 flex flex-col gap-1">
+                <div className={cx("rounded-lg px-2 py-1 text-xs font-bold", 
+                  gestureState === "confirmed" ? "bg-brand-teal text-white" :
+                  gestureState === "match" ? "bg-brand-teal/80 text-white" :
+                  gestureState === "partial" ? "bg-brand-orange/60 text-white" :
+                  "bg-brand-deep/80 text-brand-soft"
+                )}>
+                  {gestureState === "confirmed" ? "✓ Correcto" :
+                   gestureState === "match" ? "Mantén la pose..." :
+                   gestureState === "partial" ? "Casi..." :
+                   handDetected ? "Detectando..." : "Muestra tu mano"}
+                </div>
+                {sign.template && (
+                  <div className={cx("rounded-lg px-2 py-1 text-xs font-bold", isDark ? "bg-brand-deep/80 text-brand-cyan" : "bg-white/80 text-brand-teal")}>
+                    Precisión: {Math.round(matchScore * 100)}%
+                  </div>
+                )}
+              </div>
+            )}
+            {practiceSuccess && (
+              <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/20">
+                <div className="text-center">
+                  <Icon name="check" className="h-12 w-12 text-brand-teal mx-auto mb-2" />
+                  <div className="text-base font-bold text-brand-teal">¡Excelente!</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const WASM_PATH = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm";
 const HAND_MODEL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
 const POSE_MODEL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
@@ -739,6 +1021,116 @@ const FACE_KEY_IDXS = [
 
 function mirror(lm) { return { ...lm, x: 1 - lm.x }; }
 
+// Simplified camera hook for modal - only hands, faster startup, better FPS
+function useSimpleCamera({ onResults }) {
+  const videoRef  = useRef(null);
+  const canvasRef = useRef(null);
+  const hlRef        = useRef(null);
+  const rafRef       = useRef(null);
+  const streamRef    = useRef(null);
+  const [camReady, setCamReady] = useState(false);
+  const [camError, setCamError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function init() {
+      try {
+        // Start camera first for faster feedback
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 320, height: 240, facingMode: "user" }, // Lower resolution for better performance
+        });
+        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
+        
+        streamRef.current = stream;
+
+        const video = videoRef.current;
+        if (!video) return;
+        video.srcObject = stream;
+        await video.play();
+        setCamReady(true);
+
+        // Load hand model after camera is ready
+        const vision = await FilesetResolver.forVisionTasks(WASM_PATH);
+        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
+
+        const hl = await HandLandmarker.createFromOptions(vision, {
+          baseOptions: { modelAssetPath: HAND_MODEL, delegate: "GPU" },
+          runningMode: "VIDEO",
+          numHands: 2, // Detect both hands
+          minHandDetectionConfidence: 0.5, // Lower confidence for better detection
+          minHandPresenceConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
+        if (cancelled) { hl.close(); stream.getTracks().forEach((t) => t.stop()); return; }
+        hlRef.current = hl;
+
+        function detect() {
+          if (cancelled) return;
+          const canvas = canvasRef.current;
+          const vid = videoRef.current;
+          if (!canvas || !vid || vid.readyState < 2) {
+            rafRef.current = requestAnimationFrame(detect);
+            return;
+          }
+
+          const w = vid.videoWidth || 320;
+          const h = vid.videoHeight || 240;
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          const now = performance.now();
+
+          // Video espejado
+          ctx.save();
+          ctx.scale(-1, 1);
+          ctx.translate(-w, 0);
+          ctx.drawImage(vid, 0, 0, w, h);
+          ctx.restore();
+
+          const draw = new DrawingUtils(ctx);
+
+          // Only detect hands
+          const handRes = hlRef.current.detectForVideo(vid, now);
+          for (const lms of (handRes.landmarks || [])) {
+            const m = lms.map(mirror);
+            draw.drawConnectors(m, HandLandmarker.HAND_CONNECTIONS, { color: "#2AABB8", lineWidth: 2 });
+            draw.drawLandmarks(m, { color: "#EC9960", lineWidth: 1, radius: 3 });
+          }
+
+          if (onResults) onResults({ handRes });
+          rafRef.current = requestAnimationFrame(detect);
+        }
+        rafRef.current = requestAnimationFrame(detect);
+
+      } catch (err) {
+        if (!cancelled) setCamError("Error de cámara: " + err.message);
+      }
+    }
+
+    init();
+
+    return () => {
+      cancelled = true;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      hlRef.current?.close();
+      
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+      
+      if (videoRef.current?.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach((t) => t.stop());
+        videoRef.current.srcObject = null;
+      }
+    };
+  }, [onResults]);
+
+  return { videoRef, canvasRef, camReady, camError };
+}
+
+// Full camera hook for PracticePage - hands, pose, face
 function useCameraMediaPipe({ onResults }) {
   const videoRef  = useRef(null);
   const canvasRef = useRef(null);
@@ -1032,7 +1424,7 @@ function PracticePage({ isDark, setIsDark, navigate }) {
         <div className="flex items-center gap-2 sm:gap-3">
           <Logo isDark={isDark} compact />
           <div className={cx("hidden h-5 w-px sm:block", isDark ? "bg-brand-line" : "bg-brand-mist")} />
-          <span className={cx("hidden text-xs font-semibold sm:block", isDark ? "text-brand-soft" : "text-brand-muted")}>Práctica Inmersiva · MediaPipe</span>
+          <span className={cx("hidden text-xs font-semibold sm:block", isDark ? "text-brand-soft" : "text-brand-muted")}>Práctica</span>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <span className={cx("rounded-xl px-2 py-1.5 text-xs font-bold sm:px-3", isDark ? "bg-brand-card text-brand-cyan" : "bg-white text-brand-teal shadow-sm")}>{correct}/{total}</span>
