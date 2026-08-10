@@ -240,8 +240,8 @@ export class DynamicSignDetector {
     this.previousInfo = null;
     this.maxBufferSize = 260;
     this.minBufferSize = 4;
-    this.threshold = 0.85;
-    this.minMargin = 0.06;
+    this.threshold = 2.5;
+    this.minMargin = 0.08;
   }
 
   // Cargar un patrón desde JSON de training_data. Acumula ejemplos por nombre.

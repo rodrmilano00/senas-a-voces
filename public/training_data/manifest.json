@@ -233,5 +233,18 @@
     "ROJO",
     "ROSA",
     "VERDE"
+  ],
+  "abecedario": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K"
   ]
 }

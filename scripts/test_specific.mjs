@@ -1,23 +1,9 @@
 import { DynamicSignDetector, frameInfo, buildSequence } from "../src/dynamic_sign_detector.js";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { loadManifest, loadTrainingFile, loadAllPatterns } from "./load_training.mjs";
 
-const TRAINING_ROOT = "public/training_data";
-const manifest = JSON.parse(readFileSync(join(TRAINING_ROOT, "manifest.json"), "utf8"));
+const manifest = loadManifest();
 const det = new DynamicSignDetector();
-
-// Load all training data
-for (const [cat, signs] of Object.entries(manifest)) {
-  for (const sign of signs) {
-    for (let n = 1; n <= 20; n++) {
-      const path = join(TRAINING_ROOT, cat, `${sign}_${n}.json`);
-      try {
-        const frames = JSON.parse(readFileSync(path, "utf8"));
-        det.loadPattern(sign, frames);
-      } catch { break; }
-    }
-  }
-}
+loadAllPatterns(det);
 
 console.log(`Loaded ${det.patterns.length} patterns`);
 
@@ -38,7 +24,7 @@ for (const sign of testSigns) {
   }
   
   // Feed training data into detector and see ranking
-  const frames = JSON.parse(readFileSync(join(TRAINING_ROOT, cat, `${sign}_1.json`), "utf8"));
+  const frames = loadTrainingFile(cat, sign, 1);
   console.log(`  training frames: ${frames.length}`);
   
   det.clearBuffer();

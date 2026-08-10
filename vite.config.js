@@ -34,12 +34,23 @@ function trainSignPlugin() {
         const requested = pathname.replace(/^\/+/, "");
         const relative = requested === "manifest" ? "manifest.json" : requested;
         const filePath = path.resolve(TRAINING_DIR, relative);
-        if (!relative || !filePath.startsWith(`${TRAINING_DIR}${path.sep}`) || !filePath.endsWith(".json")) {
+        const isJson = filePath.endsWith(".json");
+        const isNpy = filePath.endsWith(".npy");
+        if (!relative || !filePath.startsWith(`${TRAINING_DIR}${path.sep}`) || (!isJson && !isNpy)) {
           sendJson(res, 400, { ok: false, error: "Ruta de entrenamiento inválida" });
           return;
         }
         try {
-          sendJson(res, 200, JSON.parse(fs.readFileSync(filePath, "utf8")));
+          if (isJson) {
+            sendJson(res, 200, JSON.parse(fs.readFileSync(filePath, "utf8")));
+          } else {
+            // Servir .npy como binario
+            const buf = fs.readFileSync(filePath);
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "application/octet-stream");
+            res.setHeader("Content-Length", buf.length);
+            res.end(buf);
+          }
         } catch (e) {
           sendJson(res, e.code === "ENOENT" ? 404 : 500, { ok: false, error: e.message });
         }
@@ -94,17 +105,46 @@ function trainSignPlugin() {
           // Continuar numeracion desde ejemplos existentes (acumula)
           let startN = 0;
           for (const f of fs.readdirSync(catDir)) {
-            const m = f.match(new RegExp("^" + sign.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "_(\\d+)\\.json$"));
+            const m = f.match(new RegExp("^" + sign.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "_(\\d+)\\.(npy|json)$"));
             if (m) startN = Math.max(startN, parseInt(m[1], 10));
           }
 
           const files = [];
           examples.forEach((frames, i) => {
             const n = startN + i + 1;
-            const outFile = path.join(catDir, `${sign}_${n}.json`);
-            const stamped = frames.map((fr) => ({ ...fr, sign }));
-            fs.writeFileSync(outFile, JSON.stringify(stamped, null, 2), "utf8");
-            files.push(`${category}/${sign}_${n}.json`);
+            // Guardar como .npy (binario)
+            const npyFile = path.join(catDir, `${sign}_${n}.npy`);
+            const numFrames = frames.length;
+            const arr = Buffer.alloc(numFrames * 42 * 3 * 4); // float32
+            for (let f = 0; f < numFrames; f++) {
+              const fr = frames[f];
+              const lr = fr.landmarksRight || [];
+              const ll = fr.landmarksLeft || [];
+              for (let l = 0; l < 21; l++) {
+                const r = lr[l] || { x: 0, y: 0, z: 0 };
+                const li = ll[l] || { x: 0, y: 0, z: 0 };
+                const baseR = (f * 42 + l) * 3 * 4;
+                arr.writeFloatLE(r.x, baseR);
+                arr.writeFloatLE(r.y, baseR + 4);
+                arr.writeFloatLE(r.z || 0, baseR + 8);
+                const baseL = (f * 42 + 21 + l) * 3 * 4;
+                arr.writeFloatLE(li.x, baseL);
+                arr.writeFloatLE(li.y, baseL + 4);
+                arr.writeFloatLE(li.z || 0, baseL + 8);
+              }
+            }
+            // Escribir header .npy + datos
+            const header = `{'descr': '<f4', 'fortran_order': False, 'shape': (${numFrames}, 42, 3), }`;
+            const headerBuf = Buffer.alloc(10 + header.length + 1);
+            headerBuf.writeUInt8(0x93, 0); // magic
+            headerBuf.write("NUMPY", 1);
+            headerBuf.writeUInt8(1, 6); // major
+            headerBuf.writeUInt8(0, 7); // minor
+            headerBuf.writeUInt16LE(header.length + 1, 8); // header len (incluye \n)
+            headerBuf.write(header, 10);
+            headerBuf.writeUInt8(0x0a, 10 + header.length); // \n
+            fs.writeFileSync(npyFile, Buffer.concat([headerBuf, arr]));
+            files.push(`${category}/${sign}_${n}.npy`);
           });
 
           // Actualizar manifest.json

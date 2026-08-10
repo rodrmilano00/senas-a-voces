@@ -1,28 +1,18 @@
 import { DynamicSignDetector, frameInfo } from "../src/dynamic_sign_detector.js";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { loadManifest, loadTrainingFile, loadAllPatterns, TRAINING_ROOT } from "./load_training.mjs";
 
-const TRAINING_ROOT = "public/training_data";
-const manifest = JSON.parse(readFileSync(join(TRAINING_ROOT, "manifest.json"), "utf8"));
+const manifest = loadManifest();
 const det = new DynamicSignDetector();
-
-for (const [cat, signs] of Object.entries(manifest)) {
-  for (const sign of signs) {
-    for (let n = 1; n <= 20; n++) {
-      try {
-        const frames = JSON.parse(readFileSync(join(TRAINING_ROOT, cat, `${sign}_${n}.json`), "utf8"));
-        det.loadPattern(sign, frames);
-      } catch { break; }
-    }
-  }
-}
+const loaded = loadAllPatterns(det);
+console.log(`Loaded ${loaded} sequences`);
 
 let ok = 0, bad = 0;
 const failures = [];
 
 for (const [cat, signs] of Object.entries(manifest)) {
   for (const sign of signs) {
-    const frames = JSON.parse(readFileSync(join(TRAINING_ROOT, cat, `${sign}_1.json`), "utf8"));
+    const frames = loadTrainingFile(cat, sign, 1);
+    if (!frames) continue;
     det.clearBuffer();
     for (const f of frames) {
       const info = frameInfo(f.landmarksRight ?? f.landmarks ?? null, f.landmarksLeft ?? null);

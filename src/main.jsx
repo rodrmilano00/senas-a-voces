@@ -10,6 +10,7 @@ import { GLOSARIO_LESSONS, ALPHABET_LESSON } from "./lessons_glosario.js";
 
 import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR, scoreLetter, LSM_ALPHABET, NUMBER_TEMPLATES } from "./lsm_detector.js";
 import { dynamicDetector, featureFromFingerStates, frameInfo, buildSequence, splitHands } from "./dynamic_sign_detector.js";
+import { parseNpy, npyToFrames } from "./npy_parser.js";
 import ModelTestPage from "./model_test_page.jsx";
 import TrainPage from "./train_page.jsx";
 import TrainingViewerPage from "./training_viewer_page.jsx";
@@ -2539,24 +2540,36 @@ async function reloadDynamicPatterns() {
     const man = await manifestRes.json();
 
     // Cargar todas las señas en paralelo: cada seña intenta _1.._20
-    // simultaneamente y descarta los 404.
+    // simultaneamente. Formato principal: .npy (binario, más eficiente).
     const tasks = [];
     for (const [cat, signs] of Object.entries(man)) {
       if (!Array.isArray(signs)) continue;
       for (const sign of signs) {
         for (let n = 1; n <= 20; n++) {
           tasks.push(
-            fetch(`/api/training-data/${cat}/${sign}_${n}.json${bust}`)
-              .then(res => res.ok ? res.json().then(data => ({ sign, data })) : null)
+            fetch(`/api/training-data/${cat}/${sign}_${n}.npy${bust}`)
+              .then(res => {
+                if (res.ok) return res.arrayBuffer().then(buf => {
+                  const parsed = parseNpy(buf);
+                  const frames = npyToFrames(parsed);
+                  return { sign, data: frames };
+                });
+                // Fallback: intentar .json si no hay .npy
+                return fetch(`/api/training-data/${cat}/${sign}_${n}.json${bust}`)
+                  .then(r2 => r2.ok ? r2.json().then(data => ({ sign, data })) : null)
+                  .catch(() => null);
+              })
               .catch(() => null)
           );
         }
       }
     }
     const results = await Promise.all(tasks);
+    let loaded = 0;
     for (const r of results) {
-      if (r) dynamicDetector.loadPattern(r.sign, r.data);
+      if (r) { dynamicDetector.loadPattern(r.sign, r.data); loaded++; }
     }
+    console.log(`[DYNAMIC] ${loaded} secuencias cargadas`);
   } catch (e) { console.warn('[DYNAMIC] reload error:', e); }
   return dynamicDetector.getStatus().patternsLoaded;
 }

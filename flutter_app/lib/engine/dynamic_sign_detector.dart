@@ -266,8 +266,8 @@ class DynamicSignDetector {
 
   int maxBufferSize = 260;
   int minBufferSize = 4;
-  double threshold = 0.85;
-  double minMargin = 0.06;
+  double threshold = 2.5;
+  double minMargin = 0.08;
 
   void loadPattern(String name, List<TrainingFrame> frames) {
     // Detectar si hay desbalance de manos (todo en Left, nada en Right)
