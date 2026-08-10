@@ -886,7 +886,8 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
   if (!sign || !videoId) return null;
 
   // Use autoplay with mute to prevent freezing, loop enabled for continuous playback
-  const iframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0`;
+  // Added showinfo=0 and iv_load_policy=3 to minimize YouTube title/annotations
+  const iframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3`;
 
   return (
     <div
@@ -902,7 +903,7 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
     >
       <div
         className={cx(
-          "relative w-full max-w-4xl rounded-2xl shadow-2xl",
+          "relative w-full max-w-7xl rounded-2xl shadow-2xl",
           isDark ? "bg-brand-card border border-brand-line" : "bg-white border border-gray-200"
         )}
         onClick={(e) => e.stopPropagation()}
