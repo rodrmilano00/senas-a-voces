@@ -235,35 +235,32 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
 
   return (
     <header className={cx("app-header sticky top-0 z-40 transition-colors", isDark ? "bg-brand-deep/95" : "bg-brand-cream/95")}>
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
-        <div className={cx("rounded-full border backdrop-blur-xl", isDark ? "border-brand-line bg-brand-card/50" : "border-brand-mist bg-white/50")}>
+      <div className="mx-auto px-4 py-3 sm:px-6 sm:py-4">
+        <div className={cx("rounded-2xl border backdrop-blur-xl", isDark ? "border-brand-line bg-brand-card/50" : "border-brand-mist bg-white/50")}>
           <div className="flex items-center justify-between px-4 py-3 sm:px-6">
             <button onClick={() => navigate("/dashboard")} className="btn-press flex items-center gap-3">
               <Logo isDark={isDark} compact />
             </button>
             
-            {/* Desktop Navigation - Floating Pill Style */}
+            {/* Desktop Navigation - Rectangular Style */}
             <nav className="hidden items-center gap-1 md:flex">
               {navItems.slice(1).map((item, index) => (
                 <button 
                   key={item.path} 
                   onClick={() => navigate(item.path)} 
                   className={cx(
-                    "group relative flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition-all duration-200 active:scale-95",
+                    "group relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 active:scale-95",
                     path === item.path 
-                      ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white") 
+                      ? (isDark ? "bg-brand-cyan text-brand-deep shadow-lg shadow-brand-cyan/20" : "bg-brand-teal text-white shadow-lg shadow-brand-teal/20") 
                       : (isDark ? "text-brand-soft hover:bg-brand-card/50" : "text-brand-muted hover:bg-brand-cream/50")
                   )}
                   style={{ 
                     animationDelay: `${index * 50}ms`,
-                    transition: 'transform 160ms ease-out, background-color 200ms ease-out'
+                    transition: 'transform 160ms ease-out, background-color 200ms ease-out, box-shadow 200ms ease-out'
                   }}
                 >
                   <Icon name={item.icon} className="h-4 w-4" />
                   {item.label}
-                  {path === item.path && (
-                    <span className={cx("absolute -bottom-1 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full", isDark ? "bg-brand-cyan" : "bg-brand-teal")} />
-                  )}
                 </button>
               ))}
             </nav>
@@ -952,7 +949,7 @@ function LearnPage({ isDark }) {
                       "group flex flex-col items-center gap-3 rounded-2xl p-4 transition-all duration-300 hover:scale-105",
                       isDark 
                         ? "bg-brand-deep/40 hover:bg-brand-deep/60 border border-brand-line/30 hover:border-brand-cyan/50" 
-                        : "bg-brand-cream/40 hover:bg-brand-cream/60 border border-brand-mist/30 hover:border-brand-teal/50"
+                        : "bg-gray-100 hover:bg-gray-200 border border-gray-300 hover:border-brand-teal/50 shadow-sm"
                     )}
                     style={{ animationDelay: `${index * 30}ms` }}
                   >
@@ -965,7 +962,7 @@ function LearnPage({ isDark }) {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                     </div>
-                    <span className={cx("text-xs font-semibold text-center leading-tight", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                    <span className={cx("text-xs font-semibold text-center leading-tight", isDark ? "text-brand-soft" : "text-gray-700")}>
                       {item.label}
                     </span>
                   </button>
@@ -1091,7 +1088,7 @@ function SkillNode({ module, index, isDark, selected, onClick }) {
               ? "bg-gradient-to-br from-brand-orange to-brand-teal text-white shadow-lg shadow-brand-orange/20 animate-pulse" 
               : isDark 
                 ? "border-2 border-brand-line bg-brand-card text-[#5A8A94]" 
-                : "border-2 border-brand-mist bg-[#E8EEEF] text-[#8AA8B0]"
+                : "border-2 border-gray-300 bg-gray-100 text-gray-600"
         )} aria-hidden="true">
           {completed ? (
             <Icon name="check" className="h-6 w-6 sm:h-7 sm:w-7" />
@@ -1116,14 +1113,14 @@ function SkillNode({ module, index, isDark, selected, onClick }) {
                 : "border-2 border-brand-teal/50 bg-white shadow-lg shadow-brand-teal/10") 
             : (isDark 
                 ? "border border-brand-line/30 bg-brand-deep/30 hover:bg-brand-deep/50" 
-                : "border border-brand-mist/30 bg-brand-cream/30 hover:bg-brand-cream/50")
+                : "border border-gray-300 bg-gray-50 hover:bg-gray-100")
         )}>
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
-              <span className={cx("block text-sm font-bold sm:text-base", isDark ? "text-white" : "text-brand-ink")}>
+              <span className={cx("block text-sm font-bold sm:text-base", isDark ? "text-white" : "text-gray-900")}>
                 {module.title}
               </span>
-              <span className={cx("block text-xs mt-1", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>
+              <span className={cx("block text-xs mt-1", isDark ? "text-[#5A8A94]" : "text-gray-600")}>
                 {module.desc}
               </span>
             </div>
@@ -1132,7 +1129,7 @@ function SkillNode({ module, index, isDark, selected, onClick }) {
             {module.signs_completed !== undefined && (
               <div className={cx(
                 "flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold",
-                isDark ? "bg-brand-deep/50 text-brand-soft" : "bg-brand-cream/50 text-brand-muted"
+                isDark ? "bg-brand-deep/50 text-brand-soft" : "bg-gray-100 text-gray-600"
               )} aria-label={`Progreso: ${module.signs_completed} de ${module.signs} señas`}>
                 <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{module.signs_completed}</span>
                 <span aria-hidden="true">/</span>
@@ -1175,7 +1172,7 @@ function SkillNode({ module, index, isDark, selected, onClick }) {
       {/* Connector line */}
       {index < modules.length - 1 && (
         <div className="flex justify-center py-3" aria-hidden="true">
-          <div className={cx("h-8 w-px rounded-full sm:h-10", isDark ? "bg-brand-line/50" : "bg-brand-mist/50")} />
+          <div className={cx("h-8 w-px rounded-full sm:h-10", isDark ? "bg-brand-line/50" : "bg-gray-300")} />
         </div>
       )}
     </div>
@@ -1369,7 +1366,7 @@ function LessonPage({ isDark, navigate }) {
                           "btn-press group flex flex-col items-center gap-3 rounded-2xl p-4 text-center transition-all duration-300 hover:scale-105",
                           isDark 
                             ? "bg-brand-deep/40 hover:bg-brand-deep/60 border border-brand-line/30 hover:border-brand-cyan/50" 
-                            : "bg-brand-cream/40 hover:bg-brand-cream/60 border border-brand-mist/30 hover:border-brand-teal/50"
+                            : "bg-gray-100 hover:bg-gray-200 border border-gray-300 hover:border-brand-teal/50 shadow-sm"
                         )}
                         style={{ animationDelay: `${index * 30}ms` }}
                       >
@@ -1382,7 +1379,7 @@ function LessonPage({ isDark, navigate }) {
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                         </div>
-                        <span className={cx("text-xs font-semibold leading-tight", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                        <span className={cx("text-xs font-semibold leading-tight", isDark ? "text-brand-soft" : "text-gray-700")}>
                           {item.label}
                         </span>
                       </button>
