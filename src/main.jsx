@@ -26,7 +26,78 @@ const modules = [ALPHABET_LESSON, ...GLOSARIO_LESSONS].map((lesson, i) => ({
   status: i === 0 ? "current" : i < 3 ? "completed" : "locked",
   items: lesson.items,
   level: lesson.level,
+  icon: getModuleIcon(lesson.title),
 }));
+
+function getModuleIcon(title) {
+  const iconMap = {
+    "Abecedario LSM (A–Z + Ñ)": "abc",
+    "Números (todos)": "numbers",
+    "Expresiones cotidianas": "expressions",
+    "Colores (todos)": "colors",
+    "Familia (todos)": "family",
+    "Salud (todos)": "health",
+    "Tecnología (todos)": "technology",
+  };
+  return iconMap[title] || "book";
+}
+
+function getSignIcon(name) {
+  const iconMap = {
+    // Números
+    "1": "number-1",
+    "2": "number-2",
+    "3": "number-3",
+    "4": "number-4",
+    "5": "number-5",
+    "6": "number-6",
+    "7": "number-7",
+    "8": "number-8",
+    "9": "number-9",
+    "10": "number-10",
+    "20": "number-20",
+    "100": "number-100",
+    // Expresiones
+    "DISCULPA": "sorry",
+    "POR FAVOR": "please",
+    "¿CÓMO ESTÁS?": "how-are-you",
+    "¿CÓMO TE LLAMAS?": "what-name",
+    "¡SORPRESA!": "surprise",
+    "¡QUÉ MILAGRO!": "miracle",
+    // Colores
+    "ROJO": "red",
+    "AZUL": "blue",
+    "VERDE": "green",
+    "AMARILLO": "yellow",
+    "BLANCO": "white",
+    "NEGRO": "black",
+    "NARANJA": "orange",
+    "MORADO": "purple",
+    "ROSA": "pink",
+    "CAFÉ": "brown",
+    // Familia
+    "MAMÁ": "mom",
+    "PAPÁ": "dad",
+    "HERMANO": "brother",
+    "ABUELO": "grandpa",
+    "ABUELA": "grandma",
+    "TÍO": "uncle",
+    "ESPOSO": "spouse",
+    // Salud
+    "DOCTOR": "doctor",
+    "HOSPITAL": "hospital",
+    "MEDICINA": "medicine",
+    "ENFERMEDAD": "disease",
+    "EMERGENCIA": "emergency",
+    // Tecnología
+    "INTERNET": "internet",
+    "TELÉFONO": "phone",
+    "COMPUTADORA": "computer",
+    "INSTAGRAM": "instagram",
+    "YOUTUBE": "youtube",
+  };
+  return iconMap[name] || "sparkles";
+}
 
 // signsQueue generado desde ALPHABET_LESSON + currículum del lsm_teacher.py
 // Orden: Abecedario (G0) → Números (G1) → Expresiones → Colores → Familia → Salud → Tecnología
@@ -158,7 +229,61 @@ function Icon({ name, className = "h-5 w-5" }) {
     flame: <svg {...common}><path fill="currentColor" fillOpacity="0.26" d="M8.5 14.5A4.5 4.5 0 0 0 13 19a5 5 0 0 0 5-5c0-3.5-2.5-5.8-5.4-8.7-.5 2.9-2 4.3-4.1 5.7C7 12 6 13.2 6 15a5 5 0 0 0 10 0c0-1.2-.4-2.2-1.1-3.1-.2 2.2-1.4 3.6-3 3.6-1.2 0-2.3-.7-3.4-1Z" /><path d="M8.5 14.5A4.5 4.5 0 0 0 13 19a5 5 0 0 0 5-5c0-3.5-2.5-5.8-5.4-8.7-.5 2.9-2 4.3-4.1 5.7C7 12 6 13.2 6 15a5 5 0 0 0 10 0c0-1.2-.4-2.2-1.1-3.1-.2 2.2-1.4 3.6-3 3.6-1.2 0-2.3-.7-3.4-1Z" /></svg>,
     sparkles: <svg {...common}><path d="m12 3 1.3 4.1L17 9l-3.7 1.9L12 15l-1.3-4.1L7 9l3.7-1.9L12 3Z" /><path d="m19 14 .7 2.1L22 17l-2.3.9L19 20l-.7-2.1L16 17l2.3-.9L19 14Z" /><path d="m5 13 .7 2.1L8 16l-2.3.9L5 19l-.7-2.1L2 16l2.3-.9L5 13Z" /></svg>,
     trophy: <svg {...common}><path d="M8 21h8" /><path d="M12 17v4" /><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z" /><path d="M5 5H3v2a4 4 0 0 0 4 4" /><path d="M19 5h2v2a4 4 0 0 1-4 4" /></svg>,
-    x: <svg {...filled}><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z" /></svg>
+    x: <svg {...filled}><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z" /></svg>,
+    // Iconos específicos para módulos
+    abc: <svg {...common} viewBox="0 0 24 24"><text x="12" y="16" textAnchor="middle" fontSize="10" fontWeight="bold" fill="currentColor">Aa</text></svg>,
+    numbers: <svg {...common} viewBox="0 0 24 24"><text x="12" y="16" textAnchor="middle" fontSize="10" fontWeight="bold" fill="currentColor">123</text></svg>,
+    expressions: <svg {...common}><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="9" r="1.5" fill="currentColor"/><path d="M12 14c-1.5 0-2.8.8-3.5 2h7c-.7-1.2-2-2-3.5-2z" /></svg>,
+    colors: <svg {...common}><circle cx="6" cy="12" r="4" fill="currentColor" fillOpacity="0.6"/><circle cx="12" cy="12" r="4" fill="currentColor" fillOpacity="0.8"/><circle cx="18" cy="12" r="4" fill="currentColor" /></svg>,
+    family: <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8z" /><circle cx="9" cy="10" r="1.5" fill="currentColor"/><circle cx="15" cy="10" r="1.5" fill="currentColor"/><path d="M12 14a3 3 0 0 0 0 6 3 3 0 0 0 0-6z" /></svg>,
+    health: <svg {...common}><path d="M19 12c0 1.1-.9 2-2 2-7 0-3.3-2.7-6-6-6s-6 2.7-6 6c0 1.1-.9 2-2 2-2 4.4 0 8 3.6 8 8 0 0 0 8-8 0-3.6-3.6-8-8-8z" /><path d="M12 4c.28 0 .5.22.5.5s-.22.5-.5.5-.5-.22-.5-.5.5s.22.5.5.5zM12 6c.28 0 .5.22.5.5s-.22.5-.5.5-.22-.5-.5.5s.22.5.5.5zM12 8c.28 0 .5.22.5.5s-.22.5-.5.5-.22-.5-.5.5s.22.5.5.5z" /></svg>,
+    technology: <svg {...common}><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M6 7h12M6 11h12M6 15h8" /><circle cx="16" cy="17" r="2" /></svg>,
+    // Iconos específicos para señas individuales
+    "number-1": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">1</text></svg>,
+    "number-2": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">2</text></svg>,
+    "number-3": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">3</text></svg>,
+    "number-4": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">4</text></svg>,
+    "number-5": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">5</text></svg>,
+    "number-6": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">6</text></svg>,
+    "number-7": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">7</text></svg>,
+    "number-8": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">8</text></svg>,
+    "number-9": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">9</text></svg>,
+    "number-10": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="14" fontWeight="bold" fill="currentColor">10</text></svg>,
+    "number-20": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="14" fontWeight="bold" fill="currentColor">20</text></svg>,
+    "number-100": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="12" fontWeight="bold" fill="currentColor">100</text></svg>,
+    "sorry": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "please": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" /></svg>,
+    "how-are-you": <svg {...common}><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="9" r="1.5" fill="currentColor"/><path d="M12 14c-1.5 0-2.8.8-3.5 2h7c-.7-1.2-2-2-3.5-2z" /></svg>,
+    "what-name": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2 15h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V7h4v2z" /></svg>,
+    "surprise": <svg {...common}><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="9" r="1.5" fill="currentColor"/><path d="M12 14c-2 0-3.7 1.3-4.5 3h9c-.8-1.7-2.5-3-4.5-3z" /></svg>,
+    "miracle": <svg {...common}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>,
+    "red": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" /></svg>,
+    "blue": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.7"/></svg>,
+    "green": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.5"/></svg>,
+    "yellow": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.9"/></svg>,
+    "white": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.3"/></svg>,
+    "black": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" /></svg>,
+    "orange": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.8"/></svg>,
+    "purple": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.6"/></svg>,
+    "pink": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.7"/></svg>,
+    "brown": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.5"/></svg>,
+    "mom": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "dad": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2 15h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V7h4v2z" /></svg>,
+    "brother": <svg {...common}><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" /></svg>,
+    "grandpa": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "grandma": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "uncle": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "spouse": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "doctor": <svg {...common}><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z" /></svg>,
+    "hospital": <svg {...common}><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z" /></svg>,
+    "medicine": <svg {...common}><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" /></svg>,
+    "disease": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" /></svg>,
+    "emergency": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "internet": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" /></svg>,
+    "phone": <svg {...common}><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" /></svg>,
+    "computer": <svg {...common}><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M6 17h12M12 17v4" /></svg>,
+    "instagram": <svg {...common}><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="3" /><circle cx="18" cy="6" r="1" /></svg>,
+    "youtube": <svg {...common}><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" /><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" /></svg>
   };
   return icons[name] || icons.play;
 }
@@ -409,8 +534,8 @@ function Card({ isDark, className = "", children }) {
     <div className={cx(
       "surface-card overflow-hidden rounded-3xl transition-all duration-300",
       isDark 
-        ? "border border-brand-line/50 bg-brand-card shadow-[0_0_0_1px_rgba(26,92,106,0.1)]" 
-        : "border border-gray-200/50 bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.05)]",
+        ? "border border-brand-line/50 bg-brand-card shadow-sm" 
+        : "border border-gray-200/50 bg-white shadow-sm",
       className
     )}>
       <div className={cx("p-6 sm:p-8", isDark ? "relative" : "relative")}>
@@ -423,9 +548,6 @@ function Card({ isDark, className = "", children }) {
 function LearningPulse({ isDark }) {
   return (
     <Card isDark={isDark} className="learning-pulse mb-6 relative overflow-hidden">
-      {/* Subtle gradient background */}
-      <div className={cx("absolute inset-0 opacity-10", isDark ? "bg-gradient-to-br from-brand-cyan/5 to-brand-orange/5" : "bg-gradient-to-br from-brand-teal/5 to-brand-orange/5")} />
-      
       <div className="relative">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between sm:gap-6">
           <div className="flex-1">
@@ -457,18 +579,18 @@ function LearningPulse({ isDark }) {
                 "group relative overflow-hidden rounded-2xl border p-4 transition-all duration-300 hover:scale-[1.02]",
                 isDark 
                   ? "border-brand-line/30 bg-brand-deep/40 hover:border-brand-cyan/50 hover:bg-brand-deep/60" 
-                  : "border-brand-mist/50 bg-white/50 hover:border-brand-teal/50 hover:bg-white/80"
+                  : "border-gray-200 bg-gray-50 hover:border-brand-teal/50 hover:bg-gray-100"
               )}
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="relative">
-                <span className={cx("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                <span className={cx("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-gray-600")}>
                   {item.label}
                 </span>
-                <strong className={cx("mt-2 block text-xl font-extrabold sm:text-2xl", isDark ? "text-white" : "text-brand-ink")}>
+                <strong className={cx("mt-2 block text-xl font-extrabold sm:text-2xl", isDark ? "text-white" : "text-gray-900")}>
                   {item.value}
                 </strong>
-                <p className={cx("mt-2 text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                <p className={cx("mt-2 text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-gray-600")}>
                   {item.detail}
                 </p>
               </div>
@@ -492,9 +614,9 @@ function QuestList({ isDark }) {
             Reto de hoy
           </span>
         </div>
-        <div className={cx("flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-deep/50 text-brand-soft" : "bg-brand-cream/50 text-brand-muted")}>
+        <div className={cx("flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-deep/50 text-brand-soft" : "bg-gray-100 text-gray-600")}>
           <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{completedCount}</span>
-          <span className="text-brand-muted">/</span>
+          <span className="text-gray-400">/</span>
           <span>{totalCount}</span>
         </div>
       </div>
@@ -506,8 +628,8 @@ function QuestList({ isDark }) {
             className={cx(
               "group flex items-center gap-4 rounded-2xl p-4 transition-all duration-300",
               quest.done 
-                ? (isDark ? "bg-brand-deep/30 opacity-70" : "bg-brand-cream/40 opacity-70") 
-                : (isDark ? "bg-brand-deep/50 hover:bg-brand-deep/70" : "bg-brand-cream/60 hover:bg-brand-cream/80")
+                ? (isDark ? "bg-brand-deep/30 opacity-70" : "bg-gray-100 opacity-70") 
+                : (isDark ? "bg-brand-deep/50 hover:bg-brand-deep/70" : "bg-gray-50 hover:bg-gray-100")
             )}
             style={{ animationDelay: `${index * 50}ms` }}
           >
@@ -515,15 +637,15 @@ function QuestList({ isDark }) {
               "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all duration-300",
               quest.done 
                 ? "bg-brand-teal text-white" 
-                : (isDark ? "border-2 border-brand-line text-brand-soft" : "border-2 border-brand-mist text-brand-muted")
+                : (isDark ? "border-2 border-brand-line text-brand-soft" : "border-2 border-gray-300 text-gray-600")
             )}>
               <Icon name={quest.done ? "check" : "sparkles"} className="h-4 w-4" />
             </div>
             <p className={cx(
               "flex-1 text-sm font-semibold transition-all duration-300",
               quest.done 
-                ? (isDark ? "text-brand-soft line-through" : "text-brand-muted line-through") 
-                : (isDark ? "text-white" : "text-brand-ink")
+                ? (isDark ? "text-brand-soft line-through" : "text-gray-500 line-through") 
+                : (isDark ? "text-white" : "text-gray-900")
             )}>
               {quest.task}
             </p>
@@ -574,44 +696,33 @@ function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, 
             Progreso actual
           </span>
         </div>
-        <div className={cx("rounded-full px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-deep/50 text-brand-cyan" : "bg-brand-cream/50 text-brand-teal")}>
+        <div className={cx("rounded-full px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-deep/50 text-brand-cyan" : "bg-gray-100 text-brand-teal")}>
           Nivel {currentLevel}
         </div>
       </div>
       
       <div className="mb-6">
-        <h3 className={cx("text-2xl font-extrabold sm:text-3xl", isDark ? "text-white" : "text-brand-ink")}>
+        <h3 className={cx("text-2xl font-extrabold sm:text-3xl", isDark ? "text-white" : "text-gray-900")}>
           Lección {currentLesson}
         </h3>
-        <p className={cx("mt-1 text-sm font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}>
+        <p className={cx("mt-1 text-sm font-medium", isDark ? "text-brand-soft" : "text-gray-600")}>
           Progreso del módulo
         </p>
       </div>
       
-      {/* Enhanced Progress Bar */}
+      {/* Simplified Progress Bar */}
       <div className="mb-8">
-        <div className={cx("relative h-3 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}>
+        <div className={cx("relative h-3 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-gray-200")}>
           <div 
             className={cx(
               "absolute left-0 top-0 h-full rounded-full transition-all duration-700 ease-out",
-              "bg-gradient-to-r from-brand-teal via-brand-cyan to-brand-orange"
+              "bg-brand-teal"
             )}
             style={{ width: `${moduleProgressPercent}%` }}
           />
-          {/* Animated glow effect */}
-          <div 
-            className={cx(
-              "absolute top-0 h-full w-20 rounded-full transition-all duration-700 ease-out blur-lg opacity-50",
-              "bg-gradient-to-r from-brand-teal to-brand-orange"
-            )}
-            style={{ 
-              left: `${moduleProgressPercent - 10}%`,
-              opacity: moduleProgressPercent > 0 ? 0.6 : 0
-            }}
-          />
         </div>
         <div className="mt-2 flex justify-between">
-          <span className={cx("text-xs font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}>
+          <span className={cx("text-xs font-medium", isDark ? "text-brand-soft" : "text-gray-600")}>
             {moduleProgressPercent}% completado
           </span>
         </div>
@@ -628,10 +739,10 @@ function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, 
             <div className={cx("flex items-center justify-center gap-1 mb-1", isDark ? "text-brand-cyan" : "text-brand-teal")}>
               <Icon name={icon} className="h-3 w-3" />
             </div>
-            <div className={cx("text-xl font-extrabold sm:text-2xl", isDark ? "text-white" : "text-brand-ink")}>
+            <div className={cx("text-xl font-extrabold sm:text-2xl", isDark ? "text-white" : "text-gray-900")}>
               {value}
             </div>
-            <div className={cx("mt-1 text-[10px] font-medium uppercase tracking-wider", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>
+            <div className={cx("mt-1 text-[10px] font-medium uppercase tracking-wider", isDark ? "text-[#5A8A94]" : "text-gray-600")}>
               {label}
             </div>
           </div>
@@ -916,12 +1027,12 @@ function LearnPage({ isDark }) {
             <Card isDark={isDark}>
               <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3">
-                  <div className={cx("flex h-12 w-12 items-center justify-center rounded-2xl", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-brand-orange/20 text-brand-teal")}>
-                    <Icon name="book" className="h-6 w-6" />
+                  <div className={cx("flex h-12 w-12 items-center justify-center rounded-2xl", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-brand-orange/20 text-brand-orange")}>
+                    <Icon name={selected.icon || "book"} className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className={cx("text-lg font-bold", isDark ? "text-white" : "text-brand-ink")}>{selected.title}</h3>
-                    <p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{selected.signs} señas · Nivel {selected.level}</p>
+                    <h3 className={cx("text-lg font-bold", isDark ? "text-white" : "text-gray-900")}>{selected.title}</h3>
+                    <p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-gray-600")}>{selected.signs} señas · Nivel {selected.level}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -961,6 +1072,10 @@ function LearnPage({ isDark }) {
                         loading="lazy" 
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      {/* Icon overlay */}
+                      <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                        <Icon name={getSignIcon(item.label)} className="h-3 w-3 text-gray-800" />
+                      </div>
                     </div>
                     <span className={cx("text-xs font-semibold text-center leading-tight", isDark ? "text-brand-soft" : "text-gray-700")}>
                       {item.label}
@@ -1079,29 +1194,35 @@ function SkillNode({ module, index, isDark, selected, onClick }) {
         aria-label={`${module.title} - ${module.desc} - ${locked ? 'Bloqueado' : completed ? 'Completado' : 'En progreso'}`}
         role="button"
       >
-        {/* Status Icon */}
-        <div className={cx(
-          "relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-all duration-300 sm:h-16 sm:w-16",
-          completed 
-            ? "bg-gradient-to-br from-brand-teal to-brand-cyan text-white shadow-lg shadow-brand-teal/20" 
-            : current 
-              ? "bg-gradient-to-br from-brand-orange to-brand-teal text-white shadow-lg shadow-brand-orange/20 animate-pulse" 
-              : isDark 
-                ? "border-2 border-brand-line bg-brand-card text-[#5A8A94]" 
-                : "border-2 border-gray-300 bg-gray-100 text-gray-600"
-        )} aria-hidden="true">
-          {completed ? (
-            <Icon name="check" className="h-6 w-6 sm:h-7 sm:w-7" />
-          ) : current ? (
-            <Icon name="play" className="h-6 w-6 sm:h-7 sm:w-7" />
-          ) : (
-            <Icon name="lock" className="h-5 w-5 sm:h-6 sm:w-6" />
-          )}
+        {/* Module Icon with Status Overlay */}
+        <div className="relative">
+          <div className={cx(
+            "relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-all duration-300 sm:h-16 sm:w-16",
+            isDark 
+              ? "border-2 border-brand-line bg-brand-card text-brand-orange" 
+              : "border-2 border-gray-300 bg-gray-100 text-brand-orange"
+          )} aria-hidden="true">
+            <Icon name={module.icon || "book"} className="h-6 w-6 sm:h-7 sm:w-7" />
+          </div>
           
-          {/* Glow effect for current */}
-          {current && (
-            <div className="absolute inset-0 rounded-2xl bg-brand-orange/20 blur-xl animate-pulse" />
-          )}
+          {/* Status Badge */}
+          <div className={cx(
+            "absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all duration-300 sm:h-7 sm:w-7",
+            isDark ? "border-brand-deep bg-brand-card" : "border-white bg-white",
+            completed 
+              ? "text-brand-teal" 
+              : current 
+                ? "text-brand-orange" 
+                : "text-gray-400"
+          )}>
+            {completed ? (
+              <Icon name="check" className="h-3 w-3 sm:h-4 sm:w-4" />
+            ) : current ? (
+              <Icon name="play" className="h-3 w-3 sm:h-4 sm:w-4" />
+            ) : (
+              <Icon name="lock" className="h-3 w-3 sm:h-3 sm:w-3" />
+            )}
+          </div>
         </div>
         
         {/* Content */}
@@ -1109,8 +1230,8 @@ function SkillNode({ module, index, isDark, selected, onClick }) {
           "flex-1 rounded-2xl p-4 transition-all duration-300 sm:p-5",
           selected 
             ? (isDark 
-                ? "border-2 border-brand-cyan/50 bg-brand-card shadow-lg shadow-brand-cyan/10" 
-                : "border-2 border-brand-teal/50 bg-white shadow-lg shadow-brand-teal/10") 
+                ? "border-2 border-brand-cyan/50 bg-brand-card shadow-md" 
+                : "border-2 border-brand-teal/50 bg-white shadow-md") 
             : (isDark 
                 ? "border border-brand-line/30 bg-brand-deep/30 hover:bg-brand-deep/50" 
                 : "border border-gray-300 bg-gray-50 hover:bg-gray-100")
@@ -1146,9 +1267,9 @@ function SkillNode({ module, index, isDark, selected, onClick }) {
                   className={cx(
                     "h-full rounded-full transition-all duration-500 ease-out",
                     completed 
-                      ? "bg-gradient-to-r from-brand-teal to-brand-cyan" 
+                      ? "bg-brand-teal" 
                       : current 
-                        ? "bg-gradient-to-r from-brand-orange to-brand-teal" 
+                        ? "bg-brand-orange" 
                         : "bg-gray-400"
                   )}
                   style={{ width: `${(module.signs_completed / module.signs) * 100}%` }}
@@ -1205,8 +1326,14 @@ function ModuleDetail({ module, isDark, items, search, onSearch, onSelect }) {
               isDark ? "border-brand-line bg-brand-deep/40 hover:border-brand-cyan/40 hover:bg-brand-card" : "border-brand-mist bg-brand-cream hover:border-brand-teal/30 hover:bg-white hover:shadow-sm"
             )}
           >
-            <img src={item.thumbnail} alt={item.label} className="h-12 w-full rounded-lg object-cover sm:h-14" loading="lazy" />
-            <span className={cx("text-[10px] font-semibold leading-tight sm:text-[11px]", isDark ? "text-brand-soft" : "text-brand-muted")}>{item.label}</span>
+            <div className="relative">
+              <img src={item.thumbnail} alt={item.label} className="h-12 w-full rounded-lg object-cover sm:h-14" loading="lazy" />
+              {/* Icon overlay */}
+              <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                <Icon name={getSignIcon(item.label)} className="h-2.5 w-2.5 text-gray-800" />
+              </div>
+            </div>
+            <span className={cx("text-[10px] font-semibold leading-tight sm:text-[11px]", isDark ? "text-brand-soft" : "text-gray-600")}>{item.label}</span>
           </button>
         ))}
       </div>
@@ -1334,12 +1461,12 @@ function LessonPage({ isDark, navigate }) {
                 <Card isDark={isDark}>
                   <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
-                      <div className={cx("flex h-14 w-14 items-center justify-center rounded-2xl", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-brand-orange/20 text-brand-teal")}>
-                        <Icon name="book" className="h-7 w-7" />
+                      <div className={cx("flex h-14 w-14 items-center justify-center rounded-2xl", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-brand-orange/20 text-brand-orange")}>
+                        <Icon name={selected.icon || "book"} className="h-7 w-7" />
                       </div>
                       <div>
-                        <h3 className={cx("text-xl font-bold", isDark ? "text-white" : "text-brand-ink")}>{selected.title}</h3>
-                        <p className={cx("text-sm", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{selected.signs} señas · Nivel {selected.level}</p>
+                        <h3 className={cx("text-xl font-bold", isDark ? "text-white" : "text-gray-900")}>{selected.title}</h3>
+                        <p className={cx("text-sm", isDark ? "text-[#5A8A94]" : "text-gray-600")}>{selected.signs} señas · Nivel {selected.level}</p>
                       </div>
                     </div>
                     
@@ -1378,6 +1505,10 @@ function LessonPage({ isDark, navigate }) {
                             loading="lazy" 
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                          {/* Icon overlay */}
+                          <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                            <Icon name={getSignIcon(item.label)} className="h-3 w-3 text-gray-800" />
+                          </div>
                         </div>
                         <span className={cx("text-xs font-semibold leading-tight", isDark ? "text-brand-soft" : "text-gray-700")}>
                           {item.label}
