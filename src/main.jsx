@@ -391,15 +391,19 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
             </nav>
 
             <div className="flex items-center gap-3">
-              {/* Mobile Navigation Button */}
+              {/* Mobile Navigation Button - Toggle */}
               <button 
                 onClick={() => setMobileNavOpen(!mobileNavOpen)}
-                className={cx("md:hidden btn-press relative flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 active:scale-95", isDark ? "bg-brand-card text-brand-soft hover:text-white" : "bg-white text-brand-muted hover:text-brand-ink")}
-                aria-label="Menu"
+                className={cx("md:hidden btn-press relative flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 active:scale-95", isDark ? "bg-brand-orange text-white" : "bg-brand-orange text-white")}
+                aria-label={mobileNavOpen ? "Cerrar menú" : "Abrir menú"}
               >
-                <svg className="h-5 w-5 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ transform: mobileNavOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
+                {mobileNavOpen ? (
+                  <Icon name="x" className="h-5 w-5" />
+                ) : (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
               </button>
 
               {/* Desktop Actions */}
@@ -458,18 +462,6 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
           style={{ animation: 'fadeIn 200ms ease-out' }}
         >
           <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between px-6 py-4">
-              <Logo isDark={isDark} compact />
-              <button 
-                onClick={() => setMobileNavOpen(false)}
-                className={cx("btn-press flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 active:scale-95", isDark ? "bg-brand-card text-brand-soft hover:text-white" : "bg-white text-brand-muted hover:text-brand-ink")}
-              >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
             <nav className="flex-1 px-6 py-8">
               <div className="space-y-2">
                 {navItems.slice(1).map((item, index) => (
@@ -496,10 +488,13 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
             
             <div className="border-t px-6 py-6" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
-                  <span className={cx("text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{userName}</span>
-                </div>
+                <span className={cx("text-sm font-semibold", isDark ? "text-white" : "text-gray-900")}>{userName}</span>
+                <button 
+                  onClick={() => setIsDark(!isDark)}
+                  className={cx("btn-press rounded-xl px-3 py-2 text-xs font-bold", isDark ? "bg-brand-card text-brand-orange" : "bg-white text-brand-orange shadow-sm")}
+                >
+                  {isDark ? "☀️ Claro" : "🌙 Oscuro"}
+                </button>
               </div>
               <button 
                 onClick={() => { signOut(); setMobileNavOpen(false); }}
@@ -2696,7 +2691,7 @@ function ConfigErrorPage({ isDark }) {
 
 
 function App() {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
   const [path, navigate, state] = useRoute();
   const { user, loading, authConfigError } = useAuth();
 
