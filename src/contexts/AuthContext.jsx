@@ -11,6 +11,7 @@ export function AuthProvider({ children }) {
   const [moduleProgress, setModuleProgress] = useState([]);
   const [loading, setLoading] = useState(true);
   const authConfigError = isSupabaseConfigured ? "" : "Faltan variables de entorno de Supabase.";
+  const [justLoggedIn, setJustLoggedIn] = useState(false);
 
   useEffect(() => {
     if (!supabase) {
@@ -38,10 +39,20 @@ export function AuthProvider({ children }) {
         fetchProfile(session.user.id);
         fetchUserProgress(session.user.id);
         fetchModuleProgress(session.user.id);
+        setJustLoggedIn(true);
+        // Navigate to dashboard after successful auth
+        setTimeout(() => {
+          const currentPath = window.location.pathname;
+          if (currentPath === '/' || currentPath === '/login' || currentPath === '/signup') {
+            window.history.pushState({}, "", '/dashboard');
+            window.dispatchEvent(new PopStateEvent('popstate'));
+          }
+        }, 100);
       } else {
         setProfile(null);
         setUserProgress(null);
         setModuleProgress([]);
+        setJustLoggedIn(false);
       }
       setLoading(false);
     });
@@ -180,6 +191,30 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const signInWithGoogle = async () => {
+    if (!supabase) {
+      return { data: null, error: new Error(authConfigError) };
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  };
+
   const signOut = async () => {
     if (!supabase) return;
 
@@ -202,6 +237,7 @@ export function AuthProvider({ children }) {
     authConfigError,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
   };
 

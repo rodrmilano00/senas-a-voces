@@ -9,6 +9,7 @@ import AuthPage from "./components/AuthPage";
 import EmailConfirmationPage from "./components/EmailConfirmationPage";
 import { updateSignProgress, updateModuleProgress, updateStreak, recordVideoView, updateWeeklyActivity, updatePracticeDays, getRecommendations } from "./services/progressService";
 import { Analytics } from "@vercel/analytics/react";
+import { supabase } from "./lib/supabaseClient";
 
 const navItems = [
   { path: "/", label: "Acceso", icon: "lock" },
@@ -2698,6 +2699,20 @@ function App() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
+
+  // Handle OAuth callback redirect
+  useEffect(() => {
+    const handleOAuthCallback = async () => {
+      const hash = window.location.hash;
+      if (hash.includes('access_token') || hash.includes('error')) {
+        // Let Supabase handle the session restoration
+        await supabase.auth.getSession();
+        // The auth state change will trigger navigation
+      }
+    };
+    
+    handleOAuthCallback();
+  }, []);
 
   // Ensure camera is stopped when navigating away from practice page
   useEffect(() => {

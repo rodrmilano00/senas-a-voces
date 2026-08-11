@@ -33,6 +33,12 @@ function Icon({ name, className = "h-5 w-5" }) {
     lock: <svg {...filled}><path fillRule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clipRule="evenodd" /></svg>,
     user: <svg {...filled}><path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.465 14.493A7.002 7.002 0 0 1 16.54 14.49c.196.507.022 1.077-.408 1.41A9.957 9.957 0 0 1 10 18a9.957 9.957 0 0 1-6.125-2.095 1.23 1.23 0 0 1-.41-1.412Z" /></svg>,
     eye: <svg {...filled}><path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" /><path fillRule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clipRule="evenodd" /></svg>,
+    google: <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v4.64c2.28 4.18 6.5 6.96 11.38 6.96z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>,
   };
   return icons[name] || icons.user;
 }
@@ -62,10 +68,11 @@ function WaveBackground({ isDark }) {
 
 export default function AuthPage({ mode, isDark, setIsDark, navigate }) {
   const isSignup = mode === "signup";
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signInWithGoogle } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     fullName: "",
@@ -139,6 +146,19 @@ export default function AuthPage({ mode, isDark, setIsDark, navigate }) {
         navigate("/dashboard");
       }
     }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setGoogleLoading(true);
+
+    const { data, error } = await signInWithGoogle();
+
+    if (error) {
+      setError(error.message || "Error al iniciar sesión con Google");
+      setGoogleLoading(false);
+    }
+    // Navigation will be handled by auth state change
   };
 
   return (
@@ -289,6 +309,33 @@ export default function AuthPage({ mode, isDark, setIsDark, navigate }) {
                   </button>
                 </div>
               )}
+              
+              {/* Google OAuth Button */}
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={googleLoading}
+                className={`btn-press w-full rounded-lg py-3.5 text-sm font-bold transition flex items-center justify-center gap-3 border ${
+                  isDark
+                    ? "bg-brand-deep border-brand-line text-white hover:bg-brand-card"
+                    : "bg-white border-gray-200 text-gray-900 hover:bg-gray-50"
+                } ${googleLoading && "cursor-not-allowed opacity-55"}`}
+              >
+                <Icon name="google" className="h-5 w-5" />
+                {googleLoading ? "Conectando con Google..." : "Continuar con Google"}
+              </button>
+
+              <div className="relative my-6">
+                <div className={`absolute inset-0 flex items-center ${isDark ? "text-brand-line" : "text-gray-200"}`}>
+                  <div className="w-full border-t" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className={`px-2 ${isDark ? "bg-brand-deep text-brand-soft" : "bg-white text-gray-500"}`}>
+                    o
+                  </span>
+                </div>
+              </div>
+
               <button
                 disabled={loading || (isSignup && !agreed)}
                 className={`btn-press w-full rounded-lg py-3.5 text-sm font-bold transition ${
