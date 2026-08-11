@@ -11,10 +11,11 @@ import { updateSignProgress, updateModuleProgress, updateStreak, recordVideoView
 import { Analytics } from "@vercel/analytics/react";
 
 const navItems = [
-  { path: "/", label: "Acceso" },
-  { path: "/dashboard", label: "Dashboard" },
-  { path: "/learn", label: "Aprender" },
-  { path: "/practice", label: "Práctica" }
+  { path: "/", label: "Acceso", icon: "lock" },
+  { path: "/dashboard", label: "Dashboard", icon: "trophy" },
+  { path: "/learn", label: "Progreso", icon: "sparkles" },
+  { path: "/lesson", label: "Lecciones", icon: "book" },
+  { path: "/practice", label: "Práctica", icon: "camera" }
 ];
 
 const modules = [ALPHABET_LESSON, ...GLOSARIO_LESSONS].map((lesson, i) => ({
@@ -25,7 +26,78 @@ const modules = [ALPHABET_LESSON, ...GLOSARIO_LESSONS].map((lesson, i) => ({
   status: i === 0 ? "current" : i < 3 ? "completed" : "locked",
   items: lesson.items,
   level: lesson.level,
+  icon: getModuleIcon(lesson.title),
 }));
+
+function getModuleIcon(title) {
+  const iconMap = {
+    "Abecedario LSM (A–Z + Ñ)": "abc",
+    "Números (todos)": "numbers",
+    "Expresiones cotidianas": "expressions",
+    "Colores (todos)": "colors",
+    "Familia (todos)": "family",
+    "Salud (todos)": "health",
+    "Tecnología (todos)": "technology",
+  };
+  return iconMap[title] || "book";
+}
+
+function getSignIcon(name) {
+  const iconMap = {
+    // Números
+    "1": "number-1",
+    "2": "number-2",
+    "3": "number-3",
+    "4": "number-4",
+    "5": "number-5",
+    "6": "number-6",
+    "7": "number-7",
+    "8": "number-8",
+    "9": "number-9",
+    "10": "number-10",
+    "20": "number-20",
+    "100": "number-100",
+    // Expresiones
+    "DISCULPA": "sorry",
+    "POR FAVOR": "please",
+    "¿CÓMO ESTÁS?": "how-are-you",
+    "¿CÓMO TE LLAMAS?": "what-name",
+    "¡SORPRESA!": "surprise",
+    "¡QUÉ MILAGRO!": "miracle",
+    // Colores
+    "ROJO": "red",
+    "AZUL": "blue",
+    "VERDE": "green",
+    "AMARILLO": "yellow",
+    "BLANCO": "white",
+    "NEGRO": "black",
+    "NARANJA": "orange",
+    "MORADO": "purple",
+    "ROSA": "pink",
+    "CAFÉ": "brown",
+    // Familia
+    "MAMÁ": "mom",
+    "PAPÁ": "dad",
+    "HERMANO": "brother",
+    "ABUELO": "grandpa",
+    "ABUELA": "grandma",
+    "TÍO": "uncle",
+    "ESPOSO": "spouse",
+    // Salud
+    "DOCTOR": "doctor",
+    "HOSPITAL": "hospital",
+    "MEDICINA": "medicine",
+    "ENFERMEDAD": "disease",
+    "EMERGENCIA": "emergency",
+    // Tecnología
+    "INTERNET": "internet",
+    "TELÉFONO": "phone",
+    "COMPUTADORA": "computer",
+    "INSTAGRAM": "instagram",
+    "YOUTUBE": "youtube",
+  };
+  return iconMap[name] || "sparkles";
+}
 
 // signsQueue generado desde ALPHABET_LESSON + currículum del lsm_teacher.py
 // Orden: Abecedario (G0) → Números (G1) → Expresiones → Colores → Familia → Salud → Tecnología
@@ -95,22 +167,22 @@ const signsQueue = [
 ];
 
 const learningMoments = [
-  { label: "Memoria visual", value: "Alta", detail: "Reconoces patrones de mano con buena precision." },
-  { label: "Ritmo", value: "12 dias", detail: "Tu constancia desbloquea practica avanzada." },
+  { label: "Memoria visual", value: "Alta", detail: "Reconoces patrones de mano con buena precisión." },
+  { label: "Ritmo", value: "12 días", detail: "Tu constancia desbloquea práctica avanzada." },
   { label: "Siguiente foco", value: "Familia", detail: "Practica parentescos antes de pasar a comida." }
 ];
 
 const dailyQuest = [
-  { task: "Completa 3 senas de Familia", done: true },
-  { task: "Repite una sena dificil", done: true },
-  { task: "Graba una practica corta", done: false }
+  { task: "Completa 3 señas de Familia", done: true },
+  { task: "Repite una seña difícil", done: true },
+  { task: "Graba una práctica corta", done: false }
 ];
 
 const accountActions = [
   { label: "Mi perfil", helper: "Datos y preferencias", icon: "user", path: "/dashboard" },
-  { label: "Progreso", helper: "Racha y modulos", icon: "trophy", path: "/learn" },
-  { label: "Practica", helper: "Abrir camara", icon: "camera", path: "/practice" },
-  { label: "Cerrar sesion", helper: "Volver al acceso", icon: "lock", path: "/" }
+  { label: "Progreso", helper: "Racha y módulos", icon: "trophy", path: "/learn" },
+  { label: "Práctica", helper: "Abrir cámara", icon: "camera", path: "/practice" },
+  { label: "Cerrar sesión", helper: "Volver al acceso", icon: "lock", path: "/" }
 ];
 
 const LOGO_SRC = "/logo-senas-a-voces-crop.png";
@@ -157,7 +229,61 @@ function Icon({ name, className = "h-5 w-5" }) {
     flame: <svg {...common}><path fill="currentColor" fillOpacity="0.26" d="M8.5 14.5A4.5 4.5 0 0 0 13 19a5 5 0 0 0 5-5c0-3.5-2.5-5.8-5.4-8.7-.5 2.9-2 4.3-4.1 5.7C7 12 6 13.2 6 15a5 5 0 0 0 10 0c0-1.2-.4-2.2-1.1-3.1-.2 2.2-1.4 3.6-3 3.6-1.2 0-2.3-.7-3.4-1Z" /><path d="M8.5 14.5A4.5 4.5 0 0 0 13 19a5 5 0 0 0 5-5c0-3.5-2.5-5.8-5.4-8.7-.5 2.9-2 4.3-4.1 5.7C7 12 6 13.2 6 15a5 5 0 0 0 10 0c0-1.2-.4-2.2-1.1-3.1-.2 2.2-1.4 3.6-3 3.6-1.2 0-2.3-.7-3.4-1Z" /></svg>,
     sparkles: <svg {...common}><path d="m12 3 1.3 4.1L17 9l-3.7 1.9L12 15l-1.3-4.1L7 9l3.7-1.9L12 3Z" /><path d="m19 14 .7 2.1L22 17l-2.3.9L19 20l-.7-2.1L16 17l2.3-.9L19 14Z" /><path d="m5 13 .7 2.1L8 16l-2.3.9L5 19l-.7-2.1L2 16l2.3-.9L5 13Z" /></svg>,
     trophy: <svg {...common}><path d="M8 21h8" /><path d="M12 17v4" /><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z" /><path d="M5 5H3v2a4 4 0 0 0 4 4" /><path d="M19 5h2v2a4 4 0 0 1-4 4" /></svg>,
-    x: <svg {...filled}><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z" /></svg>
+    x: <svg {...filled}><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z" /></svg>,
+    // Iconos específicos para módulos
+    abc: <svg {...common} viewBox="0 0 24 24"><text x="12" y="16" textAnchor="middle" fontSize="10" fontWeight="bold" fill="currentColor">Aa</text></svg>,
+    numbers: <svg {...common} viewBox="0 0 24 24"><text x="12" y="16" textAnchor="middle" fontSize="10" fontWeight="bold" fill="currentColor">123</text></svg>,
+    expressions: <svg {...common}><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="9" r="1.5" fill="currentColor"/><path d="M12 14c-1.5 0-2.8.8-3.5 2h7c-.7-1.2-2-2-3.5-2z" /></svg>,
+    colors: <svg {...common}><circle cx="6" cy="12" r="4" fill="currentColor" fillOpacity="0.6"/><circle cx="12" cy="12" r="4" fill="currentColor" fillOpacity="0.8"/><circle cx="18" cy="12" r="4" fill="currentColor" /></svg>,
+    family: <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8z" /><circle cx="9" cy="10" r="1.5" fill="currentColor"/><circle cx="15" cy="10" r="1.5" fill="currentColor"/><path d="M12 14a3 3 0 0 0 0 6 3 3 0 0 0 0-6z" /></svg>,
+    health: <svg {...common}><path d="M19 12c0 1.1-.9 2-2 2-7 0-3.3-2.7-6-6-6s-6 2.7-6 6c0 1.1-.9 2-2 2-2 4.4 0 8 3.6 8 8 0 0 0 8-8 0-3.6-3.6-8-8-8z" /><path d="M12 4c.28 0 .5.22.5.5s-.22.5-.5.5-.5-.22-.5-.5.5s.22.5.5.5zM12 6c.28 0 .5.22.5.5s-.22.5-.5.5-.22-.5-.5.5s.22.5.5.5zM12 8c.28 0 .5.22.5.5s-.22.5-.5.5-.22-.5-.5.5s.22.5.5.5z" /></svg>,
+    technology: <svg {...common}><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M6 7h12M6 11h12M6 15h8" /><circle cx="16" cy="17" r="2" /></svg>,
+    // Iconos específicos para señas individuales
+    "number-1": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">1</text></svg>,
+    "number-2": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">2</text></svg>,
+    "number-3": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">3</text></svg>,
+    "number-4": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">4</text></svg>,
+    "number-5": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">5</text></svg>,
+    "number-6": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">6</text></svg>,
+    "number-7": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">7</text></svg>,
+    "number-8": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">8</text></svg>,
+    "number-9": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">9</text></svg>,
+    "number-10": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="14" fontWeight="bold" fill="currentColor">10</text></svg>,
+    "number-20": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="14" fontWeight="bold" fill="currentColor">20</text></svg>,
+    "number-100": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="12" fontWeight="bold" fill="currentColor">100</text></svg>,
+    "sorry": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "please": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" /></svg>,
+    "how-are-you": <svg {...common}><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="9" r="1.5" fill="currentColor"/><path d="M12 14c-1.5 0-2.8.8-3.5 2h7c-.7-1.2-2-2-3.5-2z" /></svg>,
+    "what-name": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2 15h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V7h4v2z" /></svg>,
+    "surprise": <svg {...common}><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="9" r="1.5" fill="currentColor"/><path d="M12 14c-2 0-3.7 1.3-4.5 3h9c-.8-1.7-2.5-3-4.5-3z" /></svg>,
+    "miracle": <svg {...common}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>,
+    "red": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" /></svg>,
+    "blue": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.7"/></svg>,
+    "green": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.5"/></svg>,
+    "yellow": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.9"/></svg>,
+    "white": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.3"/></svg>,
+    "black": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" /></svg>,
+    "orange": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.8"/></svg>,
+    "purple": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.6"/></svg>,
+    "pink": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.7"/></svg>,
+    "brown": <svg {...common}><circle cx="12" cy="12" r="6" fill="currentColor" fillOpacity="0.5"/></svg>,
+    "mom": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "dad": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm2 15h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V7h4v2z" /></svg>,
+    "brother": <svg {...common}><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" /></svg>,
+    "grandpa": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "grandma": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "uncle": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "spouse": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "doctor": <svg {...common}><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z" /></svg>,
+    "hospital": <svg {...common}><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z" /></svg>,
+    "medicine": <svg {...common}><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" /></svg>,
+    "disease": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" /></svg>,
+    "emergency": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>,
+    "internet": <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" /></svg>,
+    "phone": <svg {...common}><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" /></svg>,
+    "computer": <svg {...common}><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M6 17h12M12 17v4" /></svg>,
+    "instagram": <svg {...common}><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="3" /><circle cx="18" cy="6" r="1" /></svg>,
+    "youtube": <svg {...common}><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" /><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" /></svg>
   };
   return icons[name] || icons.play;
 }
@@ -233,97 +359,150 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
   const userEmail = profile?.email || "";
 
   return (
-    <header className={cx("app-header sticky top-0 z-40 border-b backdrop-blur-xl transition-colors", isDark ? "border-brand-line bg-brand-deep/85" : "border-brand-mist bg-brand-cream/85")}>
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
-        <button onClick={() => navigate("/dashboard")} className="btn-press"><Logo isDark={isDark} compact /></button>
-        
-        {/* Mobile Navigation Button */}
-        <button 
-          onClick={() => setMobileNavOpen(!mobileNavOpen)}
-          className={cx("md:hidden btn-press rounded-xl p-2", isDark ? "text-brand-soft hover:bg-brand-card" : "text-brand-muted hover:bg-white")}
-          aria-label="Menu"
-        >
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            {mobileNavOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-1 md:flex">
-          {navItems.slice(1).map((item) => (
-            <button key={item.path} onClick={() => navigate(item.path)} className={cx("rounded-2xl px-3 py-2 text-xs font-bold transition", path === item.path ? (isDark ? "bg-brand-card text-white" : "bg-white text-brand-teal shadow-sm") : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-brand-muted hover:bg-white"))}>
-              {item.label}
+    <header className={cx("app-header sticky top-0 z-40 transition-colors", isDark ? "bg-brand-deep/95" : "bg-brand-cream/95")}>
+      <div className="mx-auto px-4 py-3 sm:px-6 sm:py-4">
+        <div className={cx("rounded-2xl border backdrop-blur-xl", isDark ? "border-brand-line bg-brand-card/50" : "border-brand-mist bg-white/50")}>
+          <div className="flex items-center justify-between px-4 py-3 sm:px-6">
+            <button onClick={() => navigate("/dashboard")} className="btn-press flex items-center gap-3">
+              <Logo isDark={isDark} compact />
             </button>
-          ))}
-        </nav>
+            
+            {/* Desktop Navigation - Rectangular Style */}
+            <nav className="hidden items-center gap-1 md:flex">
+              {navItems.slice(1).map((item, index) => (
+                <button 
+                  key={item.path} 
+                  onClick={() => navigate(item.path)} 
+                  className={cx(
+                    "group relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 active:scale-95",
+                    path === item.path 
+                      ? (isDark ? "bg-brand-cyan text-brand-deep shadow-lg shadow-brand-cyan/20" : "bg-brand-teal text-white shadow-lg shadow-brand-teal/20") 
+                      : (isDark ? "text-brand-soft hover:bg-brand-card/50" : "text-brand-muted hover:bg-brand-cream/50")
+                  )}
+                  style={{ 
+                    animationDelay: `${index * 50}ms`,
+                    transition: 'transform 160ms ease-out, background-color 200ms ease-out, box-shadow 200ms ease-out'
+                  }}
+                >
+                  <Icon name={item.icon} className="h-4 w-4" />
+                  {item.label}
+                </button>
+              ))}
+            </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
-          <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
-          <div ref={menuRef} className="relative">
-            <button
-              type="button"
-              aria-haspopup="menu"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((open) => !open)}
-              className={cx("profile-trigger btn-press flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal text-white")}
-            >
-              {userInitials}
-            </button>
-            {menuOpen && (
-              <div className={cx("account-menu", isDark ? "account-menu-dark" : "account-menu-light")} role="menu">
-                <div className="account-menu-head">
-                  <span className={cx("flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal text-white")}>{userInitials}</span>
-                  <span>
-                    <strong className={cx("block text-sm", isDark ? "text-white" : "text-brand-ink")}>{userName}</strong>
-                    <small className={cx("block text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>{userEmail}</small>
-                  </span>
-                </div>
-                <div className="mt-2">
-                  {accountActions.map((action) => (
-                    <button key={action.label} type="button" role="menuitem" className="account-menu-item text-left" onClick={() => selectAccountAction(action.path)}>
-                      <span className={cx("account-menu-icon", isDark ? "text-brand-cyan" : "text-brand-teal")}><Icon name={action.icon} className="h-4 w-4" /></span>
-                      <span>
-                        <strong className={cx("block text-xs", isDark ? "text-white" : "text-brand-ink")}>{action.label}</strong>
-                        <small className={cx("block text-[10px]", isDark ? "text-brand-soft" : "text-brand-muted")}>{action.helper}</small>
-                      </span>
-                    </button>
-                  ))}
+            <div className="flex items-center gap-3">
+              {/* Mobile Navigation Button - Toggle */}
+              <button 
+                onClick={() => setMobileNavOpen(!mobileNavOpen)}
+                className={cx("md:hidden btn-press relative flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 active:scale-95", isDark ? "bg-brand-orange text-white" : "bg-brand-orange text-white")}
+                aria-label={mobileNavOpen ? "Cerrar menú" : "Abrir menú"}
+              >
+                {mobileNavOpen ? (
+                  <Icon name="x" className="h-5 w-5" />
+                ) : (
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
+
+              {/* Desktop Actions */}
+              <div className="hidden items-center gap-3 md:flex">
+                <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
+                <div ref={menuRef} className="relative">
+                  <button
+                    type="button"
+                    aria-haspopup="menu"
+                    aria-expanded={menuOpen}
+                    onClick={() => setMenuOpen((open) => !open)}
+                    className={cx(
+                      "profile-trigger btn-press relative flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all duration-200 active:scale-95",
+                      isDark ? "bg-brand-cyan text-brand-deep hover:bg-brand-cyan/80" : "bg-brand-teal text-white hover:bg-brand-teal/80"
+                    )}
+                  >
+                    {userInitials}
+                    {menuOpen && (
+                      <span className="absolute -bottom-0.5 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-brand-orange" />
+                    )}
+                  </button>
+                  {menuOpen && (
+                    <div className={cx("account-menu", isDark ? "account-menu-dark" : "account-menu-light")} role="menu">
+                      <div className="account-menu-head">
+                        <span className={cx("flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-brand-teal text-white")}>{userInitials}</span>
+                        <span>
+                          <strong className={cx("block text-sm", isDark ? "text-white" : "text-brand-ink")}>{userName}</strong>
+                          <small className={cx("block text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>{userEmail}</small>
+                        </span>
+                      </div>
+                      <div className="mt-2">
+                        {accountActions.map((action) => (
+                          <button key={action.label} type="button" role="menuitem" className="account-menu-item text-left" onClick={() => selectAccountAction(action.path)}>
+                            <span className={cx("account-menu-icon", isDark ? "text-brand-cyan" : "text-brand-teal")}><Icon name={action.icon} className="h-4 w-4" /></span>
+                            <span>
+                              <strong className={cx("block text-xs", isDark ? "text-white" : "text-brand-ink")}>{action.label}</strong>
+                              <small className={cx("block text-[10px]", isDark ? "text-brand-soft" : "text-brand-muted")}>{action.helper}</small>
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile Navigation Menu */}
+      {/* Mobile Navigation Menu - Full Screen Overlay */}
       {mobileNavOpen && (
-        <div ref={mobileNavRef} className={cx("md:hidden border-t px-4 py-3", isDark ? "border-brand-line bg-brand-deep/95" : "border-brand-mist bg-brand-cream/95")}>
-          <nav className="flex flex-col gap-2">
-            {navItems.slice(1).map((item) => (
+        <div 
+          ref={mobileNavRef} 
+          className={cx("fixed inset-0 z-50 md:hidden", isDark ? "bg-brand-deep/98" : "bg-brand-cream/98")}
+          style={{ animation: 'fadeIn 200ms ease-out' }}
+        >
+          <div className="flex h-full flex-col">
+            <nav className="flex-1 px-6 py-8">
+              <div className="space-y-2">
+                {navItems.slice(1).map((item, index) => (
+                  <button 
+                    key={item.path} 
+                    onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
+                    className={cx(
+                      "btn-press flex w-full items-center gap-4 rounded-2xl px-6 py-4 text-left text-sm font-bold transition-all duration-200 active:scale-98",
+                      path === item.path 
+                        ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white") 
+                        : (isDark ? "text-brand-soft hover:bg-brand-card/50" : "text-brand-muted hover:bg-brand-cream/50")
+                    )}
+                    style={{ 
+                      animationDelay: `${index * 50}ms`,
+                      animation: 'slideUp 200ms ease-out'
+                    }}
+                  >
+                    <Icon name={item.icon} className="h-5 w-5" />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </nav>
+            
+            <div className="border-t px-6 py-6" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
+              <div className="flex items-center justify-between mb-4">
+                <span className={cx("text-sm font-semibold", isDark ? "text-white" : "text-gray-900")}>{userName}</span>
+                <button 
+                  onClick={() => setIsDark(!isDark)}
+                  className={cx("btn-press rounded-xl px-3 py-2 text-xs font-bold", isDark ? "bg-brand-card text-brand-orange" : "bg-white text-brand-orange shadow-sm")}
+                >
+                  {isDark ? "☀️ Claro" : "🌙 Oscuro"}
+                </button>
+              </div>
               <button 
-                key={item.path} 
-                onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
-                className={cx("rounded-xl px-4 py-3 text-left text-sm font-bold transition", path === item.path ? (isDark ? "bg-brand-card text-white" : "bg-white text-brand-teal shadow-sm") : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-brand-muted hover:bg-white"))}
+                onClick={() => { signOut(); setMobileNavOpen(false); }}
+                className={cx("btn-press w-full rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 active:scale-98", isDark ? "bg-brand-card text-brand-orange" : "bg-white text-brand-orange shadow-sm")}
               >
-                {item.label}
+                Cerrar sesión
               </button>
-            ))}
-          </nav>
-          <div className="mt-4 flex items-center justify-between border-t pt-4" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
-            <div className="flex items-center gap-3">
-              <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
-              <span className={cx("text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{userName}</span>
             </div>
-            <button 
-              onClick={() => { signOut(); setMobileNavOpen(false); }}
-              className={cx("btn-press rounded-xl px-4 py-2 text-xs font-bold", isDark ? "bg-brand-card text-brand-orange" : "bg-white text-brand-orange shadow-sm")}
-            >
-              Cerrar sesión
-            </button>
           </div>
         </div>
       )}
@@ -346,144 +525,135 @@ function WaveBackground({ isDark }) {
 
 
 function Card({ isDark, className = "", children }) {
-  return <div className={cx("surface-card rounded-2xl p-6", isDark ? "border border-brand-line bg-brand-card" : "border border-gray-100 bg-white shadow-sm", className)}>{children}</div>;
+  return (
+    <div className={cx(
+      "surface-card overflow-hidden rounded-3xl transition-all duration-300",
+      isDark 
+        ? "border border-brand-line/50 bg-brand-card shadow-sm" 
+        : "border border-gray-200/50 bg-white shadow-sm",
+      className
+    )}>
+      <div className={cx("p-6 sm:p-8", isDark ? "relative" : "relative")}>
+        {children}
+      </div>
+    </div>
+  );
 }
 
 function LearningPulse({ isDark }) {
   return (
-    <Card isDark={isDark} className="learning-pulse mb-6 p-4 sm:p-6 md:p-8">
-      <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between sm:gap-6">
-        <div className="flex-1">
-          <SectionLabel isDark={isDark}>Brujula de aprendizaje</SectionLabel>
-          <h2 className={cx("mt-4 text-xl font-extrabold sm:text-2xl", isDark ? "text-white" : "text-brand-ink")}>Hoy conviene practicar Familia</h2>
-          <p className={cx("mt-3 max-w-2xl text-sm leading-7", isDark ? "text-brand-soft" : "text-brand-muted")}>Tu ruta detecta buena memoria visual. Manten sesiones cortas y repite las senas que mezclan parentesco y saludo.</p>
-        </div>
-        <span className={cx("hidden h-12 w-12 shrink-0 items-center justify-center rounded-xl sm:flex sm:h-14 sm:w-14", isDark ? "bg-brand-cyan/10 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}><Icon name="sparkles" /></span>
-      </div>
-      <div className="mt-7 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-        {learningMoments.map((item) => (
-          <div key={item.label} className={cx("rounded-xl border p-3 sm:p-4", isDark ? "border-brand-line bg-brand-deep/20" : "border-brand-mist bg-white/35")}>
-            <span className={cx("text-xs font-bold", isDark ? "text-brand-soft" : "text-brand-muted")}>{item.label}</span>
-            <strong className={cx("mt-2 block text-lg sm:text-xl", isDark ? "text-white" : "text-brand-ink")}>{item.value}</strong>
-            <p className={cx("mt-2 text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>{item.detail}</p>
+    <Card isDark={isDark} className="learning-pulse mb-6 relative overflow-hidden">
+      <div className="relative">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between sm:gap-6">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-4">
+              <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
+                Brújula de aprendizaje
+              </span>
+            </div>
+            <h2 className={cx("text-2xl font-extrabold sm:text-3xl", isDark ? "text-white" : "text-brand-ink")}>
+              Hoy conviene practicar <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>Familia</span>
+            </h2>
+            <p className={cx("mt-3 max-w-2xl text-sm leading-7", isDark ? "text-brand-soft" : "text-brand-muted")}>
+              Tu ruta detecta buena memoria visual. Mantén sesiones cortas y repite las señas que mezclan parentesco y saludo.
+            </p>
           </div>
-        ))}
+          <div className={cx(
+            "hidden h-16 w-16 shrink-0 items-center justify-center rounded-2xl sm:flex",
+            isDark ? "bg-brand-cyan/15 text-brand-cyan" : "bg-brand-teal/15 text-brand-teal"
+          )}>
+            <Icon name="sparkles" className="h-8 w-8" />
+          </div>
+        </div>
+        
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+          {learningMoments.map((item, index) => (
+            <div 
+              key={item.label} 
+              className={cx(
+                "group relative overflow-hidden rounded-2xl border p-4 transition-all duration-300 hover:scale-[1.02]",
+                isDark 
+                  ? "border-brand-line/30 bg-brand-deep/40 hover:border-brand-cyan/50 hover:bg-brand-deep/60" 
+                  : "border-gray-200 bg-gray-50 hover:border-brand-teal/50 hover:bg-gray-100"
+              )}
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div className="relative">
+                <span className={cx("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-gray-600")}>
+                  {item.label}
+                </span>
+                <strong className={cx("mt-2 block text-xl font-extrabold sm:text-2xl", isDark ? "text-white" : "text-gray-900")}>
+                  {item.value}
+                </strong>
+                <p className={cx("mt-2 text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-gray-600")}>
+                  {item.detail}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </Card>
   );
 }
 
 function QuestList({ isDark }) {
+  const completedCount = dailyQuest.filter(q => q.done).length;
+  const totalCount = dailyQuest.length;
+  
   return (
     <Card isDark={isDark}>
-      <div className="mb-4 flex items-center justify-between"><SectionLabel isDark={isDark}>Reto de hoy</SectionLabel><span className={cx("rounded-full px-3 py-1 text-xs font-bold", isDark ? "bg-brand-orange/15 text-brand-orange" : "bg-brand-orange/20 text-brand-teal")}>2/3</span></div>
-      <div className="space-y-4">
-        {dailyQuest.map((quest) => (
-          <div key={quest.task} className={cx("flex items-center gap-3 rounded-xl p-2", !quest.done && (isDark ? "bg-brand-deep/35" : "bg-brand-cream/55"))}>
-            <span className={cx("flex h-7 w-7 items-center justify-center rounded-lg", quest.done ? "bg-brand-teal text-white" : isDark ? "border border-brand-line text-brand-soft" : "border border-brand-mist text-brand-muted")}><Icon name={quest.done ? "check" : "sparkles"} className="h-4 w-4" /></span>
-            <p className={cx("text-xs font-semibold", isDark ? "text-brand-soft" : "text-brand-muted")}>{quest.task}</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-brand-orange/20 text-brand-teal")}>
+            Reto de hoy
+          </span>
+        </div>
+        <div className={cx("flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-deep/50 text-brand-soft" : "bg-gray-100 text-gray-600")}>
+          <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{completedCount}</span>
+          <span className="text-gray-400">/</span>
+          <span>{totalCount}</span>
+        </div>
+      </div>
+      
+      <div className="space-y-3">
+        {dailyQuest.map((quest, index) => (
+          <div 
+            key={quest.task} 
+            className={cx(
+              "group flex items-center gap-4 rounded-2xl p-4 transition-all duration-300",
+              quest.done 
+                ? (isDark ? "bg-brand-deep/30 opacity-70" : "bg-gray-100 opacity-70") 
+                : (isDark ? "bg-brand-deep/50 hover:bg-brand-deep/70" : "bg-gray-50 hover:bg-gray-100")
+            )}
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            <div className={cx(
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all duration-300",
+              quest.done 
+                ? "bg-brand-teal text-white" 
+                : (isDark ? "border-2 border-brand-line text-brand-soft" : "border-2 border-gray-300 text-gray-600")
+            )}>
+              <Icon name={quest.done ? "check" : "sparkles"} className="h-4 w-4" />
+            </div>
+            <p className={cx(
+              "flex-1 text-sm font-semibold transition-all duration-300",
+              quest.done 
+                ? (isDark ? "text-brand-soft line-through" : "text-gray-500 line-through") 
+                : (isDark ? "text-white" : "text-gray-900")
+            )}>
+              {quest.task}
+            </p>
+            {!quest.done && (
+              <span className={cx(
+                "h-2 w-2 rounded-full animate-pulse",
+                isDark ? "bg-brand-orange" : "bg-brand-teal"
+              )} />
+            )}
           </div>
         ))}
       </div>
     </Card>
-  );
-}
-
-function Dashboard({ isDark, navigate }) {
-  const { profile, userProgress, moduleProgress, user } = useAuth();
-  const levels = isDark ? ["#0C4A57", "#0E5F6E", "#14889A", "#1FAAB8", "#2AABB8"] : ["#E8EEEF", "#A8CDD6", "#5AADBE", "#1D7F94", "#0D5C6F"];
-  const [recommendations, setRecommendations] = useState([]);
-  
-  // Parse weekly activity from database or use default
-  const activity = useMemo(() => {
-    if (userProgress?.weekly_activity && userProgress.weekly_activity.length > 0) {
-      return userProgress.weekly_activity;
-    }
-    return Array.from({ length: 16 }, (_, week) => Array.from({ length: 7 }, (_, day) => (week * 3 + day * 5) % 5));
-  }, [userProgress]);
-
-  const userName = profile?.full_name || "Usuario";
-  const streakDays = userProgress?.streak_days || 0;
-  const practiceDays = userProgress?.practice_days || 0;
-  const currentLevel = userProgress?.current_level || 1;
-  const currentLesson = userProgress?.current_lesson || 1;
-  const totalSignsLearned = userProgress?.total_signs_learned || 0;
-  const totalPracticeTime = userProgress?.total_practice_time || 0;
-  const averageAccuracy = userProgress?.average_accuracy || 0;
-
-  // Calculate module progress
-  const completedModules = moduleProgress?.filter(m => m.status === 'completed').length || 0;
-  const totalModules = modules.length;
-  const moduleProgressPercent = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
-
-  // Fetch recommendations
-  useEffect(() => {
-    if (user) {
-      getRecommendations(user.id).then(setRecommendations);
-    }
-  }, [user]);
-
-  return (
-    <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-      <PageTitle isDark={isDark} title={`Buenas tardes, ${userName.split(' ')[0]}`} accent={userName.split(' ')[0]} subtitle="Tu progreso de la semana va excelente" />
-      <LearningPulse isDark={isDark} />
-      {streakDays > 0 && (
-        <div className={cx("streak-banner animate-fade mb-6 flex items-center gap-3 rounded-xl border p-3 sm:gap-4 sm:p-4", isDark ? "border-brand-line bg-brand-card/70" : "border-brand-mist bg-white/60")}>
-          <div className="flex items-center gap-2 text-brand-orange"><Icon name="flame" className="streak-fire h-6 w-6 sm:h-7 sm:w-7" /><strong className="text-2xl sm:text-3xl">{streakDays}</strong></div>
-          <div><div className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>¡Racha de {streakDays} días!</div><div className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>Sigue practicando para mantener tu racha activa</div></div>
-        </div>
-      )}
-      <div className="grid gap-6 lg:grid-cols-5">
-        <div className="space-y-6 lg:col-span-3">
-          <Card isDark={isDark}>
-            <div className="mb-4 flex items-center justify-between"><SectionLabel isDark={isDark}>Actividad reciente</SectionLabel><span className={cx("text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>Últimas 16 semanas</span></div>
-            <div className="overflow-x-auto">
-              <div className="flex w-max gap-1.5">
-                {activity.map((week, wi) => <div key={wi} className="flex flex-col gap-[3px]">{week.map((level, di) => <div key={di} className="heatmap-cell h-[12px] w-[12px] sm:h-[14px] sm:w-[14px] rounded-[3px]" style={{ backgroundColor: levels[level] }} />)}</div>)}
-              </div>
-            </div>
-          </Card>
-          <ProgressCard 
-            isDark={isDark} 
-            currentLevel={currentLevel}
-            currentLesson={currentLesson}
-            totalSignsLearned={totalSignsLearned}
-            totalPracticeTime={totalPracticeTime}
-            averageAccuracy={averageAccuracy}
-            moduleProgressPercent={moduleProgressPercent}
-            practiceDays={practiceDays}
-          />
-        </div>
-        <div className="space-y-6 lg:col-span-2">
-          <QuestList isDark={isDark} />
-          {recommendations.length > 0 && (
-            <Card isDark={isDark}>
-              <SectionLabel isDark={isDark}>Recomendaciones</SectionLabel>
-              <div className="mt-4 space-y-2">
-                {recommendations.map((rec, i) => (
-                  <div key={i} className={cx("flex items-start gap-3 rounded-lg p-3", isDark ? "bg-brand-deep/50" : "bg-brand-cream/50")}>
-                    <span className={cx("mt-0.5 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>{i + 1}</span>
-                    <p className={cx("text-xs font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}>{rec.reason}</p>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-          <Card isDark={isDark}>
-            <SectionLabel isDark={isDark}>Tu semana</SectionLabel>
-            <div className="mt-4 space-y-3">{[45, 30, 60, 25, 0, 0, 0].map((min, i) => <BarRow key={i} label={["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"][i]} value={min} isDark={isDark} />)}</div>
-          </Card>
-          <div>
-            <SectionLabel isDark={isDark}>Acciones rápidas</SectionLabel>
-            <div className="mt-3 space-y-3">
-              <QuickAction isDark={isDark} icon="play" title="Comenzar lección" desc={`Lección ${currentLesson}`} onClick={() => navigate("/learn")} />
-              <QuickAction isDark={isDark} icon="camera" title="Práctica inmersiva" desc="Feedback con IA" onClick={() => navigate("/practice")} accent />
-              <QuickAction isDark={isDark} icon="refresh" title="Repaso diario" desc={`${Math.max(0, 12 - totalSignsLearned)} señas pendientes`} onClick={() => navigate("/learn")} />
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
   );
 }
 
@@ -491,8 +661,12 @@ function PageTitle({ isDark, title, accent, subtitle }) {
   const parts = title.split(accent);
   return (
     <div className="animate-fade mb-8">
-      <h1 className={cx("text-2xl font-extrabold md:text-3xl", isDark ? "text-white" : "text-brand-ink")}>{parts[0]}<span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{accent}</span>{parts[1]}</h1>
-      <p className={cx("mt-1 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>{subtitle}</p>
+      <h1 className={cx("text-2xl font-extrabold md:text-3xl lg:text-4xl", isDark ? "text-white" : "text-brand-ink")} role="heading" aria-level="1">
+        {parts[0]}<span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{accent}</span>{parts[1]}
+      </h1>
+      <p className={cx("mt-2 text-sm md:text-base", isDark ? "text-brand-soft" : "text-brand-muted")} role="doc-subtitle">
+        {subtitle}
+      </p>
     </div>
   );
 }
@@ -502,22 +676,70 @@ function SectionLabel({ isDark, children }) {
 }
 
 function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, totalPracticeTime, averageAccuracy, moduleProgressPercent, practiceDays }) {
+  const stats = [
+    [totalSignsLearned, "Señas aprendidas", "sparkles"],
+    [`${totalPracticeTime} min`, "Tiempo total", "clock"],
+    [`${Math.round(averageAccuracy)}%`, "Precisión", "trophy"],
+    [practiceDays, "Días practicados", "flame"]
+  ];
+  
   return (
     <Card isDark={isDark}>
-      <div className="mb-4 flex items-center justify-between"><SectionLabel isDark={isDark}>Progreso actual</SectionLabel><span className={cx("rounded-full px-3 py-1 text-xs font-semibold", isDark ? "bg-brand-cyan/15 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>Nivel {currentLevel}</span></div>
-      <h3 className={cx("text-2xl font-extrabold sm:text-3xl", isDark ? "text-white" : "text-brand-ink")}>Lección {currentLesson}:</h3>
-      <p className={cx("text-sm font-medium", isDark ? "text-brand-soft" : "text-brand-muted")}>Progreso del módulo</p>
-      <div className={cx("mt-5 h-2.5 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}><div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" style={{ width: `${moduleProgressPercent}%` }} /></div>
-      <div className="mt-5 grid grid-cols-2 gap-3 border-t border-dashed pt-5 sm:grid-cols-4" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
-        {[
-          [totalSignsLearned, "Señas aprendidas"],
-          [`${totalPracticeTime} min`, "Tiempo total"],
-          [`${Math.round(averageAccuracy)}%`, "Precisión"],
-          [practiceDays, "Días practicados"]
-        ].map(([v, l]) => (
-          <div key={l} className="text-center">
-            <div className={cx("text-lg font-extrabold sm:text-xl", isDark ? "text-white" : "text-brand-ink")}>{v}</div>
-            <div className={cx("mt-0.5 text-[10px] font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{l}</div>
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
+            Progreso actual
+          </span>
+        </div>
+        <div className={cx("rounded-full px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-deep/50 text-brand-cyan" : "bg-gray-100 text-brand-teal")}>
+          Nivel {currentLevel}
+        </div>
+      </div>
+      
+      <div className="mb-6">
+        <h3 className={cx("text-2xl font-extrabold sm:text-3xl", isDark ? "text-white" : "text-gray-900")}>
+          Lección {currentLesson}
+        </h3>
+        <p className={cx("mt-1 text-sm font-medium", isDark ? "text-brand-soft" : "text-gray-600")}>
+          Progreso del módulo
+        </p>
+      </div>
+      
+      {/* Simplified Progress Bar */}
+      <div className="mb-8">
+        <div className={cx("relative h-3 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-gray-200")}>
+          <div 
+            className={cx(
+              "absolute left-0 top-0 h-full rounded-full transition-all duration-700 ease-out",
+              "bg-brand-teal"
+            )}
+            style={{ width: `${moduleProgressPercent}%` }}
+          />
+        </div>
+        <div className="mt-2 flex justify-between">
+          <span className={cx("text-xs font-medium", isDark ? "text-brand-soft" : "text-gray-600")}>
+            {moduleProgressPercent}% completado
+          </span>
+        </div>
+      </div>
+      
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 gap-4 border-t border-dashed pt-6 sm:grid-cols-4" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
+        {stats.map(([value, label, icon], index) => (
+          <div 
+            key={label} 
+            className="text-center transition-all duration-300 hover:scale-105"
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            <div className={cx("flex items-center justify-center gap-1 mb-1", isDark ? "text-brand-cyan" : "text-brand-teal")}>
+              <Icon name={icon} className="h-3 w-3" />
+            </div>
+            <div className={cx("text-xl font-extrabold sm:text-2xl", isDark ? "text-white" : "text-gray-900")}>
+              {value}
+            </div>
+            <div className={cx("mt-1 text-[10px] font-medium uppercase tracking-wider", isDark ? "text-[#5A8A94]" : "text-gray-600")}>
+              {label}
+            </div>
           </div>
         ))}
       </div>
@@ -531,11 +753,160 @@ function BarRow({ label, value, isDark }) {
 
 function QuickAction({ isDark, icon, title, desc, onClick, accent }) {
   return (
-    <button onClick={onClick} className={cx("btn-press group flex w-full items-center gap-4 rounded-xl border p-4 text-left transition", isDark ? "border-brand-line bg-brand-card hover:border-brand-cyan/30" : "border-gray-100 bg-white shadow-sm hover:shadow-md")}>
-      <span className={cx("flex h-11 w-11 items-center justify-center rounded-lg", accent ? "bg-brand-orange/15 text-brand-orange" : isDark ? "bg-brand-teal/20 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}><Icon name={icon} /></span>
-      <span className="min-w-0 flex-1"><span className={cx("block text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{title}</span><span className={cx("block text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{desc}</span></span>
-      <Icon name="arrow" className={cx("h-4 w-4 transition group-hover:translate-x-1", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")} />
+    <button 
+      onClick={onClick} 
+      className={cx(
+        "btn-press group flex w-full items-center gap-4 rounded-2xl border p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:shadow-lg",
+        isDark 
+          ? "border-brand-line/30 bg-brand-card hover:border-brand-cyan/50 hover:bg-brand-deep/50" 
+          : "border-gray-200/50 bg-white hover:border-brand-teal/50 hover:shadow-brand-teal/10"
+      )}
+    >
+      <div className={cx(
+        "flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110",
+        accent 
+          ? "bg-brand-orange/20 text-brand-orange" 
+          : isDark 
+            ? "bg-brand-teal/20 text-brand-cyan" 
+            : "bg-brand-teal/10 text-brand-teal"
+      )}>
+        <Icon name={icon} className="h-6 w-6" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <span className={cx("block text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{title}</span>
+        <span className={cx("block text-xs mt-1", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{desc}</span>
+      </div>
+      <div className={cx(
+        "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1",
+        isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal"
+      )}>
+        <Icon name="arrow" className="h-4 w-4" />
+      </div>
     </button>
+  );
+}
+
+function DashboardPage({ isDark, navigate }) {
+  const { profile, userProgress, moduleProgress } = useAuth();
+  
+  const completedSigns = moduleProgress?.reduce((sum, mp) => sum + (mp.signs_completed || 0), 0) || 0;
+  const totalSigns = modules.reduce((sum, m) => sum + m.signs, 0);
+  const progress = Math.round((completedSigns / totalSigns) * 100);
+  const streakDays = userProgress?.streak_days || 0;
+  const practiceTime = userProgress?.total_practice_time || 0;
+  const averageAccuracy = userProgress?.average_accuracy || 0;
+
+  return (
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+      {/* Welcome Section */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-2">
+          <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
+            Bienvenido de nuevo
+          </span>
+        </div>
+        <h1 className={cx("text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
+          Hola, <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{profile?.full_name || "Usuario"}</span>
+        </h1>
+        <p className={cx("mt-2 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>
+          Continúa tu aprendizaje de lengua de señas mexicana
+        </p>
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-12">
+        <div className="space-y-6 lg:col-span-8">
+          {/* Learning Pulse */}
+          <LearningPulse isDark={isDark} />
+          
+          {/* Quick Stats */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <ProgressCard 
+              isDark={isDark}
+              currentLevel={userProgress?.current_level || 1}
+              currentLesson={userProgress?.current_lesson || 1}
+              totalSignsLearned={completedSigns}
+              totalPracticeTime={practiceTime}
+              averageAccuracy={averageAccuracy}
+              moduleProgressPercent={progress}
+              practiceDays={streakDays}
+            />
+            <QuestList isDark={isDark} />
+          </div>
+        </div>
+        
+        {/* Sidebar */}
+        <div className="space-y-6 lg:col-span-4">
+          <Card isDark={isDark}>
+            <div className="flex items-center gap-2 mb-6">
+              <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
+                Acciones rápidas
+              </span>
+            </div>
+            
+            <div className="space-y-3">
+              <QuickAction
+                isDark={isDark}
+                icon="book"
+                title="Continuar lección"
+                desc="Retoma donde lo dejaste"
+                onClick={() => navigate("/lesson")}
+                accent
+              />
+              <QuickAction
+                isDark={isDark}
+                icon="camera"
+                title="Practicar"
+                desc="Mejora tu técnica"
+                onClick={() => navigate("/practice")}
+              />
+              <QuickAction
+                isDark={isDark}
+                icon="trophy"
+                title="Ver progreso"
+                desc="Estadísticas detalladas"
+                onClick={() => navigate("/learn")}
+              />
+            </div>
+          </Card>
+          
+          {/* User Info Card */}
+          <Card isDark={isDark}>
+            <div className="flex items-center gap-2 mb-6">
+              <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
+                Tu perfil
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-4 mb-4">
+              <div className={cx("flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-bold", isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")}>
+                {profile?.avatar_initials || profile?.full_name?.substring(0, 2).toUpperCase() || "US"}
+              </div>
+              <div>
+                <h3 className={cx("text-lg font-bold", isDark ? "text-white" : "text-brand-ink")}>
+                  {profile?.full_name || "Usuario"}
+                </h3>
+                <p className={cx("text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                  {profile?.email || ""}
+                </p>
+              </div>
+            </div>
+            
+            <div className="border-t pt-4" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <div className={cx("text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{streakDays}</div>
+                  <div className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>Días de racha</div>
+                </div>
+                <div>
+                  <div className={cx("text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{progress}%</div>
+                  <div className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>Progreso total</div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    </main>
   );
 }
 
@@ -544,6 +915,15 @@ function LearnPage({ isDark }) {
   const [selected, setSelected] = useState(modules[0]);
   const [activeSign, setActiveSign] = useState(null);
   const [search, setSearch] = useState("");
+
+  // Auto-advance to next sign in current module
+  const handleNextSign = () => {
+    if (!selected || !activeSign) return;
+    const currentIndex = selected.items.findIndex(item => item.label === activeSign.label);
+    if (currentIndex !== -1 && currentIndex < selected.items.length - 1) {
+      setActiveSign(selected.items[currentIndex + 1]);
+    }
+  };
 
   // Merge module data with progress from database
   const modulesWithProgress = useMemo(() => {
@@ -592,46 +972,198 @@ function LearnPage({ isDark }) {
   }, [selected, search]);
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-      <PageTitle isDark={isDark} title="Tu ruta de aprendizaje" accent="aprendizaje" subtitle="Selecciona un módulo y toca cualquier seña para ver el video" />
-      <div className="grid gap-6 lg:grid-cols-12">
-        <section className="space-y-0 lg:col-span-4 overflow-y-auto max-h-[60vh] lg:max-h-[80vh] pr-1">
-          {modulesWithProgress.map((module, index) => (
-            <SkillNode
-              key={module.id} module={module} index={index} isDark={isDark}
-              selected={selected?.id === module.id}
-              onClick={() => { setSelected(module); setActiveSign(null); setSearch(""); }}
-            />
-          ))}
-        </section>
-        <section className="space-y-4 lg:col-span-8">
-          <div className="grid gap-4 sm:grid-cols-2">
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+      {/* Enhanced Page Title */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-2">
+          <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
+            Tu Progreso
+          </span>
+        </div>
+        <h1 className={cx("text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
+          Avance en <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>módulos</span> y señas aprendidas
+        </h1>
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-12">
+        <div className="space-y-6 lg:col-span-8">
+          {/* Enhanced Modules Card */}
+          <Card isDark={isDark}>
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
+                  Módulos
+                </span>
+              </div>
+              <div className={cx("flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-deep/50 text-brand-soft" : "bg-brand-cream/50 text-brand-muted")}>
+                <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{completedSigns}</span>
+                <span className="text-brand-muted">/</span>
+                <span>{totalSigns}</span>
+                <span className="ml-1">señas</span>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {modulesWithProgress.map((module, index) => (
+                <SkillNode
+                  key={module.id}
+                  module={module}
+                  index={index}
+                  isDark={isDark}
+                  selected={selected?.id === module.id}
+                  onClick={() => setSelected(module)}
+                />
+              ))}
+            </div>
+          </Card>
+          
+          {/* Enhanced Selected Module Card */}
+          {selected && (
             <Card isDark={isDark}>
-              <SectionLabel isDark={isDark}>Tu racha</SectionLabel>
-              <div className="mt-4 text-center">
-                <div className="text-3xl font-extrabold text-brand-orange sm:text-4xl">{streakDays}</div>
-                <div className={cx("mt-1 text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>días consecutivos</div>
+              <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-3">
+                  <div className={cx("flex h-12 w-12 items-center justify-center rounded-2xl", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-brand-orange/20 text-brand-orange")}>
+                    <Icon name={selected.icon || "book"} className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className={cx("text-lg font-bold", isDark ? "text-white" : "text-gray-900")}>{selected.title}</h3>
+                    <p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-gray-600")}>{selected.signs} señas · Nivel {selected.level}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <Icon name="sparkles" className={cx("absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4", isDark ? "text-brand-soft" : "text-brand-muted")} />
+                    <input
+                      type="text"
+                      placeholder="Buscar seña..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className={cx(
+                        "pl-10 pr-4 py-2.5 rounded-xl text-sm w-48 sm:w-64 transition-all duration-200 focus:ring-2 focus:ring-brand-cyan/50",
+                        isDark ? "bg-brand-deep text-white border border-brand-line placeholder:text-[#5A8A94]" : "bg-white text-brand-ink border border-gray-200 placeholder:text-[#8AA8B0]"
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                {filteredItems.map((item, index) => (
+                  <button
+                    key={item.label}
+                    className={cx(
+                      "group flex flex-col items-center gap-3 rounded-2xl p-4 transition-all duration-300 hover:scale-105",
+                      isDark 
+                        ? "bg-brand-deep/40 hover:bg-brand-deep/60 border border-brand-line/30 hover:border-brand-cyan/50" 
+                        : "bg-gray-100 hover:bg-gray-200 border border-gray-300 hover:border-brand-teal/50 shadow-sm"
+                    )}
+                    style={{ animationDelay: `${index * 30}ms` }}
+                  >
+                    <div className="relative h-20 w-20 overflow-hidden rounded-xl shadow-md">
+                      <img 
+                        src={item.thumbnail} 
+                        alt={item.label} 
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" 
+                        loading="lazy" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      {/* Icon overlay */}
+                      <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                        <Icon name={getSignIcon(item.label)} className="h-3 w-3 text-gray-800" />
+                      </div>
+                    </div>
+                    <span className={cx("text-xs font-semibold text-center leading-tight", isDark ? "text-brand-soft" : "text-gray-700")}>
+                      {item.label}
+                    </span>
+                  </button>
+                ))}
               </div>
             </Card>
-            <Card isDark={isDark}>
-              <SectionLabel isDark={isDark}>Progreso general</SectionLabel>
-              <div className={cx("mt-3 text-2xl font-extrabold sm:text-3xl", isDark ? "text-white" : "text-brand-ink")}>{progress}%</div>
-              <div className={cx("mt-3 h-2 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}>
-                <div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" style={{ width: `${progress}%` }} />
-              </div>
-              <p className={cx("mt-2 text-[10px]", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{completedSigns} de {totalSigns} señas</p>
-            </Card>
-          </div>
-          {activeSign ? (
-            <SignVideoPanel sign={activeSign} isDark={isDark} onClose={() => setActiveSign(null)} moduleId={selected.id} />
-          ) : (
-            <ModuleDetail
-              module={selected} isDark={isDark}
-              items={filteredItems} search={search}
-              onSearch={setSearch} onSelect={setActiveSign}
-            />
           )}
-        </section>
+        </div>
+        
+        {/* Enhanced Sidebar */}
+        <div className="space-y-6 lg:col-span-4">
+          {/* Stats Card */}
+          <Card isDark={isDark}>
+            <div className="flex items-center gap-2 mb-6">
+              <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
+                Estadísticas
+              </span>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Overall Progress */}
+              <div>
+                <div className={cx("flex items-center justify-between mb-2", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                  <span className="text-xs font-medium">Progreso total</span>
+                  <span className="text-xs font-bold">{progress}%</span>
+                </div>
+                <div className={cx("relative h-3 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}>
+                  <div 
+                    className={cx(
+                      "absolute left-0 top-0 h-full rounded-full transition-all duration-700 ease-out",
+                      "bg-gradient-to-r from-brand-teal via-brand-cyan to-brand-orange"
+                    )}
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+              
+              {/* Streak */}
+              {streakDays > 0 && (
+                <div className={cx(
+                  "flex items-center gap-4 rounded-2xl p-4 transition-all duration-300",
+                  isDark ? "bg-brand-deep/50" : "bg-brand-cream/50"
+                )}>
+                  <div className={cx("flex h-12 w-12 items-center justify-center rounded-xl", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-brand-orange/20 text-brand-teal")}>
+                    <Icon name="flame" className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <div className={cx("text-xs font-medium mb-1", isDark ? "text-brand-soft" : "text-brand-muted")}>Racha actual</div>
+                    <div className={cx("text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{streakDays} días</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+          
+          {/* Actions Card */}
+          <Card isDark={isDark}>
+            <div className="flex items-center gap-2 mb-6">
+              <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
+                Acciones
+              </span>
+            </div>
+            
+            <div className="space-y-3">
+              <button
+                onClick={() => window.location.href = "/lesson"}
+                className={cx(
+                  "group btn-press w-full flex items-center justify-center gap-2 rounded-2xl px-6 py-4 text-sm font-bold transition-all duration-200 active:scale-95",
+                  isDark 
+                    ? "bg-gradient-to-r from-brand-teal to-brand-cyan text-white hover:shadow-lg hover:shadow-brand-cyan/20" 
+                    : "bg-gradient-to-r from-brand-teal to-brand-cyan text-white hover:shadow-lg hover:shadow-brand-teal/20"
+                )}
+              >
+                <Icon name="book" className="h-5 w-5 transition-transform group-hover:scale-110" />
+                Comenzar Lección
+              </button>
+              <button
+                onClick={() => window.location.href = "/practice"}
+                className={cx(
+                  "group btn-press w-full flex items-center justify-center gap-2 rounded-2xl px-6 py-4 text-sm font-bold transition-all duration-200 active:scale-95",
+                  isDark 
+                    ? "bg-brand-deep text-brand-soft hover:bg-brand-card border border-brand-line" 
+                    : "bg-white text-brand-muted hover:bg-brand-cream border border-gray-200"
+                )}
+              >
+                <Icon name="camera" className="h-5 w-5 transition-transform group-hover:scale-110" />
+                Ir a Práctica
+              </button>
+            </div>
+          </Card>
+        </div>
       </div>
     </main>
   );
@@ -641,16 +1173,124 @@ function SkillNode({ module, index, isDark, selected, onClick }) {
   const completed = module.status === "completed";
   const current = module.status === "current";
   const locked = module.status === "locked";
+  
   return (
-    <div>
-      <button onClick={onClick} className={cx("animate-fade flex w-full items-center gap-3 text-left sm:gap-4", locked && "cursor-default opacity-60")} style={{ animationDelay: `${index * 60}ms` }}>
-        <span className={cx("flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition sm:h-14 sm:w-14", completed ? "bg-brand-teal text-white" : current ? "node-glow bg-brand-orange text-white" : isDark ? "border border-brand-line bg-brand-card text-[#5A8A94]" : "border border-brand-mist bg-[#E8EEEF] text-[#8AA8B0]")}>{completed ? <Icon name="check" /> : current ? <Icon name="play" /> : <Icon name="lock" />}</span>
-        <span className={cx("flex-1 rounded-xl p-3 transition sm:p-4", selected ? (isDark ? "border border-brand-cyan/30 bg-brand-card" : "border border-brand-teal/20 bg-white shadow-sm") : (isDark ? "hover:bg-brand-card/50" : "hover:bg-white/50"))}>
-          <span className={cx("block text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{module.title}</span>
-          <span className={cx("block text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{module.desc}</span>
-        </span>
+    <div className="relative">
+      <button 
+        onClick={onClick} 
+        className={cx(
+          "group btn-press relative flex w-full items-center gap-4 text-left transition-all duration-300",
+          locked && "cursor-default opacity-50",
+          !locked && "hover:scale-[1.01]"
+        )}
+        style={{ animationDelay: `${index * 50}ms` }}
+        disabled={locked}
+        aria-pressed={selected}
+        aria-label={`${module.title} - ${module.desc} - ${locked ? 'Bloqueado' : completed ? 'Completado' : 'En progreso'}`}
+        role="button"
+      >
+        {/* Module Icon with Status Overlay */}
+        <div className="relative">
+          <div className={cx(
+            "relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-all duration-300 sm:h-16 sm:w-16",
+            isDark 
+              ? "border-2 border-brand-line bg-brand-card text-brand-orange" 
+              : "border-2 border-gray-300 bg-gray-100 text-brand-orange"
+          )} aria-hidden="true">
+            <Icon name={module.icon || "book"} className="h-6 w-6 sm:h-7 sm:w-7" />
+          </div>
+          
+          {/* Status Badge */}
+          <div className={cx(
+            "absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all duration-300 sm:h-7 sm:w-7",
+            isDark ? "border-brand-deep bg-brand-card" : "border-white bg-white",
+            completed 
+              ? "text-brand-teal" 
+              : current 
+                ? "text-brand-orange" 
+                : "text-gray-400"
+          )}>
+            {completed ? (
+              <Icon name="check" className="h-3 w-3 sm:h-4 sm:w-4" />
+            ) : current ? (
+              <Icon name="play" className="h-3 w-3 sm:h-4 sm:w-4" />
+            ) : (
+              <Icon name="lock" className="h-3 w-3 sm:h-3 sm:w-3" />
+            )}
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className={cx(
+          "flex-1 rounded-2xl p-4 transition-all duration-300 sm:p-5",
+          selected 
+            ? (isDark 
+                ? "border-2 border-brand-cyan/50 bg-brand-card shadow-md" 
+                : "border-2 border-brand-teal/50 bg-white shadow-md") 
+            : (isDark 
+                ? "border border-brand-line/30 bg-brand-deep/30 hover:bg-brand-deep/50" 
+                : "border border-gray-300 bg-gray-50 hover:bg-gray-100")
+        )}>
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1">
+              <span className={cx("block text-sm font-bold sm:text-base", isDark ? "text-white" : "text-gray-900")}>
+                {module.title}
+              </span>
+              <span className={cx("block text-xs mt-1", isDark ? "text-[#5A8A94]" : "text-gray-600")}>
+                {module.desc}
+              </span>
+            </div>
+            
+            {/* Progress indicator */}
+            {module.signs_completed !== undefined && (
+              <div className={cx(
+                "flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold",
+                isDark ? "bg-brand-deep/50 text-brand-soft" : "bg-gray-100 text-gray-600"
+              )} aria-label={`Progreso: ${module.signs_completed} de ${module.signs} señas`}>
+                <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{module.signs_completed}</span>
+                <span aria-hidden="true">/</span>
+                <span>{module.signs}</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Mini progress bar */}
+          {module.signs_completed !== undefined && (
+            <div className="mt-3" role="progressbar" aria-valuenow={module.signs_completed} aria-valuemin={0} aria-valuemax={module.signs} aria-label={`Progreso del módulo: ${Math.round((module.signs_completed / module.signs) * 100)}%`}>
+              <div className={cx("h-1.5 w-full overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-gray-200")}>
+                <div 
+                  className={cx(
+                    "h-full rounded-full transition-all duration-500 ease-out",
+                    completed 
+                      ? "bg-brand-teal" 
+                      : current 
+                        ? "bg-brand-orange" 
+                        : "bg-gray-400"
+                  )}
+                  style={{ width: `${(module.signs_completed / module.signs) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Arrow indicator */}
+        {!locked && (
+          <div className={cx(
+            "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100",
+            isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal"
+          )} aria-hidden="true">
+            <Icon name="arrow" className="h-4 w-4" />
+          </div>
+        )}
       </button>
-      {index < modules.length - 1 && <div className="flex justify-center py-1"><div className={cx("h-8 w-px rounded-full sm:h-10", isDark ? "bg-brand-line" : "bg-brand-mist")} /></div>}
+      
+      {/* Connector line */}
+      {index < modules.length - 1 && (
+        <div className="flex justify-center py-3" aria-hidden="true">
+          <div className={cx("h-8 w-px rounded-full sm:h-10", isDark ? "bg-brand-line/50" : "bg-gray-300")} />
+        </div>
+      )}
     </div>
   );
 }
@@ -675,17 +1315,217 @@ function ModuleDetail({ module, isDark, items, search, onSearch, onSelect }) {
       <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto sm:max-h-72 sm:grid-cols-3">
         {items.map((item) => (
           <button
-            key={item.label} onClick={() => onSelect(item)}
+            key={item.label} 
+            onClick={() => onSelect(item)}
             className={cx("btn-press group flex flex-col items-center gap-2 rounded-xl border p-2 sm:p-3 text-center transition",
               isDark ? "border-brand-line bg-brand-deep/40 hover:border-brand-cyan/40 hover:bg-brand-card" : "border-brand-mist bg-brand-cream hover:border-brand-teal/30 hover:bg-white hover:shadow-sm"
             )}
           >
-            <img src={item.thumbnail} alt={item.label} className="h-12 w-full rounded-lg object-cover sm:h-14" loading="lazy" />
-            <span className={cx("text-[10px] font-semibold leading-tight sm:text-[11px]", isDark ? "text-brand-soft" : "text-brand-muted")}>{item.label}</span>
+            <div className="relative">
+              <img src={item.thumbnail} alt={item.label} className="h-12 w-full rounded-lg object-cover sm:h-14" loading="lazy" />
+              {/* Icon overlay */}
+              <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                <Icon name={getSignIcon(item.label)} className="h-2.5 w-2.5 text-gray-800" />
+              </div>
+            </div>
+            <span className={cx("text-[10px] font-semibold leading-tight sm:text-[11px]", isDark ? "text-brand-soft" : "text-gray-600")}>{item.label}</span>
           </button>
         ))}
       </div>
     </Card>
+  );
+}
+
+function LessonPage({ isDark, navigate }) {
+  const { userProgress, moduleProgress } = useAuth();
+  const [selected, setSelected] = useState(modules[0]);
+  const [activeSign, setActiveSign] = useState(null);
+  const [search, setSearch] = useState("");
+
+  // Auto-advance to next sign in current module
+  const handleNextSign = () => {
+    if (!selected || !activeSign) return;
+    const currentIndex = selected.items.findIndex(item => item.label === activeSign.label);
+    if (currentIndex !== -1 && currentIndex < selected.items.length - 1) {
+      setActiveSign(selected.items[currentIndex + 1]);
+    }
+  };
+
+  // Merge module data with progress from database
+  const modulesWithProgress = useMemo(() => {
+    return modules.map((module, index) => {
+      const progressData = moduleProgress?.find(mp => mp.module_id === module.id);
+      const signsCompleted = progressData?.signs_completed || 0;
+      const isCompleted = signsCompleted >= module.signs;
+      
+      let status = 'locked';
+      if (index === 0) {
+        status = isCompleted ? 'completed' : 'current';
+      } else {
+        const prevModule = modules[index - 1];
+        const prevProgressData = moduleProgress?.find(mp => mp.module_id === prevModule.id);
+        const prevCompleted = (prevProgressData?.signs_completed || 0) >= prevModule.signs;
+        
+        if (prevCompleted) {
+          status = isCompleted ? 'completed' : 'current';
+        } else {
+          status = 'locked';
+        }
+      }
+      
+      return {
+        ...module,
+        status: progressData?.status || status,
+        signs_completed: signsCompleted,
+      };
+    });
+  }, [moduleProgress]);
+
+  const filteredItems = useMemo(() => {
+    if (!selected) return [];
+    if (!search.trim()) return selected.items;
+    return selected.items.filter((item) =>
+      item.label.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [selected, search]);
+
+  return (
+    <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+      <AppHeader isDark={isDark} setIsDark={() => {}} navigate={navigate} path="/lesson" />
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
+        {/* Enhanced Header */}
+        <div className="mb-8">
+          <button
+            onClick={() => navigate("/learn")}
+            className={cx(
+              "btn-press group flex items-center gap-2 text-sm font-medium transition-all duration-200",
+              isDark ? "text-brand-soft hover:text-white" : "text-brand-muted hover:text-brand-ink"
+            )}
+          >
+            <Icon name="arrow" className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-1" />
+            Volver a Progreso
+          </button>
+          
+          <div className="mt-4 flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
+                  Lecciones
+                </span>
+              </div>
+              <h1 className={cx("text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
+                Explora y <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>aprende</span>
+              </h1>
+            </div>
+            <div className="w-20" />
+          </div>
+        </div>
+
+        {!activeSign ? (
+          <div className="grid gap-8 lg:grid-cols-12">
+            {/* Enhanced Module List */}
+            <section className="space-y-4 lg:col-span-4">
+              <div className={cx(
+                "rounded-3xl border p-6 backdrop-blur-xl",
+                isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+              )}>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
+                    Módulos
+                  </span>
+                </div>
+                
+                <div className="space-y-3 max-h-[60vh] lg:max-h-[80vh] overflow-y-auto pr-2">
+                  {modulesWithProgress.map((module, index) => (
+                    <SkillNode
+                      key={module.id} 
+                      module={module} 
+                      index={index} 
+                      isDark={isDark}
+                      selected={selected?.id === module.id}
+                      onClick={() => { setSelected(module); setSearch(""); }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </section>
+            
+            {/* Enhanced Sign Grid */}
+            <section className="space-y-6 lg:col-span-8">
+              {selected && (
+                <Card isDark={isDark}>
+                  <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className={cx("flex h-14 w-14 items-center justify-center rounded-2xl", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-brand-orange/20 text-brand-orange")}>
+                        <Icon name={selected.icon || "book"} className="h-7 w-7" />
+                      </div>
+                      <div>
+                        <h3 className={cx("text-xl font-bold", isDark ? "text-white" : "text-gray-900")}>{selected.title}</h3>
+                        <p className={cx("text-sm", isDark ? "text-[#5A8A94]" : "text-gray-600")}>{selected.signs} señas · Nivel {selected.level}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="relative">
+                      <Icon name="sparkles" className={cx("absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4", isDark ? "text-brand-soft" : "text-brand-muted")} />
+                      <input
+                        value={search} 
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Buscar seña..."
+                        className={cx(
+                          "pl-11 pr-4 py-3 rounded-xl text-sm w-48 sm:w-64 transition-all duration-200 focus:ring-2 focus:ring-brand-cyan/50",
+                          isDark ? "bg-brand-deep text-white border border-brand-line placeholder:text-[#5A8A94]" : "bg-white text-brand-ink border border-gray-200 placeholder:text-[#8AA8B0]"
+                        )}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 max-h-96 overflow-y-auto pr-2">
+                    {filteredItems.map((item, index) => (
+                      <button
+                        key={item.label} 
+                        onClick={() => setActiveSign(item)}
+                        className={cx(
+                          "btn-press group flex flex-col items-center gap-3 rounded-2xl p-4 text-center transition-all duration-300 hover:scale-105",
+                          isDark 
+                            ? "bg-brand-deep/40 hover:bg-brand-deep/60 border border-brand-line/30 hover:border-brand-cyan/50" 
+                            : "bg-gray-100 hover:bg-gray-200 border border-gray-300 hover:border-brand-teal/50 shadow-sm"
+                        )}
+                        style={{ animationDelay: `${index * 30}ms` }}
+                      >
+                        <div className="relative h-24 w-full overflow-hidden rounded-xl shadow-md">
+                          <img 
+                            src={item.thumbnail} 
+                            alt={item.label} 
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" 
+                            loading="lazy" 
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                          {/* Icon overlay */}
+                          <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                            <Icon name={getSignIcon(item.label)} className="h-3 w-3 text-gray-800" />
+                          </div>
+                        </div>
+                        <span className={cx("text-xs font-semibold leading-tight", isDark ? "text-brand-soft" : "text-gray-700")}>
+                          {item.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </Card>
+              )}
+            </section>
+          </div>
+        ) : (
+          <LessonView
+            sign={activeSign}
+            isDark={isDark}
+            onClose={() => setActiveSign(null)}
+            moduleId={selected.id}
+            onNextSign={handleNextSign}
+          />
+        )}
+      </main>
+    </div>
   );
 }
 
@@ -724,6 +1564,458 @@ function SignVideoPanel({ sign, isDark, onClose, moduleId }) {
   );
 }
 
+function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
+  const { user } = useAuth();
+  const [viewRecorded, setViewRecorded] = useState(false);
+  const [handDetected, setHandDetected] = useState(false);
+  const [gestureState, setGestureState] = useState("waiting");
+  const [matchScore, setMatchScore] = useState(0);
+  const [practiceSuccess, setPracticeSuccess] = useState(false);
+  const holdStartRef = useRef(null);
+  const HOLD_MS = 600;
+
+  // Extract YouTube video ID from URL
+  const getYouTubeVideoId = (url) => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url?.match(regex);
+    return match ? match[1] : null;
+  };
+
+  const videoId = getYouTubeVideoId(sign?.video_ref || sign?.video_ref);
+
+  // Record video view once on open
+  useEffect(() => {
+    if (!viewRecorded && user && sign) {
+      recordVideoView(user.id, sign.label || sign.name, moduleId, sign.lessonId || moduleId);
+      setViewRecorded(true);
+    }
+  }, [user, sign, moduleId, viewRecorded]);
+
+  // Simplified practice handler for lesson view
+  const handlePracticeResults = useCallback(({ handRes }) => {
+    const lms = handRes?.landmarks?.[0] ?? null;
+    setHandDetected(!!lms);
+
+    if (!lms || practiceSuccess) {
+      holdStartRef.current = null;
+      if (!practiceSuccess) setGestureState("waiting");
+      setMatchScore(0);
+      return;
+    }
+
+    const states = fingerStates(lms);
+    const sc = sign.template
+      ? scoreTarget(states, sign.label || sign.name, sign.template)
+      : 0;
+
+    setMatchScore(sc);
+
+    if (sc >= MATCH_THR) {
+      if (!holdStartRef.current) holdStartRef.current = performance.now();
+      const held = performance.now() - holdStartRef.current;
+      const pct = Math.min(1, held / HOLD_MS);
+      setGestureState(pct >= 1 ? "match" : "partial");
+
+      if (held >= HOLD_MS) {
+        setPracticeSuccess(true);
+        setGestureState("confirmed");
+        
+        // Save progress
+        if (user) {
+          updateSignProgress(user.id, sign.label || sign.name, moduleId, sc, 0);
+          updateStreak(user.id);
+        }
+        
+        setTimeout(() => {
+          setPracticeSuccess(false);
+          holdStartRef.current = null;
+          setGestureState("waiting");
+          setMatchScore(0);
+          // Auto-advance to next sign
+          if (onNextSign) onNextSign();
+        }, 1500);
+      }
+    } else {
+      holdStartRef.current = null;
+      setGestureState(sc > 0.45 ? "partial" : "waiting");
+    }
+  }, [sign, user, moduleId, practiceSuccess]);
+
+  const { videoRef, canvasRef, camReady, camError } = useSimpleCamera({ 
+    onResults: handlePracticeResults 
+  });
+
+  if (!sign || !videoId) return null;
+
+  // Use autoplay with mute to prevent freezing, loop enabled for continuous playback
+  // Added showinfo=0 and iv_load_policy=3 to minimize YouTube title/annotations
+  const iframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3`;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <button
+          onClick={onClose}
+          className={cx("btn-press flex items-center gap-2 text-sm font-medium", isDark ? "text-brand-soft hover:text-white" : "text-brand-muted hover:text-brand-ink")}
+        >
+          <Icon name="arrow" className="h-4 w-4 rotate-180" />
+          Volver a lecciones
+        </button>
+        <div className="text-center">
+          <h2 className={cx("text-xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+            {sign.label || sign.name}
+          </h2>
+          <p className={cx("text-sm", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>
+            {sign.hint || sign.desc}
+          </p>
+        </div>
+        <div className="w-24" />
+      </div>
+
+      {/* Split view: Camera on left (larger), Video on right (smaller) */}
+      <div className="grid grid-cols-1 gap-4 rounded-2xl p-4 sm:grid-cols-3">
+        {/* Camera with hand detection - 2 columns wide */}
+        <div className="relative overflow-hidden rounded-xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%", position: "relative" }}>
+          <video
+            ref={videoRef}
+            className="absolute inset-0 h-full w-full object-cover"
+            playsInline
+            muted
+            style={{ transform: "scaleX(-1)" }}
+          />
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ transform: "scaleX(-1)" }}
+          />
+          {!camReady && !camError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+              <div className="text-sm font-semibold text-white">
+                Iniciando cámara...
+              </div>
+            </div>
+          )}
+          {camError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+              <div className="text-center">
+                <div className="text-sm font-semibold text-red-400">{camError}</div>
+              </div>
+            </div>
+          )}
+          {camReady && (
+            <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2">
+              <div className={cx("rounded-lg px-3 py-2 text-sm font-bold", 
+                gestureState === "confirmed" ? "bg-brand-teal text-white" :
+                gestureState === "match" ? "bg-brand-teal/80 text-white" :
+                gestureState === "partial" ? "bg-brand-orange/60 text-white" :
+                "bg-brand-deep/80 text-brand-soft"
+              )}>
+                {gestureState === "confirmed" ? "✓ Correcto" :
+                 gestureState === "match" ? "Mantén la pose..." :
+                 gestureState === "partial" ? "Casi..." :
+                 handDetected ? "Detectando..." : "Muestra tu mano"}
+              </div>
+              {sign.template && (
+                <div className={cx("rounded-lg px-3 py-2 text-sm font-bold", isDark ? "bg-brand-deep/80 text-brand-cyan" : "bg-white/80 text-brand-teal")}>
+                  Precisión: {Math.round(matchScore * 100)}%
+                </div>
+              )}
+            </div>
+          )}
+          {practiceSuccess && (
+            <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/20">
+              <div className="text-center">
+                <Icon name="check" className="h-16 w-16 text-brand-teal mx-auto mb-2" />
+                <div className="text-lg font-bold text-brand-teal">¡Excelente!</div>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* YouTube Video - 1 column */}
+        <div className="relative overflow-hidden rounded-xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
+          <iframe
+            key={videoId}
+            src={iframeSrc}
+            title={sign.label || sign.name}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 h-full w-full border-0"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
+  const { user } = useAuth();
+  const [viewRecorded, setViewRecorded] = useState(false);
+  const modalRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const previousActiveElementRef = useRef(null);
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const [handDetected, setHandDetected] = useState(false);
+  const [gestureState, setGestureState] = useState("waiting");
+  const [matchScore, setMatchScore] = useState(0);
+  const [practiceSuccess, setPracticeSuccess] = useState(false);
+  const holdStartRef = useRef(null);
+  const HOLD_MS = 600;
+
+  // Extract YouTube video ID from URL
+  const getYouTubeVideoId = (url) => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url?.match(regex);
+    return match ? match[1] : null;
+  };
+
+  const videoId = getYouTubeVideoId(sign?.video_ref || sign?.video_ref);
+
+  // Record video view once on open
+  useEffect(() => {
+    if (!viewRecorded && user && sign) {
+      recordVideoView(user.id, sign.label || sign.name, moduleId, sign.lessonId || moduleId);
+      setViewRecorded(true);
+    }
+  }, [user, sign, moduleId, viewRecorded]);
+
+  // Block body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  // Focus management: capture previous active element and focus close button
+  useEffect(() => {
+    previousActiveElementRef.current = document.activeElement;
+    if (closeButtonRef.current) {
+      closeButtonRef.current.focus();
+    }
+    return () => {
+      if (previousActiveElementRef.current) {
+        previousActiveElementRef.current.focus();
+      }
+    };
+  }, []);
+
+  // Focus trap within modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Tab') {
+        if (!modalRef.current) return;
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  // Simplified practice handler for modal
+  const handlePracticeResults = useCallback(({ handRes }) => {
+    const lms = handRes?.landmarks?.[0] ?? null;
+    setHandDetected(!!lms);
+
+    if (!lms || practiceSuccess) {
+      holdStartRef.current = null;
+      if (!practiceSuccess) setGestureState("waiting");
+      setMatchScore(0);
+      return;
+    }
+
+    const states = fingerStates(lms);
+    const sc = sign.template
+      ? scoreTarget(states, sign.label || sign.name, sign.template)
+      : 0;
+
+    setMatchScore(sc);
+
+    if (sc >= MATCH_THR) {
+      if (!holdStartRef.current) holdStartRef.current = performance.now();
+      const held = performance.now() - holdStartRef.current;
+      const pct = Math.min(1, held / HOLD_MS);
+      setGestureState(pct >= 1 ? "match" : "partial");
+
+      if (held >= HOLD_MS) {
+        setPracticeSuccess(true);
+        setGestureState("confirmed");
+        
+        // Save progress
+        if (user) {
+          updateSignProgress(user.id, sign.label || sign.name, moduleId, sc, 0);
+          updateStreak(user.id);
+        }
+        
+        setTimeout(() => {
+          setPracticeSuccess(false);
+          holdStartRef.current = null;
+          setGestureState("waiting");
+          setMatchScore(0);
+          // Auto-advance to next sign
+          if (onNextSign) onNextSign();
+        }, 1500);
+      }
+    } else {
+      holdStartRef.current = null;
+      setGestureState(sc > 0.45 ? "partial" : "waiting");
+    }
+  }, [sign, user, moduleId, practiceSuccess]);
+
+  const { videoRef, canvasRef, camReady, camError } = useSimpleCamera({ 
+    onResults: handlePracticeResults 
+  });
+
+  if (!sign || !videoId) return null;
+
+  // Use autoplay with mute to prevent freezing, loop enabled for continuous playback
+  // Added showinfo=0 and iv_load_policy=3 to minimize YouTube title/annotations
+  const iframeSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3`;
+
+  return (
+    <div
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Video de seña: ${sign.label || sign.name}`}
+      className={cx(
+        "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50",
+        prefersReducedMotion ? "" : "animate-fade"
+      )}
+      onClick={handleOverlayClick}
+    >
+      <div
+        className={cx(
+          "relative w-full max-w-7xl rounded-2xl shadow-2xl",
+          isDark ? "bg-brand-card border border-brand-line" : "bg-white border border-gray-200"
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between p-4 sm:p-6">
+          <div>
+            <h3 className={cx("text-lg font-extrabold sm:text-xl", isDark ? "text-white" : "text-brand-ink")}>
+              {sign.label || sign.name}
+            </h3>
+            <p className={cx("text-xs sm:text-sm", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>
+              {sign.hint || sign.desc}
+            </p>
+          </div>
+          <button
+            ref={closeButtonRef}
+            onClick={onClose}
+            className={cx(
+              "btn-press rounded-lg p-2 transition",
+              isDark ? "bg-brand-deep text-brand-soft hover:text-white" : "bg-brand-cream text-brand-muted hover:text-brand-ink"
+            )}
+            aria-label="Cerrar video"
+          >
+            <Icon name="x" className="h-5 w-5" />
+          </button>
+        </div>
+        
+        {/* Split view: Video on left (larger), Camera on right */}
+        <div className="grid grid-cols-1 gap-4 rounded-b-2xl p-4 sm:grid-cols-3">
+          {/* YouTube Video - 2 columns wide */}
+          <div className="relative overflow-hidden rounded-xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%", position: "relative" }}>
+            <iframe
+              key={videoId}
+              src={iframeSrc}
+              title={sign.label || sign.name}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 h-full w-full border-0"
+            />
+          </div>
+          
+          {/* Camera with hand detection - 1 column */}
+          <div className="relative overflow-hidden rounded-xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
+            <video
+              ref={videoRef}
+              className="absolute inset-0 h-full w-full object-cover"
+              playsInline
+              muted
+              style={{ transform: "scaleX(-1)" }}
+            />
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{ transform: "scaleX(-1)" }}
+            />
+            {!camReady && !camError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                <div className="text-sm font-semibold text-white">
+                  Iniciando cámara...
+                </div>
+              </div>
+            )}
+            {camError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                <div className="text-center">
+                  <div className="text-sm font-semibold text-red-400">{camError}</div>
+                </div>
+              </div>
+            )}
+            {camReady && (
+              <div className="absolute bottom-2 left-2 right-2 flex flex-col gap-1">
+                <div className={cx("rounded-lg px-2 py-1 text-xs font-bold", 
+                  gestureState === "confirmed" ? "bg-brand-teal text-white" :
+                  gestureState === "match" ? "bg-brand-teal/80 text-white" :
+                  gestureState === "partial" ? "bg-brand-orange/60 text-white" :
+                  "bg-brand-deep/80 text-brand-soft"
+                )}>
+                  {gestureState === "confirmed" ? "✓ Correcto" :
+                   gestureState === "match" ? "Mantén la pose..." :
+                   gestureState === "partial" ? "Casi..." :
+                   handDetected ? "Detectando..." : "Muestra tu mano"}
+                </div>
+                {sign.template && (
+                  <div className={cx("rounded-lg px-2 py-1 text-xs font-bold", isDark ? "bg-brand-deep/80 text-brand-cyan" : "bg-white/80 text-brand-teal")}>
+                    Precisión: {Math.round(matchScore * 100)}%
+                  </div>
+                )}
+              </div>
+            )}
+            {practiceSuccess && (
+              <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/20">
+                <div className="text-center">
+                  <Icon name="check" className="h-12 w-12 text-brand-teal mx-auto mb-2" />
+                  <div className="text-base font-bold text-brand-teal">¡Excelente!</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const WASM_PATH = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm";
 const HAND_MODEL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
 const POSE_MODEL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
@@ -739,6 +2031,116 @@ const FACE_KEY_IDXS = [
 
 function mirror(lm) { return { ...lm, x: 1 - lm.x }; }
 
+// Simplified camera hook for modal - only hands, faster startup, better FPS
+function useSimpleCamera({ onResults }) {
+  const videoRef  = useRef(null);
+  const canvasRef = useRef(null);
+  const hlRef        = useRef(null);
+  const rafRef       = useRef(null);
+  const streamRef    = useRef(null);
+  const [camReady, setCamReady] = useState(false);
+  const [camError, setCamError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function init() {
+      try {
+        // Start camera first for faster feedback
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 320, height: 240, facingMode: "user" }, // Lower resolution for better performance
+        });
+        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
+        
+        streamRef.current = stream;
+
+        const video = videoRef.current;
+        if (!video) return;
+        video.srcObject = stream;
+        await video.play();
+        setCamReady(true);
+
+        // Load hand model after camera is ready
+        const vision = await FilesetResolver.forVisionTasks(WASM_PATH);
+        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
+
+        const hl = await HandLandmarker.createFromOptions(vision, {
+          baseOptions: { modelAssetPath: HAND_MODEL, delegate: "GPU" },
+          runningMode: "VIDEO",
+          numHands: 2, // Detect both hands
+          minHandDetectionConfidence: 0.5, // Lower confidence for better detection
+          minHandPresenceConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
+        if (cancelled) { hl.close(); stream.getTracks().forEach((t) => t.stop()); return; }
+        hlRef.current = hl;
+
+        function detect() {
+          if (cancelled) return;
+          const canvas = canvasRef.current;
+          const vid = videoRef.current;
+          if (!canvas || !vid || vid.readyState < 2) {
+            rafRef.current = requestAnimationFrame(detect);
+            return;
+          }
+
+          const w = vid.videoWidth || 320;
+          const h = vid.videoHeight || 240;
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          const now = performance.now();
+
+          // Video espejado
+          ctx.save();
+          ctx.scale(-1, 1);
+          ctx.translate(-w, 0);
+          ctx.drawImage(vid, 0, 0, w, h);
+          ctx.restore();
+
+          const draw = new DrawingUtils(ctx);
+
+          // Only detect hands
+          const handRes = hlRef.current.detectForVideo(vid, now);
+          for (const lms of (handRes.landmarks || [])) {
+            const m = lms.map(mirror);
+            draw.drawConnectors(m, HandLandmarker.HAND_CONNECTIONS, { color: "#2AABB8", lineWidth: 2 });
+            draw.drawLandmarks(m, { color: "#EC9960", lineWidth: 1, radius: 3 });
+          }
+
+          if (onResults) onResults({ handRes });
+          rafRef.current = requestAnimationFrame(detect);
+        }
+        rafRef.current = requestAnimationFrame(detect);
+
+      } catch (err) {
+        if (!cancelled) setCamError("Error de cámara: " + err.message);
+      }
+    }
+
+    init();
+
+    return () => {
+      cancelled = true;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      hlRef.current?.close();
+      
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+      
+      if (videoRef.current?.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach((t) => t.stop());
+        videoRef.current.srcObject = null;
+      }
+    };
+  }, [onResults]);
+
+  return { videoRef, canvasRef, camReady, camError };
+}
+
+// Full camera hook for PracticePage - hands, pose, face
 function useCameraMediaPipe({ onResults }) {
   const videoRef  = useRef(null);
   const canvasRef = useRef(null);
@@ -1032,7 +2434,7 @@ function PracticePage({ isDark, setIsDark, navigate }) {
         <div className="flex items-center gap-2 sm:gap-3">
           <Logo isDark={isDark} compact />
           <div className={cx("hidden h-5 w-px sm:block", isDark ? "bg-brand-line" : "bg-brand-mist")} />
-          <span className={cx("hidden text-xs font-semibold sm:block", isDark ? "text-brand-soft" : "text-brand-muted")}>Práctica Inmersiva · MediaPipe</span>
+          <span className={cx("hidden text-xs font-semibold sm:block", isDark ? "text-brand-soft" : "text-brand-muted")}>Práctica</span>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <span className={cx("rounded-xl px-2 py-1.5 text-xs font-bold sm:px-3", isDark ? "bg-brand-card text-brand-cyan" : "bg-white text-brand-teal shadow-sm")}>{correct}/{total}</span>
@@ -1287,8 +2689,9 @@ function ConfigErrorPage({ isDark }) {
   );
 }
 
+
 function App() {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
   const [path, navigate, state] = useRoute();
   const { user, loading, authConfigError } = useAuth();
 
@@ -1346,16 +2749,47 @@ function App() {
     return null;
   }
 
-  // Protected pages
-  if (path === "/practice") return <PracticePage isDark={isDark} setIsDark={setIsDark} navigate={navigate} />;
+  // Protected pages - todas con header
+  if (path === "/practice") {
+    return (
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} />
+        <PracticePage isDark={isDark} setIsDark={setIsDark} navigate={navigate} />
+      </div>
+    );
+  }
+  
+  if (path === "/dashboard") {
+    return (
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} />
+        <DashboardPage isDark={isDark} navigate={navigate} />
+      </div>
+    );
+  }
+  
+  if (path === "/learn") {
+    return (
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} />
+        <LearnPage isDark={isDark} />
+      </div>
+    );
+  }
+  
+  if (path === "/lesson") {
+    return <LessonPage isDark={isDark} navigate={navigate} />;
+  }
 
   return (
     <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
       <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} />
-      {path === "/learn" ? <LearnPage isDark={isDark} /> : <Dashboard isDark={isDark} navigate={navigate} />}
+      <DashboardPage isDark={isDark} navigate={navigate} />
     </div>
   );
 }
+
+export default App;
 
 createRoot(document.getElementById("root")).render(
   <AuthProvider>
