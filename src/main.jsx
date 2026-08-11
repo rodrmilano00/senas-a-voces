@@ -360,36 +360,31 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
   const userEmail = profile?.email || "";
 
   return (
-    <header className={cx("app-header sticky top-0 z-40 transition-colors", isDark ? "bg-brand-deep/95" : "bg-brand-cream/95")}>
+    <header className={cx("sticky top-0 z-40 transition-colors bg-white backdrop-blur-xl border-b border-gray-200")}>
       <div className="mx-auto px-4 py-3 sm:px-6 sm:py-4">
-        <div className={cx("rounded-2xl border backdrop-blur-xl", isDark ? "border-brand-line bg-brand-card/50" : "border-brand-mist bg-white/50")}>
-          <div className="flex items-center justify-between px-4 py-3 sm:px-6">
-            <button onClick={() => navigate("/dashboard")} className="btn-press flex items-center gap-3">
-              <Logo isDark={isDark} compact />
-            </button>
-            
-            {/* Desktop Navigation - Rectangular Style */}
-            <nav className="hidden items-center gap-1 md:flex">
-              {navItems.slice(1).map((item, index) => (
-                <button 
-                  key={item.path} 
-                  onClick={() => navigate(item.path)} 
-                  className={cx(
-                    "group relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 active:scale-95",
-                    path === item.path 
-                      ? (isDark ? "bg-brand-cyan text-brand-deep shadow-lg shadow-brand-cyan/20" : "bg-brand-teal text-white shadow-lg shadow-brand-teal/20") 
-                      : (isDark ? "text-brand-soft hover:bg-brand-card/50" : "text-brand-muted hover:bg-brand-cream/50")
-                  )}
-                  style={{ 
-                    animationDelay: `${index * 50}ms`,
-                    transition: 'transform 160ms ease-out, background-color 200ms ease-out, box-shadow 200ms ease-out'
-                  }}
-                >
-                  <Icon name={item.icon} className="h-4 w-4" />
-                  {item.label}
-                </button>
-              ))}
-            </nav>
+        <div className="flex items-center justify-between">
+          <button onClick={() => navigate("/dashboard")} className="btn-press flex items-center gap-3">
+            <Logo isDark={isDark} compact />
+          </button>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden items-center gap-1 md:flex">
+            {navItems.slice(1).map((item, index) => (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={cx(
+                  "group relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 active:scale-95",
+                  path === item.path
+                    ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                    : (isDark ? "text-brand-soft hover:bg-brand-card/50" : "text-brand-muted hover:bg-brand-cream/50")
+                )}
+              >
+                <Icon name={item.icon} className="h-4 w-4" />
+                {item.label}
+              </button>
+            ))}
+          </nav>
 
             <div className="flex items-center gap-3">
               {/* Mobile Navigation Button - Toggle */}
@@ -452,7 +447,6 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
               </div>
             </div>
           </div>
-        </div>
       </div>
 
       {/* Mobile Navigation Menu - Full Screen Overlay */}
@@ -749,7 +743,7 @@ function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, 
 }
 
 function BarRow({ label, value, isDark }) {
-  return <div className="flex items-center gap-3"><span className={cx("w-8 text-xs font-semibold", isDark ? "text-brand-soft" : "text-brand-muted")}>{label}</span><div className={cx("h-2 flex-1 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}><div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" style={{ width: `${Math.min(100, (value / 60) * 100)}%` }} /></div><span className={cx("w-10 text-right text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{value ? `${value}m` : "-"}</span></div>;
+  return <div className="flex items-center gap-3"><span className={cx("w-8 text-xs font-semibold", isDark ? "text-brand-soft" : "text-brand-muted")}>{label}</span><div className={cx("h-2 flex-1 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}><div className="h-full rounded-full bg-brand-teal" style={{ width: `${Math.min(100, (value / 60) * 100)}%` }} /></div><span className={cx("w-10 text-right text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{value ? `${value}m` : "-"}</span></div>;
 }
 
 function QuickAction({ isDark, icon, title, desc, onClick, accent }) {
@@ -1067,7 +1061,7 @@ function LearnPage({ isDark }) {
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" 
                         loading="lazy" 
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      <div className="absolute inset-0 bg-black/10" />
                       {/* Icon overlay */}
                       <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
                         <Icon name={getSignIcon(item.label)} className="h-3 w-3 text-gray-800" />
@@ -1101,10 +1095,10 @@ function LearnPage({ isDark }) {
                   <span className="text-xs font-bold">{progress}%</span>
                 </div>
                 <div className={cx("relative h-3 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}>
-                  <div 
+                  <div
                     className={cx(
                       "absolute left-0 top-0 h-full rounded-full transition-all duration-700 ease-out",
-                      "bg-gradient-to-r from-brand-teal via-brand-cyan to-brand-orange"
+                      "bg-brand-teal"
                     )}
                     style={{ width: `${progress}%` }}
                   />
@@ -1142,9 +1136,9 @@ function LearnPage({ isDark }) {
                 onClick={() => window.location.href = "/lesson"}
                 className={cx(
                   "group btn-press w-full flex items-center justify-center gap-2 rounded-2xl px-6 py-4 text-sm font-bold transition-all duration-200 active:scale-95",
-                  isDark 
-                    ? "bg-gradient-to-r from-brand-teal to-brand-cyan text-white hover:shadow-lg hover:shadow-brand-cyan/20" 
-                    : "bg-gradient-to-r from-brand-teal to-brand-cyan text-white hover:shadow-lg hover:shadow-brand-teal/20"
+                  isDark
+                    ? "bg-brand-teal text-white hover:shadow-lg hover:shadow-brand-teal/20"
+                    : "bg-brand-teal text-white hover:shadow-lg hover:shadow-brand-teal/20"
                 )}
               >
                 <Icon name="book" className="h-5 w-5 transition-transform group-hover:scale-110" />
@@ -1500,7 +1494,7 @@ function LessonPage({ isDark, navigate }) {
                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" 
                             loading="lazy" 
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                          <div className="absolute inset-0 bg-black/10" />
                           {/* Icon overlay */}
                           <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
                             <Icon name={getSignIcon(item.label)} className="h-3 w-3 text-gray-800" />
@@ -1634,7 +1628,7 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
           setMatchScore(0);
           // Auto-advance to next sign
           if (onNextSign) onNextSign();
-        }, 1500);
+        }, 800);
       }
     } else {
       holdStartRef.current = null;
@@ -1673,10 +1667,32 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
         <div className="w-24" />
       </div>
 
-      {/* Split view: Camera on left (larger), Video on right (smaller) */}
+      {/* Split view: Video on left (larger), Camera on right (smaller) */}
       <div className="grid grid-cols-1 gap-4 rounded-2xl p-4 sm:grid-cols-3">
-        {/* Camera with hand detection - 2 columns wide */}
-        <div className="relative overflow-hidden rounded-xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%", position: "relative" }}>
+        {/* YouTube Video - 2 columns wide */}
+        <div className="relative overflow-hidden rounded-2xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%" }}>
+          <iframe
+            key={videoId}
+            src={iframeSrc}
+            title={sign.label || sign.name}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 h-full w-full border-0"
+          />
+          {/* Success animation overlay */}
+          {practiceSuccess && (
+            <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/90 animate-fade-in">
+              <div className="text-center animate-success-bounce">
+                <div className="text-7xl mb-4">✓</div>
+                <div className="text-3xl font-bold text-white">¡Excelente!</div>
+                <div className="text-base text-white/90 mt-2">Seña aprendida</div>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Camera with hand detection - 1 column wide */}
+        <div className="relative overflow-hidden rounded-2xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
           <video
             ref={videoRef}
             className="absolute inset-0 h-full w-full object-cover"
@@ -1705,10 +1721,10 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
           )}
           {camReady && (
             <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2">
-              <div className={cx("rounded-lg px-3 py-2 text-sm font-bold", 
-                gestureState === "confirmed" ? "bg-brand-teal text-white" :
-                gestureState === "match" ? "bg-brand-teal/80 text-white" :
-                gestureState === "partial" ? "bg-brand-orange/60 text-white" :
+              <div className={cx("rounded-lg px-3 py-2 text-sm font-bold transition-all duration-300 transform",
+                gestureState === "confirmed" ? "bg-brand-teal text-white scale-110 shadow-lg shadow-brand-teal/30" :
+                gestureState === "match" ? "bg-brand-teal/80 text-white scale-105" :
+                gestureState === "partial" ? "bg-brand-orange/60 text-white scale-105" :
                 "bg-brand-deep/80 text-brand-soft"
               )}>
                 {gestureState === "confirmed" ? "✓ Correcto" :
@@ -1717,32 +1733,12 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
                  handDetected ? "Detectando..." : "Muestra tu mano"}
               </div>
               {sign.template && (
-                <div className={cx("rounded-lg px-3 py-2 text-sm font-bold", isDark ? "bg-brand-deep/80 text-brand-cyan" : "bg-white/80 text-brand-teal")}>
+                <div className={cx("rounded-lg px-3 py-2 text-sm font-bold transition-all duration-300", isDark ? "bg-brand-deep/80 text-brand-cyan" : "bg-white/80 text-brand-teal")}>
                   Precisión: {Math.round(matchScore * 100)}%
                 </div>
               )}
             </div>
           )}
-          {practiceSuccess && (
-            <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/20">
-              <div className="text-center">
-                <Icon name="check" className="h-16 w-16 text-brand-teal mx-auto mb-2" />
-                <div className="text-lg font-bold text-brand-teal">¡Excelente!</div>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        {/* YouTube Video - 1 column */}
-        <div className="relative overflow-hidden rounded-xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
-          <iframe
-            key={videoId}
-            src={iframeSrc}
-            title={sign.label || sign.name}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute inset-0 h-full w-full border-0"
-          />
         </div>
       </div>
     </div>
@@ -1881,7 +1877,7 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
           setMatchScore(0);
           // Auto-advance to next sign
           if (onNextSign) onNextSign();
-        }, 1500);
+        }, 800);
       }
     } else {
       holdStartRef.current = null;
@@ -1943,7 +1939,7 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
         {/* Split view: Video on left (larger), Camera on right */}
         <div className="grid grid-cols-1 gap-4 rounded-b-2xl p-4 sm:grid-cols-3">
           {/* YouTube Video - 2 columns wide */}
-          <div className="relative overflow-hidden rounded-xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%", position: "relative" }}>
+          <div className="relative overflow-hidden rounded-2xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%" }}>
             <iframe
               key={videoId}
               src={iframeSrc}
@@ -1952,10 +1948,20 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
               allowFullScreen
               className="absolute inset-0 h-full w-full border-0"
             />
+            {/* Success animation overlay */}
+            {practiceSuccess && (
+              <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/90 animate-fade-in">
+                <div className="text-center animate-success-bounce">
+                  <div className="text-7xl mb-4">✓</div>
+                  <div className="text-3xl font-bold text-white">¡Excelente!</div>
+                  <div className="text-base text-white/90 mt-2">Seña aprendida</div>
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Camera with hand detection - 1 column */}
-          <div className="relative overflow-hidden rounded-xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
+          <div className="relative overflow-hidden rounded-2xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
             <video
               ref={videoRef}
               className="absolute inset-0 h-full w-full object-cover"
@@ -1983,11 +1989,11 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
               </div>
             )}
             {camReady && (
-              <div className="absolute bottom-2 left-2 right-2 flex flex-col gap-1">
-                <div className={cx("rounded-lg px-2 py-1 text-xs font-bold", 
-                  gestureState === "confirmed" ? "bg-brand-teal text-white" :
-                  gestureState === "match" ? "bg-brand-teal/80 text-white" :
-                  gestureState === "partial" ? "bg-brand-orange/60 text-white" :
+              <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2">
+                <div className={cx("rounded-lg px-3 py-2 text-sm font-bold transition-all duration-300 transform",
+                  gestureState === "confirmed" ? "bg-brand-teal text-white scale-110 shadow-lg shadow-brand-teal/30" :
+                  gestureState === "match" ? "bg-brand-teal/80 text-white scale-105" :
+                  gestureState === "partial" ? "bg-brand-orange/60 text-white scale-105" :
                   "bg-brand-deep/80 text-brand-soft"
                 )}>
                   {gestureState === "confirmed" ? "✓ Correcto" :
@@ -1996,18 +2002,10 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
                    handDetected ? "Detectando..." : "Muestra tu mano"}
                 </div>
                 {sign.template && (
-                  <div className={cx("rounded-lg px-2 py-1 text-xs font-bold", isDark ? "bg-brand-deep/80 text-brand-cyan" : "bg-white/80 text-brand-teal")}>
+                  <div className={cx("rounded-lg px-3 py-2 text-sm font-bold transition-all duration-300", isDark ? "bg-brand-deep/80 text-brand-cyan" : "bg-white/80 text-brand-teal")}>
                     Precisión: {Math.round(matchScore * 100)}%
                   </div>
                 )}
-              </div>
-            )}
-            {practiceSuccess && (
-              <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/20">
-                <div className="text-center">
-                  <Icon name="check" className="h-12 w-12 text-brand-teal mx-auto mb-2" />
-                  <div className="text-base font-bold text-brand-teal">¡Excelente!</div>
-                </div>
               </div>
             )}
           </div>

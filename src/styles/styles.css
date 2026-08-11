@@ -337,11 +337,7 @@ a:focus-visible {
   isolation: isolate;
   overflow: hidden;
   border-color: rgba(13, 92, 111, 0.18) !important;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.58), rgba(226, 245, 242, 0.28)),
-    rgba(248, 255, 253, 0.42) !important;
-  background-clip: padding-box;
-  backdrop-filter: blur(16px) saturate(1.18);
+  background: #ffffff !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.42),
     inset 0 -1px 0 rgba(13, 92, 111, 0.06),
@@ -351,27 +347,14 @@ a:focus-visible {
 
 .dark .surface-card {
   border-color: rgba(92, 196, 214, 0.18) !important;
-  background:
-    linear-gradient(135deg, rgba(58, 171, 191, 0.1), rgba(8, 61, 72, 0.28)),
-    rgba(12, 74, 87, 0.58) !important;
+  background: #0c4a57 !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 8px 22px rgba(0, 0, 0, 0.18);
 }
 
 .surface-card::before {
-  position: absolute;
-  inset: -28%;
-  content: "";
-  pointer-events: none;
-  border-radius: inherit;
-  z-index: 0;
-  background:
-    radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.42), transparent 15rem),
-    radial-gradient(circle at 78% 76%, rgba(42, 171, 184, 0.12), transparent 18rem),
-    radial-gradient(circle at 36% 92%, rgba(236, 153, 96, 0.08), transparent 14rem);
-  filter: blur(22px);
-  animation: liquid-lens 11s var(--ease-out) infinite;
+  display: none;
 }
 
 .surface-card::after,
@@ -386,22 +369,6 @@ a:focus-visible {
   box-shadow:
     inset 0 0 0 1px rgba(13, 92, 111, 0.09),
     inset 0 -1px 0 rgba(13, 92, 111, 0.08);
-  animation: border-glow 7s ease-in-out infinite;
-}
-
-.surface-card::before {
-  will-change: transform, opacity;
-}
-
-.surface-card::after {
-  background:
-    linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.2) 32%, rgba(255, 255, 255, 0.06) 46%, transparent 62%),
-    radial-gradient(circle at 22% 16%, rgba(255, 255, 255, 0.16), transparent 10rem);
-  background-size: 220% 100%, 100% 100%;
-  background-position: -120% 0, 0 0;
-  animation:
-    border-glow 7s ease-in-out infinite,
-    liquid-sheen 8.5s ease-in-out infinite;
 }
 
 .dark .surface-card::after,
@@ -410,13 +377,6 @@ a:focus-visible {
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.05),
     inset 0 -1px 0 rgba(42, 171, 184, 0.1);
-}
-
-.dark .surface-card::after {
-  background:
-    linear-gradient(105deg, transparent 0%, rgba(136, 220, 234, 0.12) 34%, rgba(255, 255, 255, 0.035) 48%, transparent 64%),
-    radial-gradient(circle at 22% 16%, rgba(136, 220, 234, 0.08), transparent 11rem);
-  animation-duration: 8s, 10s;
 }
 
 .surface-card > * {
@@ -475,57 +435,29 @@ a:focus-visible {
 
 .mobile-dock {
   overflow: hidden;
-  background:
-    linear-gradient(135deg, rgba(230, 245, 241, 0.92), rgba(204, 229, 225, 0.84)),
-    rgba(224, 244, 240, 0.88) !important;
+  background: #ffffff !important;
   border-color: rgba(13, 92, 111, 0.2) !important;
 }
 
 .dark .mobile-dock {
-  background:
-    linear-gradient(135deg, rgba(12, 74, 87, 0.86), rgba(8, 61, 72, 0.82)),
-    rgba(8, 61, 72, 0.9) !important;
+  background: #083d48 !important;
   border-color: rgba(92, 196, 214, 0.22) !important;
 }
 
 .learning-pulse::after {
-  position: absolute;
-  inset: -18%;
-  content: "";
-  pointer-events: none;
-  z-index: 2;
-  background:
-    radial-gradient(ellipse at 16% 20%, rgba(255, 255, 255, 0.28), transparent 24rem),
-    radial-gradient(ellipse at 42% 72%, rgba(160, 220, 226, 0.14), transparent 22rem),
-    radial-gradient(ellipse at 88% 34%, rgba(236, 153, 96, 0.06), transparent 18rem);
-  filter: blur(28px);
-  opacity: 0.68;
-  mix-blend-mode: screen;
-  animation: liquid-lens 12s var(--ease-out) infinite;
-}
-
-.dark .learning-pulse::after {
-  background:
-    radial-gradient(ellipse at 16% 20%, rgba(255, 255, 255, 0.13), transparent 24rem),
-    radial-gradient(ellipse at 42% 72%, rgba(42, 171, 184, 0.1), transparent 24rem),
-    radial-gradient(ellipse at 88% 34%, rgba(236, 153, 96, 0.05), transparent 18rem);
+  display: none;
 }
 
 .learning-pulse [class*="rounded-xl"] {
   overflow: hidden;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.34), rgba(226, 245, 242, 0.14)),
-    rgba(255, 255, 255, 0.18) !important;
-  backdrop-filter: blur(14px) saturate(1.18);
+  background: #ffffff !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.3),
     inset 0 -1px 0 rgba(13, 92, 111, 0.06);
 }
 
 .dark .learning-pulse [class*="rounded-xl"] {
-  background:
-    linear-gradient(135deg, rgba(92, 196, 214, 0.07), rgba(255, 255, 255, 0.01)),
-    rgba(8, 61, 72, 0.18) !important;
+  background: #083d48 !important;
 }
 
 .streak-banner {
@@ -533,7 +465,7 @@ a:focus-visible {
 }
 
 .lesson-detail {
-  background-image: radial-gradient(circle at 100% 0%, rgba(236, 153, 96, 0.12), transparent 18rem);
+  background-image: none;
 }
 
 .record-button.is-recording {
@@ -581,9 +513,7 @@ a:focus-visible {
 
 .account-menu-light {
   border: 1px solid rgba(13, 92, 111, 0.18);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.84), rgba(226, 245, 242, 0.6)),
-    rgba(248, 255, 253, 0.76);
+  background: #ffffff;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.72),
     0 16px 36px rgba(8, 61, 72, 0.14);
@@ -591,9 +521,7 @@ a:focus-visible {
 
 .account-menu-dark {
   border: 1px solid rgba(92, 196, 214, 0.2);
-  background:
-    linear-gradient(135deg, rgba(58, 171, 191, 0.13), rgba(8, 61, 72, 0.58)),
-    rgba(8, 61, 72, 0.86);
+  background: #083d48;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 18px 40px rgba(0, 0, 0, 0.26);
@@ -832,4 +760,70 @@ a:focus-visible {
 .dark .skeleton {
   background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
   background-size: 200% 100%;
+}
+
+/* Success Animation */
+@keyframes scale-up {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes success-bounce {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes checkmark-draw {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes confetti {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.animate-scale-up {
+  animation: scale-up 0.4s var(--ease-out) forwards;
+}
+
+.animate-success-bounce {
+  animation: success-bounce 0.6s var(--ease-out) forwards;
+}
+
+.animate-checkmark {
+  animation: checkmark-draw 0.4s var(--ease-out) forwards;
+}
+
+.animate-confetti {
+  animation: confetti 1s ease-out forwards;
 }
