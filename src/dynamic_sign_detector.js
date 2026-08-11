@@ -240,8 +240,9 @@ export class DynamicSignDetector {
     this.previousInfo = null;
     this.maxBufferSize = 260;
     this.minBufferSize = 4;
-    this.threshold = 2.5;
+    this.threshold = 3.0;
     this.minMargin = 0.08;
+    this.cooldownFrames = 0;
   }
 
   // Cargar un patrón desde JSON de training_data. Acumula ejemplos por nombre.
@@ -346,6 +347,7 @@ export class DynamicSignDetector {
     this.prevVyR = 0;
     this.prevVxL = 0;
     this.prevVyL = 0;
+    this.cooldownFrames = 0;
   }
 
   pushFrameInfo(info) {
@@ -447,20 +449,22 @@ export class DynamicSignDetector {
     const topCandidates = candidates.slice(0, PRE_FILTER_N);
 
     // Etapa 2: DTW solo en los top-N candidatos.
-    // Usa ventana final del buffer del mismo tamaño que el patrón.
+    // Usa los últimos seqLen frames del buffer y DTW completo.
+    // En vivo, detect() se llama cada frame, asi que la ventana deslizante
+    // eventualmente captura la seña completa cuando coincide con el patron.
     const ranking = [];
     for (const { pattern } of topCandidates) {
       let best = Infinity;
       for (const seq of pattern.sequences) {
         const seqLen = seq.length;
+        let score;
         if (buf.length >= seqLen) {
           const subBuf = buf.slice(buf.length - seqLen);
-          const score = dtw(subBuf, seq);
-          if (score < best) best = score;
+          score = dtw(subBuf, seq);
         } else {
-          const score = dtw(buf, seq);
-          if (score < best) best = score;
+          score = dtw(buf, seq);
         }
+        if (score < best) best = score;
       }
       if (best === Infinity) continue;
       ranking.push({ name: pattern.name, score: best });
@@ -473,18 +477,27 @@ export class DynamicSignDetector {
   // El margen se mide contra la SIGUIENTE seña distinta: comparar contra otra
   // ventana del mismo patron daria un margen casi cero siempre.
   detect() {
+    if (this.cooldownFrames > 0) { this.cooldownFrames--; }
     const ranking = this.detectRanking();
     if (ranking.length === 0) return null;
     const bestScore = ranking[0].score;
     const margin = ranking.length > 1 ? ranking[1].score - bestScore : Infinity;
     const confidence = Math.max(0, Math.min(100, Math.round((1 - bestScore) * 100)));
+    const accepted = bestScore <= this.threshold && margin >= this.minMargin && this.cooldownFrames === 0;
+    // Si se aceptó, limpiar buffer y entrar en cooldown para evitar re-detección
+    if (accepted) {
+      this.buffer = [];
+      this.previousInfo = null;
+      this.prevVxR = 0; this.prevVyR = 0; this.prevVxL = 0; this.prevVyL = 0;
+      this.cooldownFrames = 15; // ~0.5s a 30fps
+    }
     return {
       matched: ranking[0].name,
       score: bestScore,
       confidence,
       margin,
       ranking,
-      accepted: bestScore <= this.threshold && margin >= this.minMargin,
+      accepted,
     };
   }
 

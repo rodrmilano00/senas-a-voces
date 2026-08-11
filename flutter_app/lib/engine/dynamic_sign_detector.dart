@@ -266,8 +266,9 @@ class DynamicSignDetector {
 
   int maxBufferSize = 260;
   int minBufferSize = 4;
-  double threshold = 2.5;
+  double threshold = 3.0;
   double minMargin = 0.08;
+  int cooldownFrames = 0;
 
   void loadPattern(String name, List<TrainingFrame> frames) {
     // Detectar si hay desbalance de manos (todo en Left, nada en Right)
@@ -349,6 +350,7 @@ class DynamicSignDetector {
     _prevVyR = 0;
     _prevVxL = 0;
     _prevVyL = 0;
+    cooldownFrames = 0;
   }
 
   void pushFrameInfo(FrameInfo? info) {
@@ -402,7 +404,7 @@ class DynamicSignDetector {
   }
 
   /// Ranking de todas las señas ordenadas por distancia DTW (menor = mejor).
-  /// Usa ventana final del buffer del mismo tamaño que el patrón.
+  /// Usa los últimos seqLen frames del buffer y DTW completo.
   List<MapEntry<String, double>> detectRanking() {
     if (_buffer.length < minBufferSize) return [];
     final buf = _buffer;
@@ -411,14 +413,14 @@ class DynamicSignDetector {
       var best = double.infinity;
       for (final seq in pattern.sequences) {
         final seqLen = seq.length;
+        double score;
         if (buf.length >= seqLen) {
           final subBuf = buf.sublist(buf.length - seqLen);
-          final score = _dtw(subBuf, seq);
-          if (score < best) best = score;
+          score = _dtw(subBuf, seq);
         } else {
-          final score = _dtw(buf, seq);
-          if (score < best) best = score;
+          score = _dtw(buf, seq);
         }
+        if (score < best) best = score;
       }
       if (best == double.infinity) continue;
       ranking.add(MapEntry(pattern.name, best));
@@ -428,6 +430,7 @@ class DynamicSignDetector {
   }
 
   DetectResult? detect() {
+    if (cooldownFrames > 0) cooldownFrames--;
     final ranking = detectRanking();
     if (ranking.isEmpty) return null;
     final bestScore = ranking.first.value;
@@ -436,12 +439,22 @@ class DynamicSignDetector {
     final confidence = bestScore.isFinite
         ? ((1 - bestScore) * 100).round().clamp(0, 100)
         : 0;
+    final accepted = bestScore.isFinite &&
+        bestScore <= threshold &&
+        margin >= minMargin &&
+        cooldownFrames == 0;
+    if (accepted) {
+      _buffer.clear();
+      _previousInfo = null;
+      _prevVxR = 0; _prevVyR = 0; _prevVxL = 0; _prevVyL = 0;
+      cooldownFrames = 15;
+    }
     return DetectResult(
       matched: bestMatch,
       score: bestScore,
       confidence: confidence,
       margin: margin.isFinite ? margin : double.infinity,
-      accepted: bestScore.isFinite && bestScore <= threshold && margin >= minMargin,
+      accepted: accepted,
     );
   }
 

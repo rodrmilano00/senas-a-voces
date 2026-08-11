@@ -11,6 +11,7 @@ import { GLOSARIO_LESSONS, ALPHABET_LESSON } from "./lessons_glosario.js";
 import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR, scoreLetter, LSM_ALPHABET, NUMBER_TEMPLATES } from "./lsm_detector.js";
 import { dynamicDetector, featureFromFingerStates, frameInfo, buildSequence, splitHands } from "./dynamic_sign_detector.js";
 import { parseNpy, npyToFrames } from "./npy_parser.js";
+import { initClassifier, classifySequence, isClassifierReady } from "./onnx_classifier.js";
 import ModelTestPage from "./model_test_page.jsx";
 import TrainPage from "./train_page.jsx";
 import TrainingViewerPage from "./training_viewer_page.jsx";
@@ -2782,13 +2783,19 @@ function DebugPage({ isDark, navigate, videoOnly = false }) {
   const [trainMsg, setTrainMsg] = useState('');
   const [patternsLoaded, setPatternsLoaded] = useState([]);
   const [dynamicSign, setDynamicSign] = useState(null);
+  const [onnxSign, setOnnxSign] = useState(null);
+  const [onnxTop5, setOnnxTop5] = useState([]);
+  const [onnxReady, setOnnxReady] = useState(false);
   const dynamicCandidateRef = useRef(null);
   const autoFramesRef = useRef([]);
   const autoTrainRef = useRef(true);
+  const onnxFramesRef = useRef([]); // buffer de frames crudos para ONNX
+  const onnxFrameCountRef = useRef(0);
   autoTrainRef.current = autoTrain;
 
   useEffect(() => {
     reloadDynamicPatterns().then(setPatternsLoaded);
+    initClassifier().then(setOnnxReady);
   }, []);
 
   const trainInfo = useMemo(() => {
@@ -2836,9 +2843,33 @@ function DebugPage({ isDark, navigate, videoOnly = false }) {
       const dyn = dynamicDetector.detect();
       if (dyn?.accepted) dynamicCandidateRef.current = { name: dyn.matched, score: dyn.score };
       setDynamicSign(dyn?.matched || null);
+
+      // Clasificador ONNX (LSTM+Attention) — paralelo al DTW
+      if (onnxReady && (right || left)) {
+        onnxFramesRef.current.push({
+          landmarksRight: right ? right.map(p => ({ x: p.x, y: p.y, z: p.z })) : null,
+          landmarksLeft: left ? left.map(p => ({ x: p.x, y: p.y, z: p.z })) : null,
+        });
+        if (onnxFramesRef.current.length > 60) onnxFramesRef.current.shift();
+        onnxFrameCountRef.current++;
+        // Ejecutar cada 10 frames (~3 veces/seg) con los últimos 24-60 frames
+        if (onnxFrameCountRef.current % 10 === 0 && onnxFramesRef.current.length >= 8) {
+          const frames = onnxFramesRef.current.slice(-60);
+          classifySequence(frames).then(result => {
+            if (result) {
+              setOnnxSign(result.top1);
+              setOnnxTop5(result.top5);
+              // Si confianza > 0.7, limpiar buffer para siguiente deteccion
+              if (result.confidence > 0.7) {
+                onnxFramesRef.current = [];
+              }
+            }
+          });
+        }
+      }
     }
 
-  }, [videoOnly]);
+  }, [videoOnly, onnxReady]);
 
 
 
@@ -3209,7 +3240,22 @@ function DebugPage({ isDark, navigate, videoOnly = false }) {
 
 
 
-                      {/* Nombre del archivo + estado de detección */}
+                      {/* Clasificador ONNX (LSTM+Attention) */}
+                      <div className={cx('absolute top-20 right-3 rounded-xl px-4 py-1.5 text-center backdrop-blur', onnxSign ? 'bg-purple-600/90' : 'bg-black/60')}>
+                        <div className={cx('text-[9px] font-bold uppercase tracking-widest', onnxSign ? 'text-purple-200' : 'text-[#A8CDD6]')}>LSTM+Attention</div>
+                        <div className='text-lg font-extrabold text-white leading-none'>
+                          {onnxReady ? (onnxSign || 'Esperando gesto…') : 'Cargando modelo…'}
+                        </div>
+                        {onnxTop5.length > 0 && (
+                          <div className='mt-1 space-y-0.5'>
+                            {onnxTop5.map((r, i) => (
+                              <div key={r.name} className={cx('text-[9px]', i === 0 ? 'text-white font-bold' : 'text-purple-200')}>
+                                {i + 1}. {r.name} ({(r.prob * 100).toFixed(0)}%)
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
                       <div className='absolute bottom-2 right-3 rounded-lg bg-black/60 px-2 py-0.5 text-[10px] text-white backdrop-blur truncate max-w-[60%] text-right'>
 
