@@ -292,6 +292,52 @@ export async function getRecentPractice(userId, limit = 10) {
   }
 }
 
+// Get practice history grouped by day for heatmap (Anki/Migaku style).
+// Returns an array of { date: 'YYYY-MM-DD', count: number, accuracy: number } for the last `days` days.
+export async function getPracticeHeatmapData(userId, days = 140) {
+  if (!hasSupabase()) return [];
+
+  try {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+    startDate.setHours(0, 0, 0, 0);
+
+    const { data, error } = await supabase
+      .from('sign_practice')
+      .select('practice_date, accuracy, time_spent')
+      .eq('user_id', userId)
+      .gte('practice_date', startDate.toISOString())
+      .order('practice_date', { ascending: true });
+
+    if (error) throw error;
+
+    // Group by day
+    const byDay = new Map();
+    for (const row of data || []) {
+      const d = new Date(row.practice_date);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const entry = byDay.get(key) || { date: key, count: 0, accSum: 0, accCount: 0, timeSpent: 0 };
+      entry.count += 1;
+      if (typeof row.accuracy === 'number') {
+        entry.accSum += row.accuracy;
+        entry.accCount += 1;
+      }
+      entry.timeSpent += row.time_spent || 0;
+      byDay.set(key, entry);
+    }
+
+    return Array.from(byDay.values()).map((e) => ({
+      date: e.date,
+      count: e.count,
+      accuracy: e.accCount > 0 ? e.accSum / e.accCount : 0,
+      timeSpent: e.timeSpent,
+    }));
+  } catch (error) {
+    console.error('Error fetching practice heatmap data:', error);
+    return [];
+  }
+}
+
 // Record video view
 export async function recordVideoView(userId, signName, moduleId, lessonId) {
   if (!hasSupabase()) return { success: false, error: new Error('Supabase is not configured') };
