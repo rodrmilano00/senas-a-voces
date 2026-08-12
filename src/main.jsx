@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+﻿import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { HandLandmarker, PoseLandmarker, FaceLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import { createRoot } from "react-dom/client";
+import { createPortal } from "react-dom";
 import "./styles/styles.css";
 import { GLOSARIO_LESSONS, ALPHABET_LESSON } from "./data/lessons_glosario.js";
 import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR } from "./utils/lsm_detector.js";
@@ -36,9 +37,10 @@ function getModuleIcon(title) {
     "Números (todos)": "numbers",
     "Expresiones cotidianas": "expressions",
     "Colores (todos)": "colors",
-    "Familia (todos)": "family",
-    "Salud (todos)": "health",
-    "Tecnología (todos)": "technology",
+    "Familia (50 señas)": "family",
+    "Salud y medicina": "health",
+    "Educación y escuela": "education",
+    "Tecnología y redes": "technology",
   };
   return iconMap[title] || "book";
 }
@@ -232,13 +234,14 @@ function Icon({ name, className = "h-5 w-5" }) {
     trophy: <svg {...common}><path d="M8 21h8" /><path d="M12 17v4" /><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z" /><path d="M5 5H3v2a4 4 0 0 0 4 4" /><path d="M19 5h2v2a4 4 0 0 1-4 4" /></svg>,
     x: <svg {...filled}><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z" /></svg>,
     // Iconos específicos para módulos
-    abc: <svg {...common} viewBox="0 0 24 24"><text x="12" y="16" textAnchor="middle" fontSize="10" fontWeight="bold" fill="currentColor">Aa</text></svg>,
-    numbers: <svg {...common} viewBox="0 0 24 24"><text x="12" y="16" textAnchor="middle" fontSize="10" fontWeight="bold" fill="currentColor">123</text></svg>,
-    expressions: <svg {...common}><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="9" r="1.5" fill="currentColor"/><path d="M12 14c-1.5 0-2.8.8-3.5 2h7c-.7-1.2-2-2-3.5-2z" /></svg>,
-    colors: <svg {...common}><circle cx="6" cy="12" r="4" fill="currentColor" fillOpacity="0.6"/><circle cx="12" cy="12" r="4" fill="currentColor" fillOpacity="0.8"/><circle cx="18" cy="12" r="4" fill="currentColor" /></svg>,
-    family: <svg {...common}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8z" /><circle cx="9" cy="10" r="1.5" fill="currentColor"/><circle cx="15" cy="10" r="1.5" fill="currentColor"/><path d="M12 14a3 3 0 0 0 0 6 3 3 0 0 0 0-6z" /></svg>,
-    health: <svg {...common}><path d="M19 12c0 1.1-.9 2-2 2-7 0-3.3-2.7-6-6-6s-6 2.7-6 6c0 1.1-.9 2-2 2-2 4.4 0 8 3.6 8 8 0 0 0 8-8 0-3.6-3.6-8-8-8z" /><path d="M12 4c.28 0 .5.22.5.5s-.22.5-.5.5-.5-.22-.5-.5.5s.22.5.5.5zM12 6c.28 0 .5.22.5.5s-.22.5-.5.5-.22-.5-.5.5s.22.5.5.5zM12 8c.28 0 .5.22.5.5s-.22.5-.5.5-.22-.5-.5.5s.22.5.5.5z" /></svg>,
-    technology: <svg {...common}><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M6 7h12M6 11h12M6 15h8" /><circle cx="16" cy="17" r="2" /></svg>,
+    abc: <svg {...common} viewBox="0 0 24 24"><text x="12" y="17" textAnchor="middle" fontSize="11" fontWeight="800" fill="currentColor">Aa</text></svg>,
+    numbers: <svg {...common} viewBox="0 0 24 24"><text x="12" y="17" textAnchor="middle" fontSize="11" fontWeight="800" fill="currentColor">123</text></svg>,
+    expressions: <svg {...common}><circle cx="9" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="9" r="1.5" fill="currentColor"/><path d="M8 14c1 2 3 3 4 3s3-1 4-3" strokeLinecap="round" /></svg>,
+    colors: <svg {...common}><circle cx="8" cy="10" r="4" fill="currentColor" fillOpacity="0.5"/><circle cx="16" cy="10" r="4" fill="currentColor" fillOpacity="0.8"/><circle cx="12" cy="16" r="4" fill="currentColor" /></svg>,
+    family: <svg {...common}><circle cx="7" cy="7" r="2.5" fill="currentColor"/><circle cx="17" cy="7" r="2.5" fill="currentColor"/><circle cx="12" cy="12" r="2.5" fill="currentColor" fillOpacity="0.7"/><path d="M7 11v8M17 11v8M12 16v3" strokeLinecap="round" /></svg>,
+    health: <svg {...common}><path d="M9 2v6H3v8h6v6h6v-6h6V8h-6V2H9z" fill="currentColor" fillOpacity="0.85" /><path d="M9 2v6H3v8h6v6h6v-6h6V8h-6V2H9z" /></svg>,
+    education: <svg {...common}><path d="M3 9l9-4 9 4-9 4-9-4z" fill="currentColor" fillOpacity="0.2" /><path d="M3 9l9-4 9 4-9 4-9-4z" /><path d="M7 11v5c0 1 2 2 5 2s5-1 5-2v-5" /><path d="M21 9v5" strokeLinecap="round" /></svg>,
+    technology: <svg {...common}><rect x="2" y="4" width="20" height="13" rx="2" /><path d="M2 17h20M9 21h6M12 17v4" strokeLinecap="round" /></svg>,
     // Iconos específicos para señas individuales
     "number-1": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">1</text></svg>,
     "number-2": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">2</text></svg>,
@@ -307,7 +310,108 @@ function ThemeToggle({ isDark, setIsDark }) {
   );
 }
 
-function AppHeader({ isDark, setIsDark, navigate, path }) {
+function FontSizeSelector({ fontScale, setFontScale, isDark }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const esc = (e) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", esc); };
+  }, [open]);
+
+  const options = [
+    { key: 'sm', label: 'A', size: 'text-xs', desc: 'Pequeño' },
+    { key: 'md', label: 'A', size: 'text-sm', desc: 'Mediano' },
+    { key: 'lg', label: 'A', size: 'text-base', desc: 'Grande' },
+  ];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className={cx(
+          "btn-press flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all duration-200 active:scale-95",
+          isDark ? "bg-brand-card text-brand-cyan hover:bg-brand-card/80" : "bg-brand-cream text-brand-teal hover:bg-brand-cream/80"
+        )}
+        aria-label="Tamaño de texto"
+        title="Tamaño de texto"
+      >
+        Aa
+      </button>
+      {open && (
+        <div className={cx("absolute right-0 top-12 z-[200] w-44 rounded-2xl border p-2 shadow-lg", isDark ? "border-brand-line bg-brand-card" : "border-[#E8E4D8] bg-white")}>
+          <div className={cx("mb-1 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-[#607274]")}>
+            Tamaño de texto
+          </div>
+          {options.map(opt => (
+            <button
+              key={opt.key}
+              type="button"
+              onClick={() => { setFontScale?.(opt.key); setOpen(false); }}
+              className={cx(
+                "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition-colors",
+                fontScale === opt.key
+                  ? (isDark ? "bg-brand-deep text-white" : "bg-brand-cream text-brand-ink")
+                  : (isDark ? "text-brand-soft hover:bg-brand-deep/50" : "text-brand-muted hover:bg-brand-cream/50")
+              )}
+            >
+              <span className="flex items-center gap-2">
+                <span className={cx("font-bold", opt.size)}>{opt.label}</span>
+                <span className="text-xs font-semibold">{opt.desc}</span>
+              </span>
+              {fontScale === opt.key && (
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FontSizeInline({ fontScale, setFontScale, isDark }) {
+  const options = [
+    { key: 'sm', label: 'A', size: 'text-xs', desc: 'Pequeño' },
+    { key: 'md', label: 'A', size: 'text-sm', desc: 'Mediano' },
+    { key: 'lg', label: 'A', size: 'text-base', desc: 'Grande' },
+  ];
+
+  return (
+    <div className="w-full">
+      <div className={cx("mb-2 text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>
+        Tamaño de texto
+      </div>
+      <div className="flex gap-2">
+        {options.map(opt => (
+          <button
+            key={opt.key}
+            type="button"
+            onClick={() => setFontScale?.(opt.key)}
+            className={cx(
+              "flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 transition-colors",
+              fontScale === opt.key
+                ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                : (isDark ? "bg-brand-card text-brand-soft" : "bg-white text-brand-muted border border-[#E8E4D8]")
+            )}
+          >
+            <span className={cx("font-bold", opt.size)}>{opt.label}</span>
+            <span className="text-[10px] font-semibold">{opt.desc}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AppHeader({ isDark, setIsDark, navigate, path, fontScale = 'md', setFontScale }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const menuRef = useRef(null);
@@ -332,16 +436,11 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
 
   useEffect(() => {
     if (!mobileNavOpen) return undefined;
-    const closeFromOutside = (event) => {
-      if (mobileNavRef.current && !mobileNavRef.current.contains(event.target)) setMobileNavOpen(false);
-    };
     const closeOnEscape = (event) => {
       if (event.key === "Escape") setMobileNavOpen(false);
     };
-    document.addEventListener("mousedown", closeFromOutside);
     document.addEventListener("keydown", closeOnEscape);
     return () => {
-      document.removeEventListener("mousedown", closeFromOutside);
       document.removeEventListener("keydown", closeOnEscape);
     };
   }, [mobileNavOpen]);
@@ -360,7 +459,7 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
   const userEmail = profile?.email || "";
 
   return (
-    <header className={cx("sticky top-0 z-40 transition-colors bg-white backdrop-blur-xl border-b border-[#E8E4D8]")}>
+    <header className={cx("sticky top-0 z-[100] transition-colors backdrop-blur-xl border-b", isDark ? "bg-brand-deep border-brand-line" : "bg-white border-[#E8E4D8]")}>
       <div className="mx-auto px-4 py-3 sm:px-6 sm:py-4">
         <div className="flex items-center justify-between">
           <button onClick={() => navigate("/dashboard")} className="btn-press flex items-center gap-3">
@@ -404,6 +503,7 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
 
               {/* Desktop Actions */}
               <div className="hidden items-center gap-3 md:flex">
+                <FontSizeSelector fontScale={fontScale} setFontScale={setFontScale} isDark={isDark} />
                 <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
                 <div ref={menuRef} className="relative">
                   <button
@@ -449,57 +549,105 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
           </div>
       </div>
 
-      {/* Mobile Navigation Menu - Full Screen Overlay */}
-      {mobileNavOpen && (
-        <div 
-          ref={mobileNavRef} 
-          className={cx("fixed inset-0 z-50 md:hidden", isDark ? "bg-brand-deep/98" : "bg-brand-cream/98")}
-          style={{ animation: 'fadeIn 200ms ease-out' }}
-        >
-          <div className="flex h-full flex-col">
-            <nav className="flex-1 px-6 py-8">
-              <div className="space-y-2">
-                {navItems.slice(1).map((item, index) => (
-                  <button 
-                    key={item.path} 
-                    onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
-                    className={cx(
-                      "btn-press flex w-full items-center gap-4 rounded-2xl px-6 py-4 text-left text-sm font-bold transition-all duration-200 active:scale-98",
-                      path === item.path 
-                        ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white") 
-                        : (isDark ? "text-brand-soft hover:bg-brand-card/50" : "text-brand-muted hover:bg-brand-cream/50")
-                    )}
-                    style={{ 
-                      animationDelay: `${index * 50}ms`,
-                      animation: 'slideUp 200ms ease-out'
-                    }}
-                  >
-                    <Icon name={item.icon} className="h-5 w-5" />
-                    {item.label}
-                  </button>
-                ))}
+      {/* Mobile Navigation Drawer — rendered via portal to escape header stacking context */}
+      {mobileNavOpen && createPortal(
+        <>
+          <div
+            className="fixed inset-0 z-[9998] bg-black/50 md:hidden"
+            onClick={() => setMobileNavOpen(false)}
+          />
+          <div
+            ref={mobileNavRef}
+            className={cx(
+              "fixed right-0 top-0 z-[9999] flex h-full w-[280px] max-w-[85vw] flex-col md:hidden",
+              isDark ? "bg-brand-deep" : "bg-white"
+            )}
+            style={{
+              boxShadow: '-4px 0 24px rgba(0,0,0,0.15)',
+              animation: 'slideInRight 200ms ease-out'
+            }}
+          >
+            <div className={cx("flex shrink-0 items-center justify-between px-5 py-4 border-b", isDark ? "border-brand-line" : "border-[#E8E4D8]")}>
+              <span className={cx("text-sm font-bold", isDark ? "text-white" : "text-[#1A2E3B]")}>Menú</span>
+              <button
+                onClick={() => setMobileNavOpen(false)}
+                className={cx("flex h-8 w-8 items-center justify-center rounded-lg transition-colors", isDark ? "bg-brand-card text-white hover:bg-brand-card/80" : "bg-[#F4EFE6] text-[#1A2E3B] hover:bg-[#E8E4D8]")}
+                aria-label="Cerrar"
+              >
+                <Icon name="x" className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 py-5">
+              <span className={cx("mb-2 block text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-[#607274]")}>
+                Navegación
+              </span>
+              <div className="mb-6 space-y-1">
+                {navItems.slice(1).map((item) => {
+                  const active = path === item.path;
+                  return (
+                    <button
+                      key={item.path}
+                      onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
+                      className={cx(
+                        "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors",
+                        active
+                          ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                          : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-[#1A2E3B] hover:bg-[#F4EFE6]")
+                      )}
+                    >
+                      <Icon name={item.icon} className="h-4 w-4 shrink-0" />
+                      {item.label}
+                    </button>
+                  );
+                })}
               </div>
-            </nav>
-            
-            <div className="border-t px-6 py-6" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
-              <div className="flex items-center justify-between mb-4">
-                <span className={cx("text-sm font-semibold", isDark ? "text-white" : "text-gray-900")}>{userName}</span>
-                <button 
+
+              <span className={cx("mb-2 block text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-[#607274]")}>
+                Ajustes
+              </span>
+
+              <div className="mb-3">
+                <button
                   onClick={() => setIsDark(!isDark)}
-                  className={cx("btn-press rounded-xl px-3 py-2 text-xs font-bold", isDark ? "bg-brand-card text-brand-orange" : "bg-white text-brand-orange shadow-sm")}
+                  className={cx(
+                    "flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-bold transition-colors",
+                    isDark ? "bg-brand-card text-white hover:bg-brand-card/80" : "bg-[#F4EFE6] text-[#1A2E3B] hover:bg-[#E8E4D8]"
+                  )}
                 >
-                  {isDark ? "☀️ Claro" : "🌙 Oscuro"}
+                  <span className="flex items-center gap-2">
+                    {isDark ? "🌙" : "☀️"}
+                    <span>{isDark ? "Modo oscuro" : "Modo claro"}</span>
+                  </span>
+                  <span className="text-[10px] font-bold uppercase text-brand-orange">
+                    {isDark ? "ON" : "OFF"}
+                  </span>
                 </button>
               </div>
-              <button 
+
+              <div className="mb-6">
+                <FontSizeInline fontScale={fontScale} setFontScale={setFontScale} isDark={isDark} />
+              </div>
+            </div>
+
+            <div className={cx("shrink-0 border-t px-5 py-4", isDark ? "border-brand-line" : "border-[#E8E4D8]")}>
+              <div className="mb-3 flex items-center gap-3">
+                <span className={cx("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold", isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")}>{userInitials}</span>
+                <div className="min-w-0 flex-1">
+                  <p className={cx("truncate text-xs font-bold", isDark ? "text-white" : "text-[#1A2E3B]")}>{userName}</p>
+                  <p className={cx("truncate text-[10px]", isDark ? "text-brand-soft" : "text-[#607274]")}>{userEmail}</p>
+                </div>
+              </div>
+              <button
                 onClick={() => { signOut(); setMobileNavOpen(false); }}
-                className={cx("btn-press w-full rounded-2xl px-6 py-3 text-sm font-bold transition-all duration-200 active:scale-98", isDark ? "bg-brand-card text-brand-orange" : "bg-white text-brand-orange shadow-sm")}
+                className="btn-press w-full rounded-lg bg-brand-orange px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-orange/90"
               >
                 Cerrar sesión
               </button>
             </div>
           </div>
-        </div>
+        </>,
+        document.body
       )}
     </header>
   );
@@ -594,6 +742,7 @@ function LearningPulse({ isDark }) {
 function QuestList({ isDark, quests }) {
   const completedCount = quests.filter(q => q.done).length;
   const totalCount = quests.length;
+  const questPct = totalCount > 0 ? Math.min(100, Math.round((completedCount / totalCount) * 100)) : 0;
 
   return (
     <Card isDark={isDark} className="h-full w-full">
@@ -660,11 +809,11 @@ function QuestList({ isDark, quests }) {
           <div className="flex items-center justify-between">
             <span className={cx("text-xs font-medium", isDark ? "text-brand-soft" : "text-[#607274]")}>Progreso del día</span>
             <span className={cx("font-display text-sm font-extrabold", isDark ? "text-brand-cyan" : "text-[#D97736]")} style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {Math.round((completedCount / totalCount) * 100)}%
+              {questPct}%
             </span>
           </div>
           <div className={cx("mt-2 h-1.5 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#F4EFE6]")}>
-            <div className="h-full rounded-full bg-[#D97736] transition-all duration-700" style={{ width: `${Math.round((completedCount / totalCount) * 100)}%` }} />
+            <div className="h-full rounded-full bg-[#D97736] transition-all duration-700" style={{ width: `${questPct}%` }} />
           </div>
         </div>
       </div>
@@ -694,7 +843,7 @@ function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, 
   const stats = [
     [totalSignsLearned, "Señas aprendidas", "sparkles"],
     [`${totalPracticeTime} min`, "Tiempo total", "clock"],
-    [`${Math.round(averageAccuracy)}%`, "Precisión", "trophy"],
+    [`${Math.min(100, Math.round((averageAccuracy || 0) * 100))}%`, "Precisión", "trophy"],
     [practiceDays, "Días practicados", "flame"]
   ];
   
@@ -995,7 +1144,7 @@ function DashboardPage({ isDark, navigate }) {
   // Real stats from Supabase
   const completedSigns = moduleProgress?.reduce((sum, mp) => sum + (mp.signs_completed || 0), 0) || 0;
   const totalSigns = modules.reduce((sum, m) => sum + m.signs, 0);
-  const progressPct = totalSigns > 0 ? Math.round((completedSigns / totalSigns) * 100) : 0;
+  const progressPct = totalSigns > 0 ? Math.min(100, Math.round((completedSigns / totalSigns) * 100)) : 0;
   const streakDays = userProgress?.streak_days || 0;
   const practiceTime = userProgress?.total_practice_time || 0;
   const averageAccuracy = userProgress?.average_accuracy || 0;
@@ -1003,6 +1152,8 @@ function DashboardPage({ isDark, navigate }) {
   const practiceDays = userProgress?.practice_days || 0;
   const currentLevel = userProgress?.current_level || 1;
   const currentLesson = userProgress?.current_lesson || 1;
+  // Has the user actually practiced? If not, accuracy is meaningless
+  const hasPracticed = (practiceHistory || []).some((h) => h.count > 0) || practiceTime > 0 || completedSigns > 0;
 
   // Daily goal: 10 signs per day. Today's count from practiceHistory.
   const todayKey = (() => {
@@ -1013,7 +1164,8 @@ function DashboardPage({ isDark, navigate }) {
   const dailyGoal = 10;
   const dailyPct = Math.min(100, Math.round((todayCount / dailyGoal) * 100));
 
-  const accuracyPct = Math.round((averageAccuracy || 0) * 100);
+  const accuracyPct = Math.min(100, Math.round((averageAccuracy || 0) * 100));
+  const accuracyDisplay = hasPracticed ? `${accuracyPct}%` : '—';
 
   // Time spent in the last 7 days (from practiceHistory, timeSpent in seconds)
   const last7DaysSeconds = (practiceHistory || [])
@@ -1055,8 +1207,8 @@ function DashboardPage({ isDark, navigate }) {
     {
       task: "Alcanza 70% de precisión",
       icon: "trophy",
-      done: accuracyPct >= 70,
-      progress: accuracyPct < 70 ? `Actual: ${accuracyPct}%` : undefined,
+      done: hasPracticed && accuracyPct >= 70,
+      progress: !hasPracticed ? "Practica para medir tu precisión" : accuracyPct < 70 ? `Actual: ${accuracyPct}%` : undefined,
     },
     {
       task: "Practica 10 minutos",
@@ -1103,7 +1255,7 @@ function DashboardPage({ isDark, navigate }) {
               <Icon name="trophy" className="h-5 w-5" />
             </div>
             <div className="flex flex-col leading-none">
-              <span className={cx("font-display text-xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")} style={{ fontVariantNumeric: 'tabular-nums' }}>{accuracyPct}%</span>
+              <span className={cx("font-display text-xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")} style={{ fontVariantNumeric: 'tabular-nums' }}>{accuracyDisplay}</span>
               <span className={cx("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-[#8AACB4]" : "text-[#607274]")}>Precisión</span>
             </div>
           </div>
@@ -1176,7 +1328,7 @@ function DashboardPage({ isDark, navigate }) {
               {modules.map((m) => {
                 const mp = moduleProgress?.find((p) => p.module_id === m.id);
                 const done = mp?.signs_completed || 0;
-                const pct = m.signs > 0 ? Math.round((done / m.signs) * 100) : 0;
+                const pct = m.signs > 0 ? Math.min(100, Math.round((done / m.signs) * 100)) : 0;
                 return (
                   <div key={m.id} className="flex items-center gap-3">
                     <span className={cx("w-28 shrink-0 truncate text-xs font-semibold", isDark ? "text-brand-soft" : "text-[#1A2E3B]")}>{m.title}</span>
@@ -1209,20 +1361,8 @@ function DashboardPage({ isDark, navigate }) {
   );
 }
 
-function LearnPage({ isDark }) {
+function LearnPage({ isDark, navigate }) {
   const { userProgress, moduleProgress } = useAuth();
-  const [selected, setSelected] = useState(modules[0]);
-  const [activeSign, setActiveSign] = useState(null);
-  const [search, setSearch] = useState("");
-
-  // Auto-advance to next sign in current module
-  const handleNextSign = () => {
-    if (!selected || !activeSign) return;
-    const currentIndex = selected.items.findIndex(item => item.label === activeSign.label);
-    if (currentIndex !== -1 && currentIndex < selected.items.length - 1) {
-      setActiveSign(selected.items[currentIndex + 1]);
-    }
-  };
 
   // Merge module data with progress from database
   const modulesWithProgress = useMemo(() => {
@@ -1257,380 +1397,242 @@ function LearnPage({ isDark }) {
     });
   }, [moduleProgress]);
 
-  const completedSigns = modulesWithProgress.filter((m) => m.status === "completed").reduce((sum, m) => sum + (m.signs_completed || m.signs), 0);
+  const completedSigns = modulesWithProgress.reduce((sum, m) => sum + (m.signs_completed || 0), 0);
   const totalSigns = modulesWithProgress.reduce((sum, m) => sum + m.signs, 0);
-  const progress = Math.round((completedSigns / totalSigns) * 100);
-  const streakDays = userProgress?.streak_days || 0;
+  const progress = totalSigns > 0 ? Math.min(100, Math.round((completedSigns / totalSigns) * 100)) : 0;
 
-  const filteredItems = useMemo(() => {
-    if (!selected) return [];
-    if (!search.trim()) return selected.items;
-    return selected.items.filter((item) =>
-      item.label.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [selected, search]);
+  const handleNodeClick = (module) => {
+    if (module.status === 'locked') return;
+    navigate('/lesson');
+  };
+
+  // ===== Continuous zigzag roadmap =====
+  // Nodes alternate left↔right down the page. Every curve connects two nodes
+  // directly, so there are no empty U-turns. The path flows like a sine wave.
+  const NODE_SPACING = 175; // px between consecutive node centers (vertical)
+  const numNodes = modulesWithProgress.length;
+
+  // Zigzag x positions as percentages — alternating wide left/right swings
+  // with slight variation so it feels organic, not mechanical
+  const xPattern = [50, 82, 18, 75, 25, 78, 22, 50];
+
+  // Compute positions: each node at (xPct, yPx)
+  const nodePositions = modulesWithProgress.map((_, index) => ({
+    xPct: xPattern[index % xPattern.length],
+    yPx: index * NODE_SPACING,
+  }));
+
+  // Build a single smooth SVG path through all node centers
+  // Uses cubic Bezier S-curves for buttery-smooth flow between each pair
+  const buildPath = () => {
+    if (numNodes === 0) return "";
+    const first = nodePositions[0];
+    let d = `M ${first.xPct} 0`;
+    for (let i = 1; i < numNodes; i++) {
+      const prev = nodePositions[i - 1];
+      const curr = nodePositions[i];
+      const y0 = prev.yPx;
+      const y1 = curr.yPx;
+      const midY = (y0 + y1) / 2;
+      // Smooth S-curve: control points keep the previous direction then ease into the next
+      // This creates a flowing sine-wave-like path with no empty sections
+      d += ` C ${prev.xPct} ${midY}, ${curr.xPct} ${midY}, ${curr.xPct} ${y1}`;
+    }
+    return d;
+  };
+
+  const pathD = buildPath();
+  const pathHeight = (numNodes - 1) * NODE_SPACING;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
-      {/* Enhanced Page Title */}
-      <div className="mb-10">
-        <div className="mb-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
-            — Tu Progreso
+    <div className="roadmap-page">
+      {/* Title + progress */}
+      <div className="mx-auto max-w-3xl px-4 pt-8 pb-6 text-center sm:px-6 sm:pt-12">
+        <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
+          — Tu Progreso
+        </span>
+        <h1 className={cx("font-display mt-1 text-2xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-[#1A2E3B]")}>
+          Avance en <span className="text-[#D97736]">módulos</span>
+        </h1>
+
+        {/* Progress bar */}
+        <div className="mx-auto mt-4 flex max-w-xs items-center gap-3">
+          <div className={cx("h-3 flex-1 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#F4EFE6]")}>
+            <div
+              className="h-full rounded-full bg-[#D97736] transition-all duration-700"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span className={cx("font-display text-sm font-extrabold tabular-nums", isDark ? "text-white" : "text-[#1A2E3B]")}>
+            {completedSigns}/{totalSigns}
           </span>
         </div>
-        <h1 className="font-display text-3xl font-extrabold sm:text-4xl text-[#1A2E3B]">
-          Avance en <span className="text-[#D97736]">módulos</span> y señas aprendidas
-        </h1>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-12">
-        <div className="space-y-6 lg:col-span-8">
-          {/* Enhanced Modules Card */}
-          <Card isDark={isDark}>
-            <div className="mb-6 flex items-center justify-between">
-              <div className="mb-6">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
-                  — Módulos
-                </span>
-              </div>
-              <div className="text-xs font-medium text-[#607274]">
-                <span className={isDark ? "text-brand-cyan" : "text-[#D97736]"}>{completedSigns}</span>
-                <span className="text-gray-400 mx-1">/</span>
-                <span>{totalSigns}</span>
-                <span className="ml-1">señas</span>
-              </div>
-            </div>
+      {/* Roadmap — full page horizontal snake path */}
+      <div
+        className="roadmap-container"
+        style={{
+          '--node-spacing': `${NODE_SPACING}px`,
+          minHeight: `${pathHeight + 160}px`,
+        }}
+      >
+        {/* Continuous SVG path behind the nodes */}
+        <svg
+          className="roadmap-path"
+          viewBox={`0 0 100 ${pathHeight}`}
+          preserveAspectRatio="none"
+          style={{ height: pathHeight }}
+          aria-hidden="true"
+        >
+          <path
+            d={pathD}
+            vectorEffect="non-scaling-stroke"
+            className={cx(
+              "roadmap-path-stroke",
+              isDark ? "roadmap-path-stroke--dark" : "roadmap-path-stroke--light"
+            )}
+          />
+        </svg>
 
-            <div className="space-y-4">
-              {modulesWithProgress.map((module, index) => (
-                <SkillNode
-                  key={module.id}
-                  module={module}
-                  index={index}
-                  isDark={isDark}
-                  selected={selected?.id === module.id}
-                  onClick={() => setSelected(module)}
-                />
-              ))}
-            </div>
-          </Card>
+        {/* Nodes positioned on top of the path */}
+        <div className="roadmap-nodes">
+          {modulesWithProgress.map((module, index) => {
+            const completed = module.status === "completed";
+            const current = module.status === "current";
+            const locked = module.status === "locked";
+            const pos = nodePositions[index];
 
-          {/* Enhanced Selected Module Card */}
-          {selected && (
-            <Card isDark={isDark}>
-              <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-3">
-                  <div className={cx("flex h-12 w-12 items-center justify-center rounded-xl", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-[#D97736]/10 text-[#D97736]")}>
-                    <Icon name={selected.icon || "book"} className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className={cx("font-display text-xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")}>{selected.title}</h3>
-                    <p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-[#607274]")}>{selected.signs} señas · Nivel {selected.level}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Icon name="sparkles" className={cx("absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4", isDark ? "text-brand-soft" : "text-[#607274]")} />
-                    <input
-                      type="text"
-                      placeholder="Buscar seña..."
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      className={cx(
-                        "pl-10 pr-4 py-2.5 rounded-xl text-sm w-48 sm:w-64 transition-all duration-200 focus:ring-2 focus:ring-[#8C4A27]/50",
-                        isDark ? "bg-brand-deep text-white border border-brand-line placeholder:text-[#5A8A94]" : "bg-white text-[#1A2E3B] border border-[#E8E4D8] placeholder:text-[#607274]"
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                {filteredItems.map((item, index) => (
-                  <button
-                    key={item.label}
-                    className={cx(
-                      "group flex flex-col items-center gap-3 rounded-xl p-4 transition-all duration-200",
-                      isDark
-                        ? "bg-transparent border border-brand-line/30 hover:border-brand-cyan/50"
-                        : "bg-transparent border border-[#E8E4D8] hover:border-[#8C4A27]/50"
-                    )}
-                  >
-                    <div className="relative h-20 w-20 overflow-hidden rounded-xl">
-                      <img
-                        src={item.thumbnail}
-                        alt={item.label}
-                        className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-110"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-black/10" />
-                      {/* Icon overlay */}
-                      <div className="absolute top-2 right-2 h-6 w-6 rounded-lg bg-white/90 flex items-center justify-center">
-                        <Icon name={getSignIcon(item.label)} className="h-3 w-3 text-gray-800" />
-                      </div>
-                    </div>
-                    <span className={cx("text-xs font-semibold text-center leading-tight", isDark ? "text-brand-soft" : "text-[#1A2E3B]")}>
-                      {item.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </Card>
-          )}
-        </div>
-        
-        {/* Enhanced Sidebar */}
-        <div className="space-y-6 lg:col-span-4">
-          {/* Stats Card */}
-          <Card isDark={isDark}>
-            <div className="mb-6">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
-                — Estadísticas
-              </span>
-            </div>
-            
-            <div className="space-y-6">
-              {/* Overall Progress */}
-              <div>
-                <div className={cx("flex items-center justify-between mb-2", isDark ? "text-brand-soft" : "text-brand-muted")}>
-                  <span className="text-xs font-medium">Progreso total</span>
-                  <span className="text-xs font-bold">{progress}%</span>
-                </div>
-                <div className={cx("relative h-3 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#F4EFE6]")}>
-                  <div
-                    className={cx(
-                      "absolute left-0 top-0 h-full rounded-full transition-all duration-700 ease-out",
-                      isDark ? "bg-brand-teal" : "bg-[#D97736]"
-                    )}
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-              </div>
-              
-              {/* Streak */}
-              {streakDays > 0 && (
-                <div className={cx(
-                  "flex items-center gap-4 rounded-2xl p-4 transition-all duration-300",
-                  isDark ? "bg-brand-deep/50" : "bg-brand-cream/50"
-                )}>
-                  <div className={cx("flex h-12 w-12 items-center justify-center rounded-xl", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-brand-orange/20 text-brand-teal")}>
-                    <Icon name="flame" className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <div className={cx("text-xs font-medium mb-1", isDark ? "text-brand-soft" : "text-brand-muted")}>Racha actual</div>
-                    <div className={cx("text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{streakDays} días</div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </Card>
-          
-          {/* Actions Card */}
-          <Card isDark={isDark}>
-            <div className="mb-6">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
-                — Acciones
-              </span>
-            </div>
-            
-            <div className="space-y-3">
-              <button
-                onClick={() => window.location.href = "/lesson"}
-                className={cx(
-                  "group btn-press w-full flex items-center justify-center gap-2 rounded-2xl px-6 py-4 text-sm font-bold transition-all duration-200 active:scale-95",
-                  isDark
-                    ? "bg-brand-teal text-white hover:shadow-lg hover:shadow-brand-teal/20"
-                    : "bg-brand-teal text-white hover:shadow-lg hover:shadow-brand-teal/20"
-                )}
+            return (
+              <div
+                key={module.id}
+                className="roadmap-node"
+                style={{
+                  '--node-x': `${pos.xPct}%`,
+                  '--node-y': `${pos.yPx}px`,
+                }}
               >
-                <Icon name="book" className="h-5 w-5 transition-transform group-hover:scale-110" />
-                Comenzar Lección
-              </button>
-              <button
-                onClick={() => window.location.href = "/practice"}
-                className={cx(
-                  "group btn-press w-full flex items-center justify-center gap-2 rounded-2xl px-6 py-4 text-sm font-bold transition-all duration-200 active:scale-95",
-                  isDark 
-                    ? "bg-brand-deep text-brand-soft hover:bg-brand-card border border-brand-line" 
-                    : "bg-white text-brand-muted hover:bg-brand-cream border border-gray-200"
-                )}
-              >
-                <Icon name="camera" className="h-5 w-5 transition-transform group-hover:scale-110" />
-                Ir a Práctica
-              </button>
-            </div>
-          </Card>
+                <button
+                  onClick={() => handleNodeClick(module)}
+                  disabled={locked}
+                  className={cx(
+                    "roadmap-circle",
+                    completed && "roadmap-circle--completed",
+                    current && "roadmap-circle--current",
+                    locked && "roadmap-circle--locked"
+                  )}
+                  aria-label={`${module.title} - ${locked ? 'Bloqueado' : completed ? 'Completado' : 'En progreso'}`}
+                >
+                  <Icon name={module.icon || "book"} className="h-7 w-7 sm:h-9 sm:w-9" />
+                  <span className={cx(
+                    "roadmap-badge",
+                    completed ? "bg-[#0D5C6F] text-white" : current ? "bg-[#D97736] text-white" : "bg-[#E8E4D8] text-[#B0A89A]"
+                  )}>
+                    {completed ? "✓" : current ? "▶" : "🔒"}
+                  </span>
+                </button>
+
+                <div className="roadmap-label">
+                  <span className={cx(
+                    "block text-xs font-bold leading-tight sm:text-sm",
+                    locked ? (isDark ? "text-[#5A7A82]" : "text-[#B0A89A]") : (isDark ? "text-white" : "text-[#1A2E3B]")
+                  )}>
+                    {module.title}
+                  </span>
+                  <span className={cx(
+                    "mt-0.5 block text-[10px] font-medium",
+                    isDark ? "text-brand-soft" : "text-[#607274]"
+                  )}>
+                    {module.signs_completed || 0}/{module.signs} señas
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
-    </main>
+
+      {/* CTA at the bottom */}
+      <div className="mx-auto max-w-md px-4 pb-12 sm:px-6">
+        <button
+          onClick={() => navigate('/lesson')}
+          className="btn-press flex w-full items-center justify-center gap-2 rounded-xl bg-[#D97736] px-6 py-3.5 text-sm font-bold text-white transition-all active:scale-95 hover:bg-[#B85C2D]"
+        >
+          <Icon name="book" className="h-5 w-5" />
+          Continuar aprendiendo
+        </button>
+      </div>
+    </div>
   );
 }
+
 
 function SkillNode({ module, index, isDark, selected, onClick }) {
   const completed = module.status === "completed";
   const current = module.status === "current";
   const locked = module.status === "locked";
-  
+
   return (
     <div className="relative">
-      <button 
-        onClick={onClick} 
+      <button
+        onClick={onClick}
         className={cx(
           "group btn-press relative flex w-full items-center gap-4 text-left transition-all duration-300",
           locked && "cursor-default opacity-50",
           !locked && "hover:scale-[1.01]"
         )}
-        style={{ animationDelay: `${index * 50}ms` }}
         disabled={locked}
         aria-pressed={selected}
         aria-label={`${module.title} - ${module.desc} - ${locked ? 'Bloqueado' : completed ? 'Completado' : 'En progreso'}`}
-        role="button"
       >
-        {/* Module Icon with Status Overlay */}
         <div className="relative">
           <div className={cx(
             "relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl transition-all duration-300 sm:h-16 sm:w-16",
-            isDark 
-              ? "border-2 border-brand-line bg-brand-card text-brand-orange" 
+            isDark
+              ? "border-2 border-brand-line bg-brand-card text-brand-orange"
               : "border-2 border-gray-300 bg-gray-100 text-brand-orange"
           )} aria-hidden="true">
             <Icon name={module.icon || "book"} className="h-6 w-6 sm:h-7 sm:w-7" />
           </div>
-          
-          {/* Status Badge */}
           <div className={cx(
             "absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all duration-300 sm:h-7 sm:w-7",
             isDark ? "border-brand-deep bg-brand-card" : "border-white bg-white",
-            completed 
-              ? "text-brand-teal" 
-              : current 
-                ? "text-brand-orange" 
-                : "text-gray-400"
+            completed ? "text-brand-teal" : current ? "text-brand-orange" : "text-gray-400"
           )}>
-            {completed ? (
-              <Icon name="check" className="h-3 w-3 sm:h-4 sm:w-4" />
-            ) : current ? (
-              <Icon name="play" className="h-3 w-3 sm:h-4 sm:w-4" />
-            ) : (
-              <Icon name="lock" className="h-3 w-3 sm:h-3 sm:w-3" />
-            )}
+            {completed ? <Icon name="check" className="h-3 w-3 sm:h-4 sm:w-4" />
+              : current ? <Icon name="play" className="h-3 w-3 sm:h-4 sm:w-4" />
+              : <Icon name="lock" className="h-3 w-3 sm:h-3 sm:w-3" />}
           </div>
         </div>
-        
-        {/* Content */}
         <div className={cx(
           "flex-1 rounded-xl p-4 transition-all duration-200 sm:p-5",
           selected
-            ? (isDark
-                ? "border-2 border-brand-cyan/50 bg-brand-card"
-                : "border-2 border-[#D97736]/50 bg-white")
-            : (isDark
-                ? "border border-brand-line/30 bg-transparent hover:border-brand-cyan/50"
-                : "border border-[#E8E4D8] bg-transparent hover:border-[#8C4A27]/50")
+            ? (isDark ? "border-2 border-brand-cyan/50 bg-brand-card" : "border-2 border-[#D97736]/50 bg-white")
+            : (isDark ? "border border-brand-line/30 bg-transparent hover:border-brand-cyan/50" : "border border-[#E8E4D8] bg-transparent hover:border-[#8C4A27]/50")
         )}>
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
-              <span className={cx("block text-sm font-bold sm:text-base", isDark ? "text-white" : "text-gray-900")}>
-                {module.title}
-              </span>
-              <span className={cx("block text-xs mt-1", isDark ? "text-[#5A8A94]" : "text-gray-600")}>
-                {module.desc}
-              </span>
+              <span className={cx("block text-sm font-bold sm:text-base", isDark ? "text-white" : "text-gray-900")}>{module.title}</span>
+              <span className={cx("block text-xs mt-1", isDark ? "text-[#5A8A94]" : "text-gray-600")}>{module.desc}</span>
             </div>
-            
-            {/* Progress indicator */}
             {module.signs_completed !== undefined && (
-              <div className={cx(
-                "flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold",
-                isDark ? "bg-brand-deep/50 text-brand-soft" : "bg-gray-100 text-gray-600"
-              )} aria-label={`Progreso: ${module.signs_completed} de ${module.signs} señas`}>
+              <div className={cx("flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold", isDark ? "bg-brand-deep/50 text-brand-soft" : "bg-gray-100 text-gray-600")}>
                 <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{module.signs_completed}</span>
-                <span aria-hidden="true">/</span>
+                <span>/</span>
                 <span>{module.signs}</span>
               </div>
             )}
           </div>
-          
-          {/* Mini progress bar */}
           {module.signs_completed !== undefined && (
-            <div className="mt-3" role="progressbar" aria-valuenow={module.signs_completed} aria-valuemin={0} aria-valuemax={module.signs} aria-label={`Progreso del módulo: ${Math.round((module.signs_completed / module.signs) * 100)}%`}>
+            <div className="mt-3">
               <div className={cx("h-1.5 w-full overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-gray-200")}>
-                <div 
-                  className={cx(
-                    "h-full rounded-full transition-all duration-500 ease-out",
-                    completed 
-                      ? "bg-brand-teal" 
-                      : current 
-                        ? "bg-brand-orange" 
-                        : "bg-gray-400"
-                  )}
-                  style={{ width: `${(module.signs_completed / module.signs) * 100}%` }}
-                />
+                <div className={cx("h-full rounded-full transition-all duration-500", completed ? "bg-brand-teal" : current ? "bg-brand-orange" : "bg-gray-400")} style={{ width: `${(module.signs_completed / module.signs) * 100}%` }} />
               </div>
             </div>
           )}
         </div>
-        
-        {/* Arrow indicator */}
-        {!locked && (
-          <div className={cx(
-            "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100",
-            isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal"
-          )} aria-hidden="true">
-            <Icon name="arrow" className="h-4 w-4" />
-          </div>
-        )}
       </button>
-      
-      {/* Connector line */}
-      {index < modules.length - 1 && (
-        <div className="flex justify-center py-3" aria-hidden="true">
-          <div className={cx("h-8 w-px rounded-full sm:h-10", isDark ? "bg-brand-line/50" : "bg-gray-300")} />
-        </div>
-      )}
     </div>
-  );
-}
-
-function ModuleDetail({ module, isDark, items, search, onSearch, onSelect }) {
-  if (!module) return null;
-  return (
-    <Card isDark={isDark}>
-      <div className="mb-4 flex items-center gap-3">
-        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-orange/15 text-brand-orange"><Icon name="book" /></span>
-        <div className="flex-1 min-w-0">
-          <h3 className={cx("text-base font-bold truncate", isDark ? "text-white" : "text-brand-ink")}>{module.title}</h3>
-          <p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{module.signs} señas · Nivel {module.level}</p>
-        </div>
-        <span className={cx("rounded-full px-2 py-1 text-[10px] font-bold", isDark ? "bg-brand-teal/20 text-brand-cyan" : "bg-brand-teal/10 text-brand-teal")}>{items.length}</span>
-      </div>
-      <input
-        value={search} onChange={(e) => onSearch(e.target.value)}
-        placeholder="Buscar seña..."
-        className={cx("mb-4 w-full rounded-lg border px-3 py-2 text-sm", isDark ? "border-brand-line bg-brand-deep text-white placeholder:text-[#5A8A94]" : "border-brand-mist bg-brand-cream text-brand-ink placeholder:text-[#8AA8B0]")}
-      />
-      <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto sm:max-h-72 sm:grid-cols-3">
-        {items.map((item) => (
-          <button
-            key={item.label} 
-            onClick={() => onSelect(item)}
-            className={cx("btn-press group flex flex-col items-center gap-2 rounded-xl border p-2 sm:p-3 text-center transition",
-              isDark ? "border-brand-line bg-brand-deep/40 hover:border-brand-cyan/40 hover:bg-brand-card" : "border-brand-mist bg-brand-cream hover:border-brand-teal/30 hover:bg-white hover:shadow-sm"
-            )}
-          >
-            <div className="relative">
-              <img src={item.thumbnail} alt={item.label} className="h-12 w-full rounded-lg object-cover sm:h-14" loading="lazy" />
-              {/* Icon overlay */}
-              <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
-                <Icon name={getSignIcon(item.label)} className="h-2.5 w-2.5 text-gray-800" />
-              </div>
-            </div>
-            <span className={cx("text-[10px] font-semibold leading-tight sm:text-[11px]", isDark ? "text-brand-soft" : "text-gray-600")}>{item.label}</span>
-          </button>
-        ))}
-      </div>
-    </Card>
   );
 }
 
@@ -2989,12 +2991,21 @@ function ConfigErrorPage({ isDark }) {
 
 function App() {
   const [isDark, setIsDark] = useState(false);
+  const [fontScale, setFontScale] = useState(() => {
+    try { return localStorage.getItem('fontScale') || 'md'; } catch { return 'md'; }
+  });
   const [path, navigate, state] = useRoute();
   const { user, loading, authConfigError } = useAuth();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
+
+  useEffect(() => {
+    const sizes = { sm: '15px', md: '17px', lg: '19px' };
+    document.documentElement.style.fontSize = sizes[fontScale] || sizes.md;
+    try { localStorage.setItem('fontScale', fontScale); } catch {}
+  }, [fontScale]);
 
   // Handle OAuth callback redirect
   useEffect(() => {
@@ -3064,7 +3075,7 @@ function App() {
   if (path === "/practice") {
     return (
       <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
-        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} />
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
         <PracticePage isDark={isDark} setIsDark={setIsDark} navigate={navigate} />
       </div>
     );
@@ -3073,7 +3084,7 @@ function App() {
   if (path === "/dashboard") {
     return (
       <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
-        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} />
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
         <DashboardPage isDark={isDark} navigate={navigate} />
       </div>
     );
@@ -3082,8 +3093,8 @@ function App() {
   if (path === "/learn") {
     return (
       <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
-        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} />
-        <LearnPage isDark={isDark} />
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
+        <LearnPage isDark={isDark} navigate={navigate} />
       </div>
     );
   }
@@ -3094,7 +3105,7 @@ function App() {
 
   return (
     <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
-      <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} />
+      <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
       <DashboardPage isDark={isDark} navigate={navigate} />
     </div>
   );

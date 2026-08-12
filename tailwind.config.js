@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Fraunces"', '"Plus Jakarta Sans"', "Georgia", "serif"],
+        display: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"],
         body: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"]
       },
       colors: {
