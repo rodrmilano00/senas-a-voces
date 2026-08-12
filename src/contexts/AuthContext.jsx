@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient';
-import { initializeUserProgress } from '../services/progressService';
+import { initializeUserProgress, getPracticeHeatmapData } from '../services/progressService';
 
 const AuthContext = createContext(null);
 
@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [userProgress, setUserProgress] = useState(null);
   const [moduleProgress, setModuleProgress] = useState([]);
+  const [practiceHistory, setPracticeHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const authConfigError = isSupabaseConfigured ? "" : "Faltan variables de entorno de Supabase.";
   const [justLoggedIn, setJustLoggedIn] = useState(false);
@@ -26,6 +27,7 @@ export function AuthProvider({ children }) {
         fetchProfile(session.user.id);
         fetchUserProgress(session.user.id);
         fetchModuleProgress(session.user.id);
+        fetchPracticeHistory(session.user.id);
       }
       setLoading(false);
     });
@@ -39,6 +41,7 @@ export function AuthProvider({ children }) {
         fetchProfile(session.user.id);
         fetchUserProgress(session.user.id);
         fetchModuleProgress(session.user.id);
+        fetchPracticeHistory(session.user.id);
         setJustLoggedIn(true);
         // Navigate to dashboard after successful auth
         setTimeout(() => {
@@ -52,6 +55,7 @@ export function AuthProvider({ children }) {
         setProfile(null);
         setUserProgress(null);
         setModuleProgress([]);
+        setPracticeHistory([]);
         setJustLoggedIn(false);
       }
       setLoading(false);
@@ -129,6 +133,16 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const fetchPracticeHistory = async (userId) => {
+    try {
+      const data = await getPracticeHeatmapData(userId, 140);
+      setPracticeHistory(data || []);
+    } catch (error) {
+      console.error('Error fetching practice history:', error);
+      setPracticeHistory([]);
+    }
+  };
+
   const signUp = async ({ email, password, fullName }) => {
     if (!supabase) {
       return { data: null, error: new Error(authConfigError), requiresEmailConfirmation: false };
@@ -200,7 +214,7 @@ export function AuthProvider({ children }) {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}/dashboard`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -233,12 +247,14 @@ export function AuthProvider({ children }) {
     profile,
     userProgress,
     moduleProgress,
+    practiceHistory,
     loading,
     authConfigError,
     signUp,
     signIn,
     signInWithGoogle,
     signOut,
+    refreshPracticeHistory: () => user && fetchPracticeHistory(user.id),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

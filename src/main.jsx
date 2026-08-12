@@ -360,36 +360,31 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
   const userEmail = profile?.email || "";
 
   return (
-    <header className={cx("app-header sticky top-0 z-40 transition-colors", isDark ? "bg-brand-deep/95" : "bg-brand-cream/95")}>
+    <header className={cx("sticky top-0 z-40 transition-colors bg-white backdrop-blur-xl border-b border-[#E8E4D8]")}>
       <div className="mx-auto px-4 py-3 sm:px-6 sm:py-4">
-        <div className={cx("rounded-2xl border backdrop-blur-xl", isDark ? "border-brand-line bg-brand-card/50" : "border-brand-mist bg-white/50")}>
-          <div className="flex items-center justify-between px-4 py-3 sm:px-6">
-            <button onClick={() => navigate("/dashboard")} className="btn-press flex items-center gap-3">
-              <Logo isDark={isDark} compact />
-            </button>
-            
-            {/* Desktop Navigation - Rectangular Style */}
-            <nav className="hidden items-center gap-1 md:flex">
-              {navItems.slice(1).map((item, index) => (
-                <button 
-                  key={item.path} 
-                  onClick={() => navigate(item.path)} 
-                  className={cx(
-                    "group relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 active:scale-95",
-                    path === item.path 
-                      ? (isDark ? "bg-brand-cyan text-brand-deep shadow-lg shadow-brand-cyan/20" : "bg-brand-teal text-white shadow-lg shadow-brand-teal/20") 
-                      : (isDark ? "text-brand-soft hover:bg-brand-card/50" : "text-brand-muted hover:bg-brand-cream/50")
-                  )}
-                  style={{ 
-                    animationDelay: `${index * 50}ms`,
-                    transition: 'transform 160ms ease-out, background-color 200ms ease-out, box-shadow 200ms ease-out'
-                  }}
-                >
-                  <Icon name={item.icon} className="h-4 w-4" />
-                  {item.label}
-                </button>
-              ))}
-            </nav>
+        <div className="flex items-center justify-between">
+          <button onClick={() => navigate("/dashboard")} className="btn-press flex items-center gap-3">
+            <Logo isDark={isDark} compact />
+          </button>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden items-center gap-1 md:flex">
+            {navItems.slice(1).map((item, index) => (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={cx(
+                  "group relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200 active:scale-95",
+                  path === item.path
+                    ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                    : (isDark ? "text-brand-soft hover:bg-brand-card/50" : "text-brand-muted hover:bg-brand-cream/50")
+                )}
+              >
+                <Icon name={item.icon} className="h-4 w-4" />
+                {item.label}
+              </button>
+            ))}
+          </nav>
 
             <div className="flex items-center gap-3">
               {/* Mobile Navigation Button - Toggle */}
@@ -452,7 +447,6 @@ function AppHeader({ isDark, setIsDark, navigate, path }) {
               </div>
             </div>
           </div>
-        </div>
       </div>
 
       {/* Mobile Navigation Menu - Full Screen Overlay */}
@@ -528,13 +522,13 @@ function WaveBackground({ isDark }) {
 function Card({ isDark, className = "", children }) {
   return (
     <div className={cx(
-      "surface-card overflow-hidden rounded-3xl transition-all duration-300",
+      "surface-card flex flex-col overflow-hidden rounded-3xl transition-all duration-300",
       isDark 
         ? "border border-brand-line/50 bg-brand-card shadow-sm" 
         : "border border-gray-200/50 bg-white shadow-sm",
       className
     )}>
-      <div className={cx("p-6 sm:p-8", isDark ? "relative" : "relative")}>
+      <div className={cx("flex flex-1 flex-col p-6 sm:p-8", isDark ? "relative" : "relative")}>
         {children}
       </div>
     </div>
@@ -543,50 +537,49 @@ function Card({ isDark, className = "", children }) {
 
 function LearningPulse({ isDark }) {
   return (
-    <Card isDark={isDark} className="learning-pulse mb-6 relative overflow-hidden">
+    <Card isDark={isDark} className="mb-6 opacity-90">
       <div className="relative">
-        <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between sm:gap-6">
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between sm:gap-6">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-4">
-              <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
-                Brújula de aprendizaje
+            <div className="mb-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
+                — Brújula de aprendizaje
               </span>
             </div>
-            <h2 className={cx("text-2xl font-extrabold sm:text-3xl", isDark ? "text-white" : "text-brand-ink")}>
-              Hoy conviene practicar <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>Familia</span>
+            <h2 className="font-display text-xl font-extrabold sm:text-2xl text-[#1A2E3B]">
+              Hoy conviene practicar <span className="text-[#D97736]">Familia</span>
             </h2>
-            <p className={cx("mt-3 max-w-2xl text-sm leading-7", isDark ? "text-brand-soft" : "text-brand-muted")}>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#607274]">
               Tu ruta detecta buena memoria visual. Mantén sesiones cortas y repite las señas que mezclan parentesco y saludo.
             </p>
           </div>
           <div className={cx(
-            "hidden h-16 w-16 shrink-0 items-center justify-center rounded-2xl sm:flex",
-            isDark ? "bg-brand-cyan/15 text-brand-cyan" : "bg-brand-teal/15 text-brand-teal"
+            "hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:flex",
+            isDark ? "bg-brand-cyan/10 text-brand-cyan" : "bg-[#D97736]/5 text-[#D97736]"
           )}>
-            <Icon name="sparkles" className="h-8 w-8" />
+            <Icon name="sparkles" className="h-5 w-5" />
           </div>
         </div>
-        
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 md:grid-cols-3">
           {learningMoments.map((item, index) => (
-            <div 
-              key={item.label} 
+            <div
+              key={item.label}
               className={cx(
-                "group relative overflow-hidden rounded-2xl border p-4 transition-all duration-300 hover:scale-[1.02]",
-                isDark 
-                  ? "border-brand-line/30 bg-brand-deep/40 hover:border-brand-cyan/50 hover:bg-brand-deep/60" 
-                  : "border-gray-200 bg-gray-50 hover:border-brand-teal/50 hover:bg-gray-100"
+                "group relative overflow-hidden rounded-xl border p-3 transition-all duration-200",
+                isDark
+                  ? "border-brand-line/20 bg-transparent hover:border-brand-cyan/30"
+                  : "border-[#E8E4D8] bg-transparent hover:border-[#8C4A27]/30"
               )}
-              style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="relative">
-                <span className={cx("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-gray-600")}>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#607274]">
                   {item.label}
                 </span>
-                <strong className={cx("mt-2 block text-xl font-extrabold sm:text-2xl", isDark ? "text-white" : "text-gray-900")}>
+                <strong className={cx("mt-1 block text-base font-extrabold sm:text-lg", isDark ? "text-white" : "text-[#1A2E3B]")}>
                   {item.value}
                 </strong>
-                <p className={cx("mt-2 text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-gray-600")}>
+                <p className={cx("mt-1 text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-[#607274]")}>
                   {item.detail}
                 </p>
               </div>
@@ -598,61 +591,82 @@ function LearningPulse({ isDark }) {
   );
 }
 
-function QuestList({ isDark }) {
-  const completedCount = dailyQuest.filter(q => q.done).length;
-  const totalCount = dailyQuest.length;
-  
+function QuestList({ isDark, quests }) {
+  const completedCount = quests.filter(q => q.done).length;
+  const totalCount = quests.length;
+
   return (
-    <Card isDark={isDark}>
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-brand-orange/20 text-brand-teal")}>
-            Reto de hoy
-          </span>
-        </div>
-        <div className={cx("flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-deep/50 text-brand-soft" : "bg-gray-100 text-gray-600")}>
-          <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{completedCount}</span>
-          <span className="text-gray-400">/</span>
-          <span>{totalCount}</span>
-        </div>
-      </div>
-      
-      <div className="space-y-3">
-        {dailyQuest.map((quest, index) => (
-          <div 
-            key={quest.task} 
-            className={cx(
-              "group flex items-center gap-4 rounded-2xl p-4 transition-all duration-300",
-              quest.done 
-                ? (isDark ? "bg-brand-deep/30 opacity-70" : "bg-gray-100 opacity-70") 
-                : (isDark ? "bg-brand-deep/50 hover:bg-brand-deep/70" : "bg-gray-50 hover:bg-gray-100")
-            )}
-            style={{ animationDelay: `${index * 50}ms` }}
-          >
-            <div className={cx(
-              "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all duration-300",
-              quest.done 
-                ? "bg-brand-teal text-white" 
-                : (isDark ? "border-2 border-brand-line text-brand-soft" : "border-2 border-gray-300 text-gray-600")
-            )}>
-              <Icon name={quest.done ? "check" : "sparkles"} className="h-4 w-4" />
-            </div>
-            <p className={cx(
-              "flex-1 text-sm font-semibold transition-all duration-300",
-              quest.done 
-                ? (isDark ? "text-brand-soft line-through" : "text-gray-500 line-through") 
-                : (isDark ? "text-white" : "text-gray-900")
-            )}>
-              {quest.task}
-            </p>
-            {!quest.done && (
-              <span className={cx(
-                "h-2 w-2 rounded-full animate-pulse",
-                isDark ? "bg-brand-orange" : "bg-brand-teal"
-              )} />
-            )}
+    <Card isDark={isDark} className="h-full w-full">
+      <div className="flex h-full flex-col">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
+              — Reto de hoy
+            </span>
+            <h3 className={cx("font-display mt-1.5 text-xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")}>Misiones diarias</h3>
           </div>
-        ))}
+          <div className={cx("rounded-lg px-2.5 py-1 text-xs font-bold", isDark ? "bg-brand-card text-brand-cyan" : "bg-[#D97736]/10 text-[#D97736]")}>
+            {completedCount}/{totalCount}
+          </div>
+        </div>
+
+        <div className="flex-1 space-y-3">
+          {quests.map((quest, index) => (
+            <div 
+              key={quest.task} 
+              className={cx(
+                "group flex items-center gap-4 rounded-2xl p-4 transition-all duration-300",
+                quest.done 
+                  ? (isDark ? "bg-brand-deep/30 opacity-70" : "bg-gray-100 opacity-70") 
+                  : (isDark ? "bg-brand-deep/50 hover:bg-brand-deep/70" : "bg-gray-50 hover:bg-gray-100")
+              )}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <div className={cx(
+                "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-all duration-300",
+                quest.done 
+                  ? "bg-brand-teal text-white" 
+                  : (isDark ? "border-2 border-brand-line text-brand-soft" : "border-2 border-gray-300 text-gray-600")
+              )}>
+                <Icon name={quest.done ? "check" : quest.icon || "sparkles"} className="h-4 w-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={cx(
+                  "text-sm font-semibold transition-all duration-300",
+                  quest.done 
+                    ? (isDark ? "text-brand-soft line-through" : "text-gray-500 line-through") 
+                    : (isDark ? "text-white" : "text-gray-900")
+                )}>
+                  {quest.task}
+                </p>
+                {quest.progress != null && !quest.done && (
+                  <p className={cx("mt-0.5 text-[11px] font-medium", isDark ? "text-[#8AACB4]" : "text-[#607274]")}>
+                    {quest.progress}
+                  </p>
+                )}
+              </div>
+              {!quest.done && (
+                <span className={cx(
+                  "h-2 w-2 shrink-0 rounded-full animate-pulse",
+                  isDark ? "bg-brand-orange" : "bg-brand-teal"
+                )} />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Footer summary — fills remaining height */}
+        <div className="mt-5 border-t pt-4" style={{ borderColor: isDark ? "#1A5C6A" : "#E8E4D8" }}>
+          <div className="flex items-center justify-between">
+            <span className={cx("text-xs font-medium", isDark ? "text-brand-soft" : "text-[#607274]")}>Progreso del día</span>
+            <span className={cx("font-display text-sm font-extrabold", isDark ? "text-brand-cyan" : "text-[#D97736]")} style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {Math.round((completedCount / totalCount) * 100)}%
+            </span>
+          </div>
+          <div className={cx("mt-2 h-1.5 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#F4EFE6]")}>
+            <div className="h-full rounded-full bg-[#D97736] transition-all duration-700" style={{ width: `${Math.round((completedCount / totalCount) * 100)}%` }} />
+          </div>
+        </div>
       </div>
     </Card>
   );
@@ -662,7 +676,7 @@ function PageTitle({ isDark, title, accent, subtitle }) {
   const parts = title.split(accent);
   return (
     <div className="animate-fade mb-8">
-      <h1 className={cx("text-2xl font-extrabold md:text-3xl lg:text-4xl", isDark ? "text-white" : "text-brand-ink")} role="heading" aria-level="1">
+      <h1 className={cx("font-display text-2xl font-extrabold md:text-3xl lg:text-4xl", isDark ? "text-white" : "text-brand-ink")} role="heading" aria-level="1">
         {parts[0]}<span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{accent}</span>{parts[1]}
       </h1>
       <p className={cx("mt-2 text-sm md:text-base", isDark ? "text-brand-soft" : "text-brand-muted")} role="doc-subtitle">
@@ -687,18 +701,18 @@ function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, 
   return (
     <Card isDark={isDark}>
       <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
-            Progreso actual
+        <div className="mb-6">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
+            — Progreso actual
           </span>
         </div>
-        <div className={cx("rounded-full px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-deep/50 text-brand-cyan" : "bg-gray-100 text-brand-teal")}>
+        <div className={cx("px-3 py-1.5 text-xs font-bold", isDark ? "text-brand-cyan" : "text-[#D97736]")}>
           Nivel {currentLevel}
         </div>
       </div>
       
       <div className="mb-6">
-        <h3 className={cx("text-2xl font-extrabold sm:text-3xl", isDark ? "text-white" : "text-gray-900")}>
+        <h3 className={cx("font-display text-2xl font-extrabold sm:text-3xl", isDark ? "text-white" : "text-gray-900")}>
           Lección {currentLesson}
         </h3>
         <p className={cx("mt-1 text-sm font-medium", isDark ? "text-brand-soft" : "text-gray-600")}>
@@ -749,37 +763,37 @@ function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, 
 }
 
 function BarRow({ label, value, isDark }) {
-  return <div className="flex items-center gap-3"><span className={cx("w-8 text-xs font-semibold", isDark ? "text-brand-soft" : "text-brand-muted")}>{label}</span><div className={cx("h-2 flex-1 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}><div className="h-full rounded-full bg-gradient-to-r from-brand-teal to-brand-orange" style={{ width: `${Math.min(100, (value / 60) * 100)}%` }} /></div><span className={cx("w-10 text-right text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{value ? `${value}m` : "-"}</span></div>;
+  return <div className="flex items-center gap-3"><span className={cx("w-8 text-xs font-semibold", isDark ? "text-brand-soft" : "text-[#607274]")}>{label}</span><div className={cx("h-2 flex-1 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#F4EFE6]")}><div className={cx("h-full rounded-full", isDark ? "bg-brand-teal" : "bg-[#D97736]")} style={{ width: `${Math.min(100, (value / 60) * 100)}%` }} /></div><span className={cx("w-10 text-right text-xs font-medium", isDark ? "text-[#5A8A94]" : "text-[#607274]")}>{value ? `${value}m` : "-"}</span></div>;
 }
 
 function QuickAction({ isDark, icon, title, desc, onClick, accent }) {
   return (
-    <button 
-      onClick={onClick} 
+    <button
+      onClick={onClick}
       className={cx(
-        "btn-press group flex w-full items-center gap-4 rounded-2xl border p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:shadow-lg",
-        isDark 
-          ? "border-brand-line/30 bg-brand-card hover:border-brand-cyan/50 hover:bg-brand-deep/50" 
-          : "border-gray-200/50 bg-white hover:border-brand-teal/50 hover:shadow-brand-teal/10"
+        "btn-press group flex w-full items-center gap-4 rounded-xl border p-4 text-left transition-all duration-200",
+        isDark
+          ? "border-brand-line/30 bg-transparent hover:border-brand-cyan/50"
+          : "border-[#E8E4D8] bg-transparent hover:border-[#8C4A27]/50"
       )}
     >
       <div className={cx(
-        "flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110",
-        accent 
-          ? "bg-brand-orange/20 text-brand-orange" 
-          : isDark 
-            ? "bg-brand-teal/20 text-brand-cyan" 
-            : "bg-brand-teal/10 text-brand-teal"
+        "flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-200",
+        accent
+          ? "bg-[#8C4A27]/10 text-[#8C4A27]"
+          : isDark
+            ? "bg-brand-teal/10 text-brand-cyan"
+            : "bg-[#D97736]/10 text-[#D97736]"
       )}>
-        <Icon name={icon} className="h-6 w-6" />
+        <Icon name={icon} className="h-5 w-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <span className={cx("block text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{title}</span>
-        <span className={cx("block text-xs mt-1", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{desc}</span>
+        <span className={cx("block text-sm font-semibold", isDark ? "text-white" : "text-[#1A2E3B]")}>{title}</span>
+        <span className={cx("block text-xs mt-0.5", isDark ? "text-[#5A8A94]" : "text-[#607274]")}>{desc}</span>
       </div>
       <div className={cx(
-        "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1",
-        isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal"
+        "flex h-6 w-6 items-center justify-center rounded transition-all duration-200 opacity-0 group-hover:opacity-100",
+        isDark ? "text-brand-cyan" : "text-[#8C4A27]"
       )}>
         <Icon name="arrow" className="h-4 w-4" />
       </div>
@@ -787,126 +801,410 @@ function QuickAction({ isDark, icon, title, desc, onClick, accent }) {
   );
 }
 
+/* ===== Activity Heatmap (Anki / Migaku Academy style) ===== */
+function ActivityHeatmap({ history, isDark }) {
+  // history: [{ date: 'YYYY-MM-DD', count, accuracy }]
+  const DAYS = 140; // ~20 weeks
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Build a map date -> entry for O(1) lookup
+  const map = new Map();
+  for (const h of history || []) map.set(h.date, h);
+
+  // Find max count to scale levels (1..4)
+  const maxCount = Math.max(1, ...(history || []).map((h) => h.count));
+
+  // Generate the last DAYS days, oldest first
+  const days = [];
+  for (let i = DAYS - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const entry = map.get(key);
+    days.push({ date: key, dow: d.getDay(), count: entry?.count || 0, accuracy: entry?.accuracy || 0 });
+  }
+
+  // Align to week columns: pad the start so the first day lands on its weekday row
+  const firstDow = days[0].dow;
+  const padded = [...Array(firstDow).fill(null), ...days];
+  const numWeeks = Math.ceil(padded.length / 7);
+
+  const levelFor = (count) => {
+    if (count <= 0) return 0;
+    const ratio = count / maxCount;
+    if (ratio <= 0.25) return 1;
+    if (ratio <= 0.5) return 2;
+    if (ratio <= 0.75) return 3;
+    return 4;
+  };
+
+  const activeDays = (history || []).filter((h) => h.count > 0).length;
+  const totalSessions = (history || []).reduce((s, h) => s + h.count, 0);
+
+  // Month labels: one per week column where the month starts
+  const monthLabels = (() => {
+    const labels = [];
+    let lastMonth = -1;
+    for (let i = 0; i < days.length; i++) {
+      const m = new Date(days[i].date).getMonth();
+      if (m !== lastMonth && new Date(days[i].date).getDate() <= 7) {
+        labels.push({ colIndex: Math.floor((i + firstDow) / 7), label: new Date(days[i].date).toLocaleDateString('es-MX', { month: 'short' }) });
+        lastMonth = m;
+      }
+    }
+    return labels;
+  })();
+
+  return (
+    <Card isDark={isDark}>
+      <div className="mb-5 flex items-center justify-between">
+        <div>
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">— Actividad</span>
+          <h3 className={cx("font-display mt-1.5 text-xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")}>
+            {activeDays} días activos · {totalSessions} sesiones
+          </h3>
+        </div>
+      </div>
+
+      {/* Month labels row — aligned to week columns */}
+      <div
+        className="mb-1 grid gap-[3px] text-[10px] font-medium text-[#607274]"
+        style={{ gridTemplateColumns: `repeat(${numWeeks}, minmax(0, 1fr))` }}
+      >
+        {Array.from({ length: numWeeks }, (_, weekIdx) => {
+          const label = monthLabels.find((m) => m.colIndex === weekIdx);
+          return <span key={weekIdx} className="truncate">{label ? label.label : ''}</span>;
+        })}
+      </div>
+
+      {/* Heatmap grid — fills full card width */}
+      <div
+        className="heatmap"
+        style={{ gridTemplateColumns: `repeat(${numWeeks}, minmax(0, 1fr))` }}
+      >
+        {padded.map((d, i) =>
+          d === null ? (
+            <div key={`pad-${i}`} className="heatmap-cell" style={{ visibility: 'hidden' }} />
+          ) : (
+            <div
+              key={d.date}
+              className="heatmap-cell"
+              data-level={levelFor(d.count)}
+              title={`${d.date}${d.count > 0 ? ` · ${d.count} sesiones${d.accuracy > 0 ? ` · ${Math.round(d.accuracy * 100)}% precisión` : ''}` : ''}`}
+            />
+          )
+        )}
+      </div>
+
+      <div className="mt-4 flex items-center justify-between">
+        <span className={cx("text-[11px]", isDark ? "text-[#8AACB4]" : "text-[#607274]")}>Hace 20 semanas</span>
+        <div className="heatmap-legend">
+          <span className={cx("mr-1 text-[10px]", isDark ? "text-[#8AACB4]" : "text-[#607274]")}>Menos</span>
+          <span className="heatmap-cell" data-level="0" />
+          <span className="heatmap-cell" data-level="1" />
+          <span className="heatmap-cell" data-level="2" />
+          <span className="heatmap-cell" data-level="3" />
+          <span className="heatmap-cell" data-level="4" />
+          <span className={cx("ml-1 text-[10px]", isDark ? "text-[#8AACB4]" : "text-[#607274]")}>Más</span>
+        </div>
+        <span className={cx("text-[11px]", isDark ? "text-[#8AACB4]" : "text-[#607274]")}>Hoy</span>
+      </div>
+    </Card>
+  );
+}
+
+/* ===== Streak flame (Duolingo-style) ===== */
+function StreakFlame({ days, isDark }) {
+  const count = Number(days) || 0;
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="streak-flame">
+        <svg width="44" height="52" viewBox="0 0 44 52" fill="none" aria-hidden="true">
+          <path
+            d="M22 2C22 2 8 14 8 30c0 11 6.5 20 14 20s14-9 14-20c0-6-3-11-3-11s-1 4-3 4c-2 0-2-4-2-7 0-7-6-14-6-14z"
+            fill="url(#flameGrad)"
+          />
+          <defs>
+            <linearGradient id="flameGrad" x1="22" y1="2" x2="22" y2="50" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#FFD15C" />
+              <stop offset="0.5" stopColor="#EC9960" />
+              <stop offset="1" stopColor="#D96B6B" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span className={cx("font-display text-2xl font-extrabold leading-none", isDark ? "text-white" : "text-[#1A2E3B]")} style={{ fontVariantNumeric: 'tabular-nums' }}>
+        {count}
+      </span>
+      <span className={cx("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-[#8AACB4]" : "text-[#607274]")}>
+        Racha
+      </span>
+    </div>
+  );
+}
+
+/* ===== Progress ring (circular, Duolingo-style) ===== */
+function ProgressRing({ percent, label, value, isDark, size = 120, stroke = 10 }) {
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+  const pct = Math.max(0, Math.min(100, percent));
+  const offset = circ - (pct / 100) * circ;
+
+  return (
+    <div className="progress-ring" style={{ '--ring-size': `${size}px`, '--ring-stroke': `${stroke}px` }}>
+      <svg className="progress-ring__svg" viewBox={`0 0 ${size} ${size}`}>
+        <circle className="progress-ring__track" cx={size / 2} cy={size / 2} r={r} />
+        <circle
+          className="progress-ring__fill"
+          cx={size / 2}
+          cy={size / 2}
+          r={r}
+          strokeDasharray={circ}
+          strokeDashoffset={offset}
+        />
+      </svg>
+      <div className="progress-ring__center">
+        <span className={cx("font-display text-2xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")} style={{ fontVariantNumeric: 'tabular-nums' }}>
+          {value}
+        </span>
+        <span className={cx("mt-1 text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-[#8AACB4]" : "text-[#607274]")}>
+          {label}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ===== Stat tile (Duolingo-style big number) ===== */
+function StatTile({ icon, value, label, color, isDark }) {
+  return (
+    <div className="stat-tile">
+      <div className="stat-tile__icon" style={{ background: `${color}1A`, color }}>
+        <Icon name={icon} className="h-5 w-5" />
+      </div>
+      <div className={cx("stat-tile__value", isDark ? "text-white" : "text-[#1A2E3B]")}>{value}</div>
+      <div className="stat-tile__label">{label}</div>
+    </div>
+  );
+}
+
 function DashboardPage({ isDark, navigate }) {
-  const { profile, userProgress, moduleProgress } = useAuth();
-  
+  const { profile, userProgress, moduleProgress, practiceHistory } = useAuth();
+
+  // Real stats from Supabase
   const completedSigns = moduleProgress?.reduce((sum, mp) => sum + (mp.signs_completed || 0), 0) || 0;
   const totalSigns = modules.reduce((sum, m) => sum + m.signs, 0);
-  const progress = Math.round((completedSigns / totalSigns) * 100);
+  const progressPct = totalSigns > 0 ? Math.round((completedSigns / totalSigns) * 100) : 0;
   const streakDays = userProgress?.streak_days || 0;
   const practiceTime = userProgress?.total_practice_time || 0;
   const averageAccuracy = userProgress?.average_accuracy || 0;
+  const totalSignsLearned = userProgress?.total_signs_learned || completedSigns;
+  const practiceDays = userProgress?.practice_days || 0;
+  const currentLevel = userProgress?.current_level || 1;
+  const currentLesson = userProgress?.current_lesson || 1;
+
+  // Daily goal: 10 signs per day. Today's count from practiceHistory.
+  const todayKey = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  })();
+  const todayCount = (practiceHistory || []).find((h) => h.date === todayKey)?.count || 0;
+  const dailyGoal = 10;
+  const dailyPct = Math.min(100, Math.round((todayCount / dailyGoal) * 100));
+
+  const accuracyPct = Math.round((averageAccuracy || 0) * 100);
+
+  // Time spent in the last 7 days (from practiceHistory, timeSpent in seconds)
+  const last7DaysSeconds = (practiceHistory || [])
+    .filter((h) => {
+      const d = new Date(h.date);
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      return d >= sevenDaysAgo;
+    })
+    .reduce((sum, h) => sum + (h.timeSpent || 0), 0);
+  const last7DaysHours = last7DaysSeconds > 0
+    ? `${(last7DaysSeconds / 3600).toFixed(1)}h`
+    : '0h';
+
+  // Dynamic daily quests based on real user data
+  const quests = [
+    {
+      task: `Practica ${dailyGoal} señas hoy`,
+      icon: "sparkles",
+      done: todayCount >= dailyGoal,
+      progress: todayCount > 0 && todayCount < dailyGoal ? `${todayCount}/${dailyGoal} completadas` : undefined,
+    },
+    {
+      task: "Mantén tu racha activa",
+      icon: "flame",
+      done: streakDays > 0,
+      progress: streakDays === 0 ? "Practica para empezar tu racha" : `${streakDays} día${streakDays !== 1 ? 's' : ''} consecutivo${streakDays !== 1 ? 's' : ''}`,
+    },
+    {
+      task: "Completa un módulo",
+      icon: "book",
+      done: (moduleProgress || []).some(mp => mp.status === 'completed'),
+      progress: (() => {
+        const completed = (moduleProgress || []).filter(mp => mp.status === 'completed').length;
+        const total = modules.length;
+        return completed > 0 ? `${completed}/${total} módulos completados` : `${completed}/${total} módulos completados`;
+      })(),
+    },
+    {
+      task: "Alcanza 70% de precisión",
+      icon: "trophy",
+      done: accuracyPct >= 70,
+      progress: accuracyPct < 70 ? `Actual: ${accuracyPct}%` : undefined,
+    },
+    {
+      task: "Practica 10 minutos",
+      icon: "clock",
+      done: practiceTime >= 10,
+      progress: practiceTime < 10 ? `${practiceTime}/10 min` : undefined,
+    },
+  ];
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
-      {/* Welcome Section */}
-      <div className="mb-10">
-        <div className="flex items-center gap-2 mb-2">
-          <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
-            Bienvenido de nuevo
-          </span>
+      {/* Welcome + compact stats inline */}
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-extrabold sm:text-4xl text-[#1A2E3B]">
+            Hola, <span className="text-[#D97736]">{profile?.full_name || "Usuario"}</span>
+          </h1>
+          <p className="mt-1 text-sm text-[#607274]">
+            Continúa tu aprendizaje de lengua de señas mexicana
+          </p>
         </div>
-        <h1 className={cx("text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
-          Hola, <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{profile?.full_name || "Usuario"}</span>
-        </h1>
-        <p className={cx("mt-2 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>
-          Continúa tu aprendizaje de lengua de señas mexicana
-        </p>
-      </div>
-
-      <div className="grid gap-8 lg:grid-cols-12">
-        <div className="space-y-6 lg:col-span-8">
-          {/* Learning Pulse */}
-          <LearningPulse isDark={isDark} />
-          
-          {/* Quick Stats */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <ProgressCard 
-              isDark={isDark}
-              currentLevel={userProgress?.current_level || 1}
-              currentLesson={userProgress?.current_lesson || 1}
-              totalSignsLearned={completedSigns}
-              totalPracticeTime={practiceTime}
-              averageAccuracy={averageAccuracy}
-              moduleProgressPercent={progress}
-              practiceDays={streakDays}
-            />
-            <QuestList isDark={isDark} />
+        {/* Prominent stat pills */}
+        <div className="flex flex-wrap gap-3">
+          <div className={cx("flex items-center gap-2.5 rounded-xl px-4 py-2.5", isDark ? "bg-brand-card" : "bg-white border border-[#E8E4D8]")}>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EC9960]/15 text-[#EC9960]">
+              <Icon name="flame" className="h-5 w-5" />
+            </div>
+            <div className="flex flex-col leading-none">
+              <span className={cx("font-display text-xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")} style={{ fontVariantNumeric: 'tabular-nums' }}>{streakDays}</span>
+              <span className={cx("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-[#8AACB4]" : "text-[#607274]")}>Racha</span>
+            </div>
+          </div>
+          <div className={cx("flex items-center gap-2.5 rounded-xl px-4 py-2.5", isDark ? "bg-brand-card" : "bg-white border border-[#E8E4D8]")}>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#D97736]/15 text-[#D97736]">
+              <Icon name="sparkles" className="h-5 w-5" />
+            </div>
+            <div className="flex flex-col leading-none">
+              <span className={cx("font-display text-xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")} style={{ fontVariantNumeric: 'tabular-nums' }}>{totalSignsLearned}</span>
+              <span className={cx("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-[#8AACB4]" : "text-[#607274]")}>Señas</span>
+            </div>
+          </div>
+          <div className={cx("flex items-center gap-2.5 rounded-xl px-4 py-2.5", isDark ? "bg-brand-card" : "bg-white border border-[#E8E4D8]")}>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#8C4A27]/15 text-[#8C4A27]">
+              <Icon name="trophy" className="h-5 w-5" />
+            </div>
+            <div className="flex flex-col leading-none">
+              <span className={cx("font-display text-xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")} style={{ fontVariantNumeric: 'tabular-nums' }}>{accuracyPct}%</span>
+              <span className={cx("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-[#8AACB4]" : "text-[#607274]")}>Precisión</span>
+            </div>
           </div>
         </div>
-        
-        {/* Sidebar */}
-        <div className="space-y-6 lg:col-span-4">
+      </div>
+
+      {/* Primary Learning Actions — PRIORITY: right below welcome */}
+      <div className="mb-8 grid gap-4 sm:grid-cols-2">
+        <button
+          onClick={() => navigate("/lesson")}
+          className={cx(
+            "btn-press group flex items-center gap-4 rounded-2xl p-6 text-left transition-all duration-200 shadow-lg",
+            "bg-[#D97736] text-white hover:bg-[#B85C2D] hover:shadow-xl"
+          )}
+        >
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/20">
+            <Icon name="book" className="h-7 w-7" />
+          </div>
+          <div className="flex-1">
+            <div className="text-lg font-bold">Continuar lección</div>
+            <div className="text-sm opacity-90">Lección {currentLesson} · Nivel {currentLevel}</div>
+          </div>
+          <Icon name="arrow" className="h-6 w-6 transition-transform group-hover:translate-x-1" />
+        </button>
+
+        <button
+          onClick={() => navigate("/practice")}
+          className={cx(
+            "btn-press group flex items-center gap-4 rounded-2xl p-6 text-left transition-all duration-200 shadow-lg",
+            "bg-[#8C4A27] text-white hover:bg-[#6B3A1F] hover:shadow-xl"
+          )}
+        >
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/20">
+            <Icon name="camera" className="h-7 w-7" />
+          </div>
+          <div className="flex-1">
+            <div className="text-lg font-bold">Practicar ahora</div>
+            <div className="text-sm opacity-90">Mejora tu técnica con la cámara</div>
+          </div>
+          <Icon name="arrow" className="h-6 w-6 transition-transform group-hover:translate-x-1" />
+        </button>
+      </div>
+
+      {/* Daily goal ring + Activity Heatmap — side by side on desktop */}
+      <div className="mb-8 grid gap-4 lg:grid-cols-4">
+        {/* Daily goal ring — fills height to match heatmap */}
+        <Card isDark={isDark} className="h-full lg:col-span-1">
+          <div className="flex h-full flex-col items-center justify-center">
+            <ProgressRing percent={dailyPct} label="Meta diaria" value={`${todayCount}/${dailyGoal}`} isDark={isDark} size={180} stroke={14} />
+          </div>
+        </Card>
+
+        {/* Heatmap — fills remaining width */}
+        <div className="lg:col-span-3">
+          <ActivityHeatmap history={practiceHistory} isDark={isDark} />
+        </div>
+      </div>
+
+      {/* Module progress + Quests */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* Module progress */}
+        <div className="lg:col-span-2">
           <Card isDark={isDark}>
-            <div className="flex items-center gap-2 mb-6">
-              <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
-                Acciones rápidas
-              </span>
+            <div className="mb-5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">— Módulos</span>
+              <h3 className={cx("font-display mt-1.5 text-xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")}>Progreso por módulo</h3>
             </div>
-            
-            <div className="space-y-3">
-              <QuickAction
-                isDark={isDark}
-                icon="book"
-                title="Continuar lección"
-                desc="Retoma donde lo dejaste"
-                onClick={() => navigate("/lesson")}
-                accent
-              />
-              <QuickAction
-                isDark={isDark}
-                icon="camera"
-                title="Practicar"
-                desc="Mejora tu técnica"
-                onClick={() => navigate("/practice")}
-              />
-              <QuickAction
-                isDark={isDark}
-                icon="trophy"
-                title="Ver progreso"
-                desc="Estadísticas detalladas"
-                onClick={() => navigate("/learn")}
-              />
+
+            <div className="space-y-2.5">
+              {modules.map((m) => {
+                const mp = moduleProgress?.find((p) => p.module_id === m.id);
+                const done = mp?.signs_completed || 0;
+                const pct = m.signs > 0 ? Math.round((done / m.signs) * 100) : 0;
+                return (
+                  <div key={m.id} className="flex items-center gap-3">
+                    <span className={cx("w-28 shrink-0 truncate text-xs font-semibold", isDark ? "text-brand-soft" : "text-[#1A2E3B]")}>{m.title}</span>
+                    <div className={cx("h-2 flex-1 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#F4EFE6]")}>
+                      <div className="h-full rounded-full bg-[#D97736] transition-all duration-700" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className={cx("w-14 shrink-0 text-right text-xs font-medium", isDark ? "text-[#8AACB4]" : "text-[#607274]")} style={{ fontVariantNumeric: 'tabular-nums' }}>{done}/{m.signs}</span>
+                  </div>
+                );
+              })}
             </div>
-          </Card>
-          
-          {/* User Info Card */}
-          <Card isDark={isDark}>
-            <div className="flex items-center gap-2 mb-6">
-              <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
-                Tu perfil
-              </span>
-            </div>
-            
-            <div className="flex items-center gap-4 mb-4">
-              <div className={cx("flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-bold", isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")}>
-                {profile?.avatar_initials || profile?.full_name?.substring(0, 2).toUpperCase() || "US"}
-              </div>
-              <div>
-                <h3 className={cx("text-lg font-bold", isDark ? "text-white" : "text-brand-ink")}>
-                  {profile?.full_name || "Usuario"}
-                </h3>
-                <p className={cx("text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>
-                  {profile?.email || ""}
-                </p>
-              </div>
-            </div>
-            
-            <div className="border-t pt-4" style={{ borderColor: isDark ? "#1A5C6A" : "#E8EEEF" }}>
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <div className={cx("text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{streakDays}</div>
-                  <div className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>Días de racha</div>
-                </div>
-                <div>
-                  <div className={cx("text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{progress}%</div>
-                  <div className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>Progreso total</div>
-                </div>
-              </div>
+
+            {/* Consolidated stats row inside same card */}
+            <div className="mt-6 grid grid-cols-4 gap-3 border-t pt-5" style={{ borderColor: isDark ? "#1A5C6A" : "#E8E4D8" }}>
+              <StatTile icon="book" value={completedSigns} label="Completadas" color="#D97736" isDark={isDark} />
+              <StatTile icon="clock" value={`${practiceTime}m`} label="Tiempo total" color="#8C4A27" isDark={isDark} />
+              <StatTile icon="sparkles" value={last7DaysHours} label="Esta semana" color="#EC9960" isDark={isDark} />
+              <StatTile icon="trophy" value={`${progressPct}%`} label="Progreso" color="#D97736" isDark={isDark} />
             </div>
           </Card>
         </div>
+
+        {/* Daily quests */}
+        <div className="lg:col-span-1">
+          <QuestList isDark={isDark} quests={quests} />
+        </div>
       </div>
+
     </main>
   );
 }
@@ -976,13 +1274,13 @@ function LearnPage({ isDark }) {
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
       {/* Enhanced Page Title */}
       <div className="mb-10">
-        <div className="flex items-center gap-2 mb-2">
-          <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
-            Tu Progreso
+        <div className="mb-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
+            — Tu Progreso
           </span>
         </div>
-        <h1 className={cx("text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
-          Avance en <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>módulos</span> y señas aprendidas
+        <h1 className="font-display text-3xl font-extrabold sm:text-4xl text-[#1A2E3B]">
+          Avance en <span className="text-[#D97736]">módulos</span> y señas aprendidas
         </h1>
       </div>
 
@@ -991,19 +1289,19 @@ function LearnPage({ isDark }) {
           {/* Enhanced Modules Card */}
           <Card isDark={isDark}>
             <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
-                  Módulos
+              <div className="mb-6">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
+                  — Módulos
                 </span>
               </div>
-              <div className={cx("flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold", isDark ? "bg-brand-deep/50 text-brand-soft" : "bg-brand-cream/50 text-brand-muted")}>
-                <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>{completedSigns}</span>
-                <span className="text-brand-muted">/</span>
+              <div className="text-xs font-medium text-[#607274]">
+                <span className={isDark ? "text-brand-cyan" : "text-[#D97736]"}>{completedSigns}</span>
+                <span className="text-gray-400 mx-1">/</span>
                 <span>{totalSigns}</span>
                 <span className="ml-1">señas</span>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               {modulesWithProgress.map((module, index) => (
                 <SkillNode
@@ -1017,31 +1315,31 @@ function LearnPage({ isDark }) {
               ))}
             </div>
           </Card>
-          
+
           {/* Enhanced Selected Module Card */}
           {selected && (
             <Card isDark={isDark}>
               <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3">
-                  <div className={cx("flex h-12 w-12 items-center justify-center rounded-2xl", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-brand-orange/20 text-brand-orange")}>
+                  <div className={cx("flex h-12 w-12 items-center justify-center rounded-xl", isDark ? "bg-brand-orange/20 text-brand-orange" : "bg-[#D97736]/10 text-[#D97736]")}>
                     <Icon name={selected.icon || "book"} className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className={cx("text-lg font-bold", isDark ? "text-white" : "text-gray-900")}>{selected.title}</h3>
-                    <p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-gray-600")}>{selected.signs} señas · Nivel {selected.level}</p>
+                    <h3 className={cx("font-display text-xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")}>{selected.title}</h3>
+                    <p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-[#607274]")}>{selected.signs} señas · Nivel {selected.level}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="relative">
-                    <Icon name="sparkles" className={cx("absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4", isDark ? "text-brand-soft" : "text-brand-muted")} />
+                    <Icon name="sparkles" className={cx("absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4", isDark ? "text-brand-soft" : "text-[#607274]")} />
                     <input
                       type="text"
                       placeholder="Buscar seña..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       className={cx(
-                        "pl-10 pr-4 py-2.5 rounded-xl text-sm w-48 sm:w-64 transition-all duration-200 focus:ring-2 focus:ring-brand-cyan/50",
-                        isDark ? "bg-brand-deep text-white border border-brand-line placeholder:text-[#5A8A94]" : "bg-white text-brand-ink border border-gray-200 placeholder:text-[#8AA8B0]"
+                        "pl-10 pr-4 py-2.5 rounded-xl text-sm w-48 sm:w-64 transition-all duration-200 focus:ring-2 focus:ring-[#8C4A27]/50",
+                        isDark ? "bg-brand-deep text-white border border-brand-line placeholder:text-[#5A8A94]" : "bg-white text-[#1A2E3B] border border-[#E8E4D8] placeholder:text-[#607274]"
                       )}
                     />
                   </div>
@@ -1053,27 +1351,26 @@ function LearnPage({ isDark }) {
                   <button
                     key={item.label}
                     className={cx(
-                      "group flex flex-col items-center gap-3 rounded-2xl p-4 transition-all duration-300 hover:scale-105",
-                      isDark 
-                        ? "bg-brand-deep/40 hover:bg-brand-deep/60 border border-brand-line/30 hover:border-brand-cyan/50" 
-                        : "bg-gray-100 hover:bg-gray-200 border border-gray-300 hover:border-brand-teal/50 shadow-sm"
+                      "group flex flex-col items-center gap-3 rounded-xl p-4 transition-all duration-200",
+                      isDark
+                        ? "bg-transparent border border-brand-line/30 hover:border-brand-cyan/50"
+                        : "bg-transparent border border-[#E8E4D8] hover:border-[#8C4A27]/50"
                     )}
-                    style={{ animationDelay: `${index * 30}ms` }}
                   >
-                    <div className="relative h-20 w-20 overflow-hidden rounded-xl shadow-md">
-                      <img 
-                        src={item.thumbnail} 
-                        alt={item.label} 
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" 
-                        loading="lazy" 
+                    <div className="relative h-20 w-20 overflow-hidden rounded-xl">
+                      <img
+                        src={item.thumbnail}
+                        alt={item.label}
+                        className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-110"
+                        loading="lazy"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      <div className="absolute inset-0 bg-black/10" />
                       {/* Icon overlay */}
-                      <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                      <div className="absolute top-2 right-2 h-6 w-6 rounded-lg bg-white/90 flex items-center justify-center">
                         <Icon name={getSignIcon(item.label)} className="h-3 w-3 text-gray-800" />
                       </div>
                     </div>
-                    <span className={cx("text-xs font-semibold text-center leading-tight", isDark ? "text-brand-soft" : "text-gray-700")}>
+                    <span className={cx("text-xs font-semibold text-center leading-tight", isDark ? "text-brand-soft" : "text-[#1A2E3B]")}>
                       {item.label}
                     </span>
                   </button>
@@ -1087,9 +1384,9 @@ function LearnPage({ isDark }) {
         <div className="space-y-6 lg:col-span-4">
           {/* Stats Card */}
           <Card isDark={isDark}>
-            <div className="flex items-center gap-2 mb-6">
-              <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
-                Estadísticas
+            <div className="mb-6">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
+                — Estadísticas
               </span>
             </div>
             
@@ -1100,11 +1397,11 @@ function LearnPage({ isDark }) {
                   <span className="text-xs font-medium">Progreso total</span>
                   <span className="text-xs font-bold">{progress}%</span>
                 </div>
-                <div className={cx("relative h-3 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#E8EEEF]")}>
-                  <div 
+                <div className={cx("relative h-3 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#F4EFE6]")}>
+                  <div
                     className={cx(
                       "absolute left-0 top-0 h-full rounded-full transition-all duration-700 ease-out",
-                      "bg-gradient-to-r from-brand-teal via-brand-cyan to-brand-orange"
+                      isDark ? "bg-brand-teal" : "bg-[#D97736]"
                     )}
                     style={{ width: `${progress}%` }}
                   />
@@ -1131,9 +1428,9 @@ function LearnPage({ isDark }) {
           
           {/* Actions Card */}
           <Card isDark={isDark}>
-            <div className="flex items-center gap-2 mb-6">
-              <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
-                Acciones
+            <div className="mb-6">
+              <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
+                — Acciones
               </span>
             </div>
             
@@ -1142,9 +1439,9 @@ function LearnPage({ isDark }) {
                 onClick={() => window.location.href = "/lesson"}
                 className={cx(
                   "group btn-press w-full flex items-center justify-center gap-2 rounded-2xl px-6 py-4 text-sm font-bold transition-all duration-200 active:scale-95",
-                  isDark 
-                    ? "bg-gradient-to-r from-brand-teal to-brand-cyan text-white hover:shadow-lg hover:shadow-brand-cyan/20" 
-                    : "bg-gradient-to-r from-brand-teal to-brand-cyan text-white hover:shadow-lg hover:shadow-brand-teal/20"
+                  isDark
+                    ? "bg-brand-teal text-white hover:shadow-lg hover:shadow-brand-teal/20"
+                    : "bg-brand-teal text-white hover:shadow-lg hover:shadow-brand-teal/20"
                 )}
               >
                 <Icon name="book" className="h-5 w-5 transition-transform group-hover:scale-110" />
@@ -1223,14 +1520,14 @@ function SkillNode({ module, index, isDark, selected, onClick }) {
         
         {/* Content */}
         <div className={cx(
-          "flex-1 rounded-2xl p-4 transition-all duration-300 sm:p-5",
-          selected 
-            ? (isDark 
-                ? "border-2 border-brand-cyan/50 bg-brand-card shadow-md" 
-                : "border-2 border-brand-teal/50 bg-white shadow-md") 
-            : (isDark 
-                ? "border border-brand-line/30 bg-brand-deep/30 hover:bg-brand-deep/50" 
-                : "border border-gray-300 bg-gray-50 hover:bg-gray-100")
+          "flex-1 rounded-xl p-4 transition-all duration-200 sm:p-5",
+          selected
+            ? (isDark
+                ? "border-2 border-brand-cyan/50 bg-brand-card"
+                : "border-2 border-[#D97736]/50 bg-white")
+            : (isDark
+                ? "border border-brand-line/30 bg-transparent hover:border-brand-cyan/50"
+                : "border border-[#E8E4D8] bg-transparent hover:border-[#8C4A27]/50")
         )}>
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
@@ -1409,12 +1706,12 @@ function LessonPage({ isDark, navigate }) {
           
           <div className="mt-4 flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
-                  Lecciones
+              <div className="mb-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
+                  — Lecciones
                 </span>
               </div>
-              <h1 className={cx("text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
+              <h1 className={cx("font-display text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
                 Explora y <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>aprende</span>
               </h1>
             </div>
@@ -1430,9 +1727,9 @@ function LessonPage({ isDark, navigate }) {
                 "rounded-3xl border p-6 backdrop-blur-xl",
                 isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
               )}>
-                <div className="flex items-center gap-2 mb-4">
-                  <span className={cx("rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/20 text-brand-teal")}>
-                    Módulos
+                <div className="mb-4">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">
+                    — Módulos
                   </span>
                 </div>
                 
@@ -1500,7 +1797,7 @@ function LessonPage({ isDark, navigate }) {
                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110" 
                             loading="lazy" 
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                          <div className="absolute inset-0 bg-black/10" />
                           {/* Icon overlay */}
                           <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
                             <Icon name={getSignIcon(item.label)} className="h-3 w-3 text-gray-800" />
@@ -1545,7 +1842,7 @@ function SignVideoPanel({ sign, isDark, onClose, moduleId }) {
     <Card isDark={isDark}>
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h3 className={cx("text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{sign.label}</h3>
+          <h3 className={cx("font-display text-xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{sign.label}</h3>
           <p className={cx("text-xs", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>{sign.hint || sign.desc}</p>
         </div>
         <button onClick={onClose} className={cx("btn-press rounded-lg p-2", isDark ? "bg-brand-deep text-brand-soft hover:text-white" : "bg-brand-cream text-brand-muted hover:text-brand-ink")}>
@@ -1634,7 +1931,7 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
           setMatchScore(0);
           // Auto-advance to next sign
           if (onNextSign) onNextSign();
-        }, 1500);
+        }, 800);
       }
     } else {
       holdStartRef.current = null;
@@ -1663,7 +1960,7 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
           Volver a lecciones
         </button>
         <div className="text-center">
-          <h2 className={cx("text-xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+          <h2 className={cx("font-display text-xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
             {sign.label || sign.name}
           </h2>
           <p className={cx("text-sm", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>
@@ -1673,10 +1970,32 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
         <div className="w-24" />
       </div>
 
-      {/* Split view: Camera on left (larger), Video on right (smaller) */}
+      {/* Split view: Video on left (larger), Camera on right (smaller) */}
       <div className="grid grid-cols-1 gap-4 rounded-2xl p-4 sm:grid-cols-3">
-        {/* Camera with hand detection - 2 columns wide */}
-        <div className="relative overflow-hidden rounded-xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%", position: "relative" }}>
+        {/* YouTube Video - 2 columns wide */}
+        <div className="relative overflow-hidden rounded-2xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%" }}>
+          <iframe
+            key={videoId}
+            src={iframeSrc}
+            title={sign.label || sign.name}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 h-full w-full border-0"
+          />
+          {/* Success animation overlay */}
+          {practiceSuccess && (
+            <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/90 animate-fade-in">
+              <div className="text-center animate-success-bounce">
+                <div className="text-7xl mb-4">✓</div>
+                <div className="text-3xl font-bold text-white">¡Excelente!</div>
+                <div className="text-base text-white/90 mt-2">Seña aprendida</div>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Camera with hand detection - 1 column wide */}
+        <div className="relative overflow-hidden rounded-2xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
           <video
             ref={videoRef}
             className="absolute inset-0 h-full w-full object-cover"
@@ -1705,10 +2024,10 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
           )}
           {camReady && (
             <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2">
-              <div className={cx("rounded-lg px-3 py-2 text-sm font-bold", 
-                gestureState === "confirmed" ? "bg-brand-teal text-white" :
-                gestureState === "match" ? "bg-brand-teal/80 text-white" :
-                gestureState === "partial" ? "bg-brand-orange/60 text-white" :
+              <div className={cx("rounded-lg px-3 py-2 text-sm font-bold transition-all duration-300 transform",
+                gestureState === "confirmed" ? "bg-brand-teal text-white scale-110 shadow-lg shadow-brand-teal/30" :
+                gestureState === "match" ? "bg-brand-teal/80 text-white scale-105" :
+                gestureState === "partial" ? "bg-brand-orange/60 text-white scale-105" :
                 "bg-brand-deep/80 text-brand-soft"
               )}>
                 {gestureState === "confirmed" ? "✓ Correcto" :
@@ -1717,32 +2036,12 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
                  handDetected ? "Detectando..." : "Muestra tu mano"}
               </div>
               {sign.template && (
-                <div className={cx("rounded-lg px-3 py-2 text-sm font-bold", isDark ? "bg-brand-deep/80 text-brand-cyan" : "bg-white/80 text-brand-teal")}>
+                <div className={cx("rounded-lg px-3 py-2 text-sm font-bold transition-all duration-300", isDark ? "bg-brand-deep/80 text-brand-cyan" : "bg-white/80 text-brand-teal")}>
                   Precisión: {Math.round(matchScore * 100)}%
                 </div>
               )}
             </div>
           )}
-          {practiceSuccess && (
-            <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/20">
-              <div className="text-center">
-                <Icon name="check" className="h-16 w-16 text-brand-teal mx-auto mb-2" />
-                <div className="text-lg font-bold text-brand-teal">¡Excelente!</div>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        {/* YouTube Video - 1 column */}
-        <div className="relative overflow-hidden rounded-xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
-          <iframe
-            key={videoId}
-            src={iframeSrc}
-            title={sign.label || sign.name}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute inset-0 h-full w-full border-0"
-          />
         </div>
       </div>
     </div>
@@ -1881,7 +2180,7 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
           setMatchScore(0);
           // Auto-advance to next sign
           if (onNextSign) onNextSign();
-        }, 1500);
+        }, 800);
       }
     } else {
       holdStartRef.current = null;
@@ -1920,7 +2219,7 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
       >
         <div className="mb-4 flex items-center justify-between p-4 sm:p-6">
           <div>
-            <h3 className={cx("text-lg font-extrabold sm:text-xl", isDark ? "text-white" : "text-brand-ink")}>
+            <h3 className={cx("font-display text-xl font-extrabold sm:text-2xl", isDark ? "text-white" : "text-brand-ink")}>
               {sign.label || sign.name}
             </h3>
             <p className={cx("text-xs sm:text-sm", isDark ? "text-[#5A8A94]" : "text-[#8AA8B0]")}>
@@ -1943,7 +2242,7 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
         {/* Split view: Video on left (larger), Camera on right */}
         <div className="grid grid-cols-1 gap-4 rounded-b-2xl p-4 sm:grid-cols-3">
           {/* YouTube Video - 2 columns wide */}
-          <div className="relative overflow-hidden rounded-xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%", position: "relative" }}>
+          <div className="relative overflow-hidden rounded-2xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%" }}>
             <iframe
               key={videoId}
               src={iframeSrc}
@@ -1952,10 +2251,20 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
               allowFullScreen
               className="absolute inset-0 h-full w-full border-0"
             />
+            {/* Success animation overlay */}
+            {practiceSuccess && (
+              <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/90 animate-fade-in">
+                <div className="text-center animate-success-bounce">
+                  <div className="text-7xl mb-4">✓</div>
+                  <div className="text-3xl font-bold text-white">¡Excelente!</div>
+                  <div className="text-base text-white/90 mt-2">Seña aprendida</div>
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Camera with hand detection - 1 column */}
-          <div className="relative overflow-hidden rounded-xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
+          <div className="relative overflow-hidden rounded-2xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
             <video
               ref={videoRef}
               className="absolute inset-0 h-full w-full object-cover"
@@ -1983,11 +2292,11 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
               </div>
             )}
             {camReady && (
-              <div className="absolute bottom-2 left-2 right-2 flex flex-col gap-1">
-                <div className={cx("rounded-lg px-2 py-1 text-xs font-bold", 
-                  gestureState === "confirmed" ? "bg-brand-teal text-white" :
-                  gestureState === "match" ? "bg-brand-teal/80 text-white" :
-                  gestureState === "partial" ? "bg-brand-orange/60 text-white" :
+              <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2">
+                <div className={cx("rounded-lg px-3 py-2 text-sm font-bold transition-all duration-300 transform",
+                  gestureState === "confirmed" ? "bg-brand-teal text-white scale-110 shadow-lg shadow-brand-teal/30" :
+                  gestureState === "match" ? "bg-brand-teal/80 text-white scale-105" :
+                  gestureState === "partial" ? "bg-brand-orange/60 text-white scale-105" :
                   "bg-brand-deep/80 text-brand-soft"
                 )}>
                   {gestureState === "confirmed" ? "✓ Correcto" :
@@ -1996,18 +2305,10 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
                    handDetected ? "Detectando..." : "Muestra tu mano"}
                 </div>
                 {sign.template && (
-                  <div className={cx("rounded-lg px-2 py-1 text-xs font-bold", isDark ? "bg-brand-deep/80 text-brand-cyan" : "bg-white/80 text-brand-teal")}>
+                  <div className={cx("rounded-lg px-3 py-2 text-sm font-bold transition-all duration-300", isDark ? "bg-brand-deep/80 text-brand-cyan" : "bg-white/80 text-brand-teal")}>
                     Precisión: {Math.round(matchScore * 100)}%
                   </div>
                 )}
-              </div>
-            )}
-            {practiceSuccess && (
-              <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/20">
-                <div className="text-center">
-                  <Icon name="check" className="h-12 w-12 text-brand-teal mx-auto mb-2" />
-                  <div className="text-base font-bold text-brand-teal">¡Excelente!</div>
-                </div>
               </div>
             )}
           </div>
@@ -2431,28 +2732,23 @@ function PracticePage({ isDark, setIsDark, navigate }) {
 
   return (
     <div className={cx("flex h-screen flex-col transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
-      <header className={cx("flex items-center justify-between border-b px-4 py-2 sm:px-6 sm:py-3 backdrop-blur-xl", isDark ? "border-brand-line bg-brand-deep/90" : "border-brand-mist bg-brand-cream/90")}>
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Logo isDark={isDark} compact />
-          <div className={cx("hidden h-5 w-px sm:block", isDark ? "bg-brand-line" : "bg-brand-mist")} />
-          <span className={cx("hidden text-xs font-semibold sm:block", isDark ? "text-brand-soft" : "text-brand-muted")}>Práctica</span>
-        </div>
-        <div className="flex items-center gap-2 sm:gap-3">
-          <span className={cx("rounded-xl px-2 py-1.5 text-xs font-bold sm:px-3", isDark ? "bg-brand-card text-brand-cyan" : "bg-white text-brand-teal shadow-sm")}>{correct}/{total}</span>
-          <button 
-            onClick={stopCamera}
-            className={cx("rounded-xl px-2 py-1.5 text-xs font-bold transition sm:px-3", isDark ? "bg-brand-card text-brand-orange hover:bg-brand-orange/20" : "bg-white text-brand-orange hover:bg-brand-orange/10 shadow-sm")}
-          >
-            <span className="hidden sm:inline">Detener Cámara</span>
-            <span className="sm:hidden">Detener</span>
-          </button>
-          <ThemeToggle isDark={isDark} setIsDark={setIsDark} />
-        </div>
-      </header>
-
       <div className="flex min-h-0 flex-1">
         <main className="relative flex-1 p-2 sm:p-4">
           <div className="relative h-full overflow-hidden rounded-xl bg-black">
+            {/* Controles flotantes - score y detener cámara (header unificado arriba) */}
+            <div className="absolute left-1/2 top-2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 backdrop-blur-md transition-opacity duration-300 sm:top-4 sm:gap-3 sm:px-4">
+              <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold text-white sm:text-xs">
+                {correct}/{total}
+              </span>
+              <button
+                onClick={stopCamera}
+                className="btn-press rounded-full bg-[#D96B6B]/90 px-2.5 py-1 text-[11px] font-bold text-white transition hover:bg-[#D96B6B] sm:text-xs"
+              >
+                <span className="hidden sm:inline">Detener Cámara</span>
+                <span className="sm:hidden">Detener</span>
+              </button>
+            </div>
+
             {/* Video oculto — solo usado como fuente para MediaPipe */}
             <video ref={videoRef} className="absolute opacity-0 pointer-events-none" playsInline muted />
             {/* Canvas con video espejado + landmarks */}
@@ -2767,7 +3063,7 @@ function App() {
   // Protected pages - todas con header
   if (path === "/practice") {
     return (
-      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
         <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} />
         <PracticePage isDark={isDark} setIsDark={setIsDark} navigate={navigate} />
       </div>
@@ -2776,7 +3072,7 @@ function App() {
   
   if (path === "/dashboard") {
     return (
-      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
         <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} />
         <DashboardPage isDark={isDark} navigate={navigate} />
       </div>
@@ -2785,7 +3081,7 @@ function App() {
   
   if (path === "/learn") {
     return (
-      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
         <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} />
         <LearnPage isDark={isDark} />
       </div>
