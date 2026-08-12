@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { HandLandmarker, PoseLandmarker, FaceLandmarker, FilesetResolver, DrawingUtils } from "@mediapipe/tasks-vision";
 import { createRoot } from "react-dom/client";
+import { createPortal } from "react-dom";
 import "./styles/styles.css";
 import { GLOSARIO_LESSONS, ALPHABET_LESSON } from "./data/lessons_glosario.js";
 import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR } from "./utils/lsm_detector.js";
@@ -343,7 +344,7 @@ function FontSizeSelector({ fontScale, setFontScale, isDark }) {
         Aa
       </button>
       {open && (
-        <div className={cx("absolute right-0 top-12 z-[60] w-44 rounded-2xl border p-2 shadow-lg", isDark ? "border-brand-line bg-brand-card" : "border-[#E8E4D8] bg-white")}>
+        <div className={cx("absolute right-0 top-12 z-[200] w-44 rounded-2xl border p-2 shadow-lg", isDark ? "border-brand-line bg-brand-card" : "border-[#E8E4D8] bg-white")}>
           <div className={cx("mb-1 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-[#607274]")}>
             Tamaño de texto
           </div>
@@ -458,7 +459,7 @@ function AppHeader({ isDark, setIsDark, navigate, path, fontScale = 'md', setFon
   const userEmail = profile?.email || "";
 
   return (
-    <header className={cx("sticky top-0 z-40 transition-colors backdrop-blur-xl border-b", isDark ? "bg-brand-deep border-brand-line" : "bg-white border-[#E8E4D8]")}>
+    <header className={cx("sticky top-0 z-[100] transition-colors backdrop-blur-xl border-b", isDark ? "bg-brand-deep border-brand-line" : "bg-white border-[#E8E4D8]")}>
       <div className="mx-auto px-4 py-3 sm:px-6 sm:py-4">
         <div className="flex items-center justify-between">
           <button onClick={() => navigate("/dashboard")} className="btn-press flex items-center gap-3">
@@ -548,17 +549,17 @@ function AppHeader({ isDark, setIsDark, navigate, path, fontScale = 'md', setFon
           </div>
       </div>
 
-      {/* Mobile Navigation Drawer */}
-      {mobileNavOpen && (
+      {/* Mobile Navigation Drawer — rendered via portal to escape header stacking context */}
+      {mobileNavOpen && createPortal(
         <>
           <div
-            className="fixed inset-0 z-[90] bg-black/40 md:hidden"
+            className="fixed inset-0 z-[9998] bg-black/50 md:hidden"
             onClick={() => setMobileNavOpen(false)}
           />
           <div
             ref={mobileNavRef}
             className={cx(
-              "fixed right-0 top-0 z-[95] flex h-full w-[280px] max-w-[85vw] flex-col md:hidden",
+              "fixed right-0 top-0 z-[9999] flex h-full w-[280px] max-w-[85vw] flex-col md:hidden",
               isDark ? "bg-brand-deep" : "bg-white"
             )}
             style={{
@@ -645,7 +646,8 @@ function AppHeader({ isDark, setIsDark, navigate, path, fontScale = 'md', setFon
               </button>
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </header>
   );
@@ -740,6 +742,7 @@ function LearningPulse({ isDark }) {
 function QuestList({ isDark, quests }) {
   const completedCount = quests.filter(q => q.done).length;
   const totalCount = quests.length;
+  const questPct = totalCount > 0 ? Math.min(100, Math.round((completedCount / totalCount) * 100)) : 0;
 
   return (
     <Card isDark={isDark} className="h-full w-full">
@@ -806,11 +809,11 @@ function QuestList({ isDark, quests }) {
           <div className="flex items-center justify-between">
             <span className={cx("text-xs font-medium", isDark ? "text-brand-soft" : "text-[#607274]")}>Progreso del día</span>
             <span className={cx("font-display text-sm font-extrabold", isDark ? "text-brand-cyan" : "text-[#D97736]")} style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {Math.round((completedCount / totalCount) * 100)}%
+              {questPct}%
             </span>
           </div>
           <div className={cx("mt-2 h-1.5 overflow-hidden rounded-full", isDark ? "bg-brand-deep" : "bg-[#F4EFE6]")}>
-            <div className="h-full rounded-full bg-[#D97736] transition-all duration-700" style={{ width: `${Math.round((completedCount / totalCount) * 100)}%` }} />
+            <div className="h-full rounded-full bg-[#D97736] transition-all duration-700" style={{ width: `${questPct}%` }} />
           </div>
         </div>
       </div>
@@ -840,7 +843,7 @@ function ProgressCard({ isDark, currentLevel, currentLesson, totalSignsLearned, 
   const stats = [
     [totalSignsLearned, "Señas aprendidas", "sparkles"],
     [`${totalPracticeTime} min`, "Tiempo total", "clock"],
-    [`${Math.round(averageAccuracy)}%`, "Precisión", "trophy"],
+    [`${Math.min(100, Math.round((averageAccuracy || 0) * 100))}%`, "Precisión", "trophy"],
     [practiceDays, "Días practicados", "flame"]
   ];
   
@@ -1141,7 +1144,7 @@ function DashboardPage({ isDark, navigate }) {
   // Real stats from Supabase
   const completedSigns = moduleProgress?.reduce((sum, mp) => sum + (mp.signs_completed || 0), 0) || 0;
   const totalSigns = modules.reduce((sum, m) => sum + m.signs, 0);
-  const progressPct = totalSigns > 0 ? Math.round((completedSigns / totalSigns) * 100) : 0;
+  const progressPct = totalSigns > 0 ? Math.min(100, Math.round((completedSigns / totalSigns) * 100)) : 0;
   const streakDays = userProgress?.streak_days || 0;
   const practiceTime = userProgress?.total_practice_time || 0;
   const averageAccuracy = userProgress?.average_accuracy || 0;
@@ -1149,6 +1152,8 @@ function DashboardPage({ isDark, navigate }) {
   const practiceDays = userProgress?.practice_days || 0;
   const currentLevel = userProgress?.current_level || 1;
   const currentLesson = userProgress?.current_lesson || 1;
+  // Has the user actually practiced? If not, accuracy is meaningless
+  const hasPracticed = (practiceHistory || []).some((h) => h.count > 0) || practiceTime > 0 || completedSigns > 0;
 
   // Daily goal: 10 signs per day. Today's count from practiceHistory.
   const todayKey = (() => {
@@ -1159,7 +1164,8 @@ function DashboardPage({ isDark, navigate }) {
   const dailyGoal = 10;
   const dailyPct = Math.min(100, Math.round((todayCount / dailyGoal) * 100));
 
-  const accuracyPct = Math.round((averageAccuracy || 0) * 100);
+  const accuracyPct = Math.min(100, Math.round((averageAccuracy || 0) * 100));
+  const accuracyDisplay = hasPracticed ? `${accuracyPct}%` : '—';
 
   // Time spent in the last 7 days (from practiceHistory, timeSpent in seconds)
   const last7DaysSeconds = (practiceHistory || [])
@@ -1201,8 +1207,8 @@ function DashboardPage({ isDark, navigate }) {
     {
       task: "Alcanza 70% de precisión",
       icon: "trophy",
-      done: accuracyPct >= 70,
-      progress: accuracyPct < 70 ? `Actual: ${accuracyPct}%` : undefined,
+      done: hasPracticed && accuracyPct >= 70,
+      progress: !hasPracticed ? "Practica para medir tu precisión" : accuracyPct < 70 ? `Actual: ${accuracyPct}%` : undefined,
     },
     {
       task: "Practica 10 minutos",
@@ -1249,7 +1255,7 @@ function DashboardPage({ isDark, navigate }) {
               <Icon name="trophy" className="h-5 w-5" />
             </div>
             <div className="flex flex-col leading-none">
-              <span className={cx("font-display text-xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")} style={{ fontVariantNumeric: 'tabular-nums' }}>{accuracyPct}%</span>
+              <span className={cx("font-display text-xl font-extrabold", isDark ? "text-white" : "text-[#1A2E3B]")} style={{ fontVariantNumeric: 'tabular-nums' }}>{accuracyDisplay}</span>
               <span className={cx("text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-[#8AACB4]" : "text-[#607274]")}>Precisión</span>
             </div>
           </div>
@@ -1322,7 +1328,7 @@ function DashboardPage({ isDark, navigate }) {
               {modules.map((m) => {
                 const mp = moduleProgress?.find((p) => p.module_id === m.id);
                 const done = mp?.signs_completed || 0;
-                const pct = m.signs > 0 ? Math.round((done / m.signs) * 100) : 0;
+                const pct = m.signs > 0 ? Math.min(100, Math.round((done / m.signs) * 100)) : 0;
                 return (
                   <div key={m.id} className="flex items-center gap-3">
                     <span className={cx("w-28 shrink-0 truncate text-xs font-semibold", isDark ? "text-brand-soft" : "text-[#1A2E3B]")}>{m.title}</span>
@@ -1393,7 +1399,7 @@ function LearnPage({ isDark, navigate }) {
 
   const completedSigns = modulesWithProgress.reduce((sum, m) => sum + (m.signs_completed || 0), 0);
   const totalSigns = modulesWithProgress.reduce((sum, m) => sum + m.signs, 0);
-  const progress = Math.round((completedSigns / totalSigns) * 100);
+  const progress = totalSigns > 0 ? Math.min(100, Math.round((completedSigns / totalSigns) * 100)) : 0;
 
   const handleNodeClick = (module) => {
     if (module.status === 'locked') return;
