@@ -20,6 +20,15 @@ const navItems = [
   { path: "/practice", label: "Práctica", icon: "camera" }
 ];
 
+// ─── Contact info —  ───────────────
+const CONTACT_INFO = {
+  email: "senasavocesac@gmail.com",
+  whatsapp: "+52 645 115 9917",
+  whatsappLink: "https://wa.me/526451159917",
+  instagram: "@senasavocesac",
+  instagramLink: "https://instagram.com/senasavoceac",
+};
+
 const modules = [ALPHABET_LESSON, ...GLOSARIO_LESSONS].map((lesson, i) => ({
   id: lesson.id,
   title: lesson.title,
@@ -207,7 +216,7 @@ const accountMenuSections = [
   {
     title: "Ayuda",
     items: [
-      { label: "Centro de ayuda", helper: "Guías y tutoriales", icon: "help", path: "/dashboard" },
+      { label: "Centro de ayuda", helper: "Guías y tutoriales", icon: "help", path: "/help" },
       { label: "Acerca de", helper: "Sobre la app", icon: "info", path: "/dashboard" },
     ],
   },
@@ -1238,6 +1247,338 @@ function StatTile({ icon, value, label, color, isDark }) {
 }
 
 // Tier styling for achievement badges
+// FAQ data
+const FAQ_ITEMS = [
+  {
+    q: "¿Cómo empiezo a aprender?",
+    a: "Ve a la pestaña Lecciones, selecciona el primer módulo (Abecedario) y toca una seña. Mira el video de referencia, imita la seña frente a la cámara y mantén la pose hasta que se confirme. Cuando completes todas las señas de un módulo, se desbloqueará el siguiente.",
+  },
+  {
+    q: "¿Por qué no se detecta mi mano?",
+    a: "Asegúrate de estar en un lugar bien iluminado, con la mano dentro del encuadre de la cámara y fondo preferentemente uniforme. Evita ropa del mismo color que tu mano. Si el problema persiste, recarga la página y permite el acceso a la cámara nuevamente.",
+  },
+  {
+    q: "¿Cómo funciona la racha diaria?",
+    a: "Tu racha aumenta cada día que practicas al menos una seña. Si dejas de practicar un día, la racha se reinicia. Mantén tu racha para desbloquear insignias especiales.",
+  },
+  {
+    q: "¿Puedo practicar sin cámara?",
+    a: "Sí. Puedes ver los videos de referencia y estudiar las señas visualmente. Sin embargo, para registrar progreso y completar módulos necesitas practicar con la cámara.",
+  },
+  {
+    q: "¿Se guarda mi progreso automáticamente?",
+    a: "Sí. Cada vez que completas una seña, tu progreso se guarda en tu cuenta. Puedes continuar desde donde lo dejaste en cualquier dispositivo iniciando sesión.",
+  },
+  {
+    q: "¿Qué son las insignias?",
+    a: "Las insignias son reconocimientos que desbloqueas al cumplir ciertos retos: mantener rachas, aprender cierta cantidad de señas, alcanzar precisión alta, entre otros. Ve a la sección Logros para verlas todas.",
+  },
+  {
+    q: "¿Puedo cambiar el tamaño del texto?",
+    a: "Sí. Toca tu foto de perfil en la esquina superior derecha, ve a Preferencias y selecciona el tamaño de texto que prefieras: pequeño, mediano o grande.",
+  },
+  {
+    q: "¿La app funciona sin conexión?",
+    a: "Necesitas conexión a internet para cargar los videos de referencia y sincronizar tu progreso. Las señas que ya hayas practicado quedan registradas en tu cuenta.",
+  },
+];
+
+const TROUBLESHOOTING_ITEMS = [
+  {
+    title: "La cámara no se abre",
+    steps: [
+      "Verifica que permitiste el acceso a la cámara en tu navegador.",
+      "Cierra otras apps que puedan estar usando la cámara (Zoom, Meet, etc.).",
+      "Recarga la página e inténtalo de nuevo.",
+      "Si usas iOS Safari, ve a Ajustes > Safari > Cámara y selecciona 'Permitir'.",
+    ],
+  },
+  {
+    title: "El video de referencia no carga",
+    steps: [
+      "Verifica tu conexión a internet.",
+      "Espera unos segundos — YouTube puede tardar en cargar.",
+      "Si el video sigue sin cargar, puede que no esté disponible en tu región.",
+      "Reporta el problema si persiste usando el email de soporte.",
+    ],
+  },
+  {
+    title: "Mi progreso no se guarda",
+    steps: [
+      "Asegúrate de estar conectado a internet al practicar.",
+      "Cierra sesión y vuelve a entrar para forzar la sincronización.",
+      "Verifica que no estés usando modo incógnito (puede perder datos).",
+      "Si el problema continúa, contacta a soporte con tu email de cuenta.",
+    ],
+  },
+  {
+    title: "La detección es muy lenta",
+    steps: [
+      "Cierra pestañas innecesarias del navegador para liberar memoria.",
+      "Usa un dispositivo con mejor cámara si es posible.",
+      "Asegúrate de tener buena iluminación para acelerar el procesamiento.",
+      "Evita fondos con mucho movimiento o ruido visual.",
+    ],
+  },
+];
+
+const LSM_FACTS = [
+  { icon: "book",   title: "Lengua oficial",       desc: "La LSM fue reconocida como lengua oficial en México en 2005, junto con el español y las lenguas indígenas." },
+  { icon: "user",   title: "Comunidad sorda",       desc: "Más de 2 millones de personas sordas viven en México. La LSM es su lengua materna." },
+  { icon: "sparkles", title: "No es universal",    desc: "Cada país tiene su propia lengua de señas. La LSM es distinta de la ASL (americana) y la LSE (española)." },
+  { icon: "heart",  title: "Más que señas",         desc: "La LSM tiene su propia gramática, sintaxis y expresiones faciales. Es una lengua completa y rica." },
+  { icon: "target", title: "Inclusión",             desc: "Aprender LSM rompe barreras comunicativas y fomenta una sociedad más inclusiva." },
+  { icon: "trophy", title: "Cultura sorda",         desc: "La comunidad sorda tiene una cultura vibrante con tradiciones, arte y literatura propias." },
+];
+
+function HelpPage({ isDark, navigate }) {
+  const [openFaq, setOpenFaq] = useState(null);
+  const [openTrouble, setOpenTrouble] = useState(null);
+
+  return (
+    <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
+        {/* Back button */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          className={cx(
+            "btn-press group flex items-center gap-2 text-sm font-medium transition-all duration-200",
+            isDark ? "text-brand-soft hover:text-white" : "text-brand-muted hover:text-brand-ink"
+          )}
+        >
+          <Icon name="arrow" className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-1" />
+          Volver al inicio
+        </button>
+
+        {/* Header */}
+        <div className="mb-8 mt-4">
+          <div className="mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">— Centro de ayuda</span>
+          </div>
+          <h1 className={cx("font-display text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
+            ¿Cómo podemos <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>ayudarte?</span>
+          </h1>
+          <p className={cx("mt-2 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>
+            Encuentra respuestas, soluciona problemas y conoce más sobre la Lengua de Señas Mexicana.
+          </p>
+        </div>
+
+        {/* Quick contact card */}
+        <div className={cx(
+          "mb-8 rounded-3xl border p-6 backdrop-blur-xl sm:p-8",
+          isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+        )}>
+          <h2 className={cx("mb-4 font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+            Contacto directo
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {/* Email */}
+            <a
+              href={`mailto:${CONTACT_INFO.email}`}
+              className={cx(
+                "btn-press flex items-center gap-3 rounded-2xl border p-4 transition-all hover:scale-[1.02]",
+                isDark ? "border-brand-line/30 bg-brand-deep/50 hover:bg-brand-deep/80" : "border-brand-mist/30 bg-brand-cream/50 hover:bg-brand-cream/80"
+              )}
+            >
+              <div className={cx("flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl", isDark ? "bg-brand-cyan/20" : "bg-brand-teal/15")}>
+                <Icon name="mail" className={cx("h-5 w-5", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+              </div>
+              <div className="min-w-0">
+                <div className={cx("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Email</div>
+                <div className={cx("truncate text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{CONTACT_INFO.email}</div>
+              </div>
+            </a>
+
+            {/* WhatsApp */}
+            <a
+              href={CONTACT_INFO.whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cx(
+                "btn-press flex items-center gap-3 rounded-2xl border p-4 transition-all hover:scale-[1.02]",
+                isDark ? "border-brand-line/30 bg-brand-deep/50 hover:bg-brand-deep/80" : "border-brand-mist/30 bg-brand-cream/50 hover:bg-brand-cream/80"
+              )}
+            >
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-green-500/15">
+                <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm5.8 14.16c-.24.68-1.42 1.31-1.96 1.36-.5.05-1.13.07-1.83-.11-.42-.13-.96-.31-1.66-.61-2.92-1.26-4.83-4.19-4.97-4.38-.15-.19-1.2-1.59-1.2-3.03s.75-2.15 1.02-2.44c.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.82 2.01.89 2.16.07.15.12.32.02.51-.09.19-.14.31-.28.48-.14.17-.29.38-.42.51-.14.14-.28.29-.12.56.16.27.72 1.19 1.55 1.93 1.06.95 1.96 1.24 2.23 1.38.27.14.43.12.59-.07.16-.19.68-.79.86-1.06.18-.27.36-.22.61-.13.24.09 1.55.73 1.81.86.27.13.44.2.51.31.07.12.07.68-.17 1.36z" /></svg>
+              </div>
+              <div className="min-w-0">
+                <div className={cx("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>WhatsApp</div>
+                <div className={cx("truncate text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{CONTACT_INFO.whatsapp}</div>
+              </div>
+            </a>
+
+            {/* Instagram */}
+            <a
+              href={CONTACT_INFO.instagramLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cx(
+                "btn-press flex items-center gap-3 rounded-2xl border p-4 transition-all hover:scale-[1.02]",
+                isDark ? "border-brand-line/30 bg-brand-deep/50 hover:bg-brand-deep/80" : "border-brand-mist/30 bg-brand-cream/50 hover:bg-brand-cream/80"
+              )}
+            >
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20">
+                <Icon name="instagram" className="h-5 w-5 text-pink-500" />
+              </div>
+              <div className="min-w-0">
+                <div className={cx("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Instagram</div>
+                <div className={cx("truncate text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{CONTACT_INFO.instagram}</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <div className={cx("flex h-8 w-8 items-center justify-center rounded-lg", isDark ? "bg-brand-card" : "bg-brand-cream")}>
+              <Icon name="help" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+              Preguntas frecuentes
+            </h2>
+          </div>
+          <div className="space-y-2">
+            {FAQ_ITEMS.map((item, i) => (
+              <div
+                key={i}
+                className={cx(
+                  "overflow-hidden rounded-2xl border transition-all",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className={cx(
+                    "flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors",
+                    isDark ? "hover:bg-brand-deep/30" : "hover:bg-brand-cream/30"
+                  )}
+                >
+                  <span className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{item.q}</span>
+                  <Icon
+                    name="chevron"
+                    className={cx(
+                      "h-4 w-4 flex-shrink-0 transition-transform duration-200",
+                      openFaq === i && "rotate-180",
+                      isDark ? "text-brand-cyan" : "text-brand-teal"
+                    )}
+                  />
+                </button>
+                {openFaq === i && (
+                  <div className={cx("px-5 pb-4 text-sm leading-relaxed animate-fade", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                    {item.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Troubleshooting Section */}
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <div className={cx("flex h-8 w-8 items-center justify-center rounded-lg", isDark ? "bg-brand-card" : "bg-brand-cream")}>
+              <Icon name="settings" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+              Solución de problemas
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {TROUBLESHOOTING_ITEMS.map((item, i) => (
+              <div
+                key={i}
+                className={cx(
+                  "overflow-hidden rounded-2xl border transition-all",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <button
+                  onClick={() => setOpenTrouble(openTrouble === i ? null : i)}
+                  className={cx(
+                    "flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors",
+                    isDark ? "hover:bg-brand-deep/30" : "hover:bg-brand-cream/30"
+                  )}
+                >
+                  <span className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{item.title}</span>
+                  <Icon
+                    name="chevron"
+                    className={cx(
+                      "h-4 w-4 flex-shrink-0 transition-transform duration-200",
+                      openTrouble === i && "rotate-180",
+                      isDark ? "text-brand-cyan" : "text-brand-teal"
+                    )}
+                  />
+                </button>
+                {openTrouble === i && (
+                  <div className="px-5 pb-4 animate-fade">
+                    <ol className="space-y-2">
+                      {item.steps.map((step, j) => (
+                        <li key={j} className="flex gap-3 text-sm leading-relaxed">
+                          <span className={cx(
+                            "flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
+                            isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/15 text-brand-teal"
+                          )}>
+                            {j + 1}
+                          </span>
+                          <span className={cx(isDark ? "text-brand-soft" : "text-brand-muted")}>{step}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* About LSM Section */}
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <div className={cx("flex h-8 w-8 items-center justify-center rounded-lg", isDark ? "bg-brand-card" : "bg-brand-cream")}>
+              <Icon name="sparkles" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+              Sobre la Lengua de Señas Mexicana
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {LSM_FACTS.map((fact, i) => (
+              <div
+                key={i}
+                className={cx(
+                  "rounded-2xl border p-5 backdrop-blur-xl transition-all hover:scale-[1.02]",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <div className={cx(
+                  "mb-3 flex h-10 w-10 items-center justify-center rounded-xl",
+                  isDark ? "bg-brand-cyan/15" : "bg-brand-teal/10"
+                )}>
+                  <Icon name={fact.icon} className={cx("h-5 w-5", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+                </div>
+                <h3 className={cx("text-sm font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{fact.title}</h3>
+                <p className={cx("mt-1.5 text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>{fact.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Footer note */}
+        <div className={cx(
+          "rounded-2xl border p-5 text-center",
+          isDark ? "border-brand-line/20 bg-brand-card/30" : "border-brand-mist/20 bg-white/30"
+        )}>
+          <p className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>
+            ¿No encuentras lo que buscas? Escríbenos a <a href={`mailto:${CONTACT_INFO.email}`} className="font-bold text-brand-orange hover:underline">{CONTACT_INFO.email}</a> y te responderemos a la brevedad.
+          </p>
+        </div>
+      </main>
+    </div>
+  );
+}
+
 const TIER_STYLES = {
   bronze: {
     glow: 'shadow-[0_0_20px_rgba(205,127,50,0.4)]',
@@ -4319,6 +4660,15 @@ function App() {
       <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
         <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
         <AchievementsPage isDark={isDark} navigate={navigate} />
+      </div>
+    );
+  }
+
+  if (path === "/help") {
+    return (
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
+        <HelpPage isDark={isDark} navigate={navigate} />
       </div>
     );
   }
