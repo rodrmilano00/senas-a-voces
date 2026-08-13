@@ -795,6 +795,23 @@ a:focus-visible {
   }
 }
 
+/* Fullscreen overlay for module completion — always fullscreen on all devices */
+.success-overlay-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  z-index: 9999 !important;
+  overscroll-behavior: none !important;
+  -webkit-overflow-scrolling: none !important;
+  background-color: rgba(0, 0, 0, 0.95) !important;
+}
+
 @keyframes scale-up {
   from {
     transform: scale(0);

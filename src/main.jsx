@@ -1784,12 +1784,104 @@ function SignProgressSnake({ items, practicedSigns, activeSignLabel, isDark, onS
   );
 }
 
+// Congratulation screen shown when a module is completed
+function ModuleCompleteScreen({ module, nextModule, isDark, onContinue, onBackToModules }) {
+  return createPortal(
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 99999,
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overscrollBehavior: 'none',
+      }}
+    >
+      <div className="flex flex-col items-center gap-4 px-6 text-center animate-fade">
+        {/* Trophy icon */}
+        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-orange/20 shadow-2xl sm:h-32 sm:w-32">
+          <Icon name="trophy" className="h-12 w-12 text-brand-orange sm:h-16 sm:w-16" />
+        </div>
+
+        {/* Title */}
+        <div className="text-center">
+          <div className="text-2xl font-extrabold text-white sm:text-4xl">¡Módulo completado!</div>
+          <div className="mt-2 text-base text-brand-orange sm:text-lg font-bold">{module?.title}</div>
+          <div className="mt-1 text-sm text-white/70">{module?.signs || module?.totalSigns} señas dominadas</div>
+        </div>
+
+        {/* Next module preview */}
+        {nextModule ? (
+          <div className="mt-2 w-full max-w-sm rounded-2xl border-2 border-white/20 bg-white/10 p-4 backdrop-blur-sm">
+            <div className="text-xs font-bold uppercase tracking-wider text-green-300">Siguiente módulo desbloqueado</div>
+            <div className="mt-2 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/30">
+                <Icon name={nextModule.icon || "book"} className="h-5 w-5 text-brand-cyan" />
+              </div>
+              <div className="text-left">
+                <div className="text-sm font-bold text-white">{nextModule.title}</div>
+                <div className="text-xs text-white/60">{nextModule.signs} señas · Nivel {nextModule.level}</div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-2 rounded-2xl border-2 border-brand-orange/40 bg-brand-orange/10 px-6 py-4">
+            <div className="text-sm font-bold text-brand-orange">¡Has completado todos los módulos! 🎉</div>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="mt-4 flex w-full max-w-xs flex-col gap-2 sm:max-w-md sm:flex-row">
+          <button
+            onClick={onBackToModules}
+            className="btn-press flex-1 rounded-xl border-2 border-white/30 bg-white/10 px-4 py-3 text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/20"
+          >
+            Volver a módulos
+          </button>
+          {nextModule && (
+            <button
+              onClick={onContinue}
+              className="btn-press flex-1 rounded-xl bg-brand-orange px-4 py-3 text-sm font-bold text-white transition-all hover:bg-brand-orange/90"
+            >
+              Empezar siguiente →
+            </button>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 function LessonPage({ isDark, navigate }) {
   const { userProgress, moduleProgress, user } = useAuth();
   const [selected, setSelected] = useState(modules[0]);
   const [activeSign, setActiveSign] = useState(null);
   const [search, setSearch] = useState("");
   const [practicedSigns, setPracticedSigns] = useState(new Set());
+  const [completedModule, setCompletedModule] = useState(null); // { moduleId, totalSigns, nextModule }
+
+  // Keep body scroll locked while the congratulation screen is visible
+  useEffect(() => {
+    if (completedModule) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [completedModule]);
+
+  // Safety: always restore body scroll when LessonPage unmounts (e.g. navigating to another tab)
+  useEffect(() => {
+    return () => { document.body.style.overflow = ''; };
+  }, []);
 
   // Fetch which signs the user has practiced for the selected module
   useEffect(() => {
@@ -1808,6 +1900,26 @@ function LessonPage({ isDark, navigate }) {
     if (currentIndex !== -1 && currentIndex < selected.items.length - 1) {
       setActiveSign(selected.items[currentIndex + 1]);
     }
+  };
+
+  // Handle module completion — mark in DB, unlock next, show congratulation screen
+  const handleModuleCompleted = async (moduleId, totalSigns) => {
+    if (!user?.id) return;
+
+    // Find the next module in the list
+    const currentIdx = modules.findIndex((m) => m.id === moduleId);
+    const nextModule = currentIdx >= 0 && currentIdx < modules.length - 1 ? modules[currentIdx + 1] : null;
+
+    // Mark current module as completed in DB
+    await updateModuleProgress(user.id, moduleId, totalSigns, totalSigns, 'completed');
+
+    // Unlock next module in DB
+    if (nextModule) {
+      await updateModuleProgress(user.id, nextModule.id, 0, nextModule.signs, 'current');
+    }
+
+    // Show congratulation screen
+    setCompletedModule({ moduleId, totalSigns, nextModule });
   };
 
   // Merge module data with progress from database
@@ -1994,9 +2106,31 @@ function LessonPage({ isDark, navigate }) {
             allItems={selected.items}
             practicedSigns={practicedSigns}
             onSelectSign={(item) => setActiveSign(item)}
+            onModuleCompleted={handleModuleCompleted}
           />
         )}
       </main>
+
+      {/* Module completion congratulation screen */}
+      {completedModule && (
+        <ModuleCompleteScreen
+          module={modules.find((m) => m.id === completedModule.moduleId)}
+          nextModule={completedModule.nextModule}
+          isDark={isDark}
+          onContinue={() => {
+            if (completedModule.nextModule) {
+              setSelected(completedModule.nextModule);
+              setActiveSign(completedModule.nextModule.items[0]);
+              setPracticedSigns(new Set());
+            }
+            setCompletedModule(null);
+          }}
+          onBackToModules={() => {
+            setActiveSign(null);
+            setCompletedModule(null);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -2142,7 +2276,7 @@ function LessonSignTracker({ items, currentLabel, practicedSigns, isDark, onSele
   );
 }
 
-function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignCompleted, allItems, practicedSigns, onSelectSign }) {
+function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignCompleted, allItems, practicedSigns, onSelectSign, onModuleCompleted }) {
   const { user } = useAuth();
   const [viewRecorded, setViewRecorded] = useState(false);
   const [handDetected, setHandDetected] = useState(false);
@@ -2209,8 +2343,6 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignComplet
         // Synchronous guard — prevents double-trigger across frames
         if (successRef.current) return;
         successRef.current = true;
-        // Lock scroll immediately (before React re-renders)
-        document.body.style.overflow = 'hidden';
         setPracticeSuccess(true);
         setGestureState("confirmed");
 
@@ -2223,13 +2355,25 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignComplet
         // Notify parent so the snake indicator updates
         if (onSignCompleted) onSignCompleted(sign.label || sign.name);
 
+        // Check if this was the last sign in the module
+        if (allItems && allItems.length > 0 && onModuleCompleted) {
+          const signLabel = sign.label || sign.name;
+          const allDone = allItems.every((item) => {
+            const itemLabel = item.label || item.name;
+            return itemLabel === signLabel || practicedSigns.has(itemLabel);
+          });
+          if (allDone) {
+            onModuleCompleted(moduleId, allItems.length);
+          }
+        }
+
         // Stay on the same sign — user taps "Continuar" to advance
       }
     } else {
       holdStartRef.current = null;
       setGestureState(sc > 0.45 ? "partial" : "waiting");
     }
-  }, [sign, user, moduleId, practiceSuccess, onSignCompleted]);
+  }, [sign, user, moduleId, practiceSuccess, onSignCompleted, onModuleCompleted, allItems, practicedSigns]);
 
   // Handler for the "Continuar" button — advances to next sign and resets state
   const handleContinue = () => {
@@ -2250,14 +2394,18 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignComplet
     setMatchScore(0);
   };
 
-  // Lock body scroll while success overlay is visible on mobile
+  // Lock body scroll while success overlay is visible
   useEffect(() => {
     if (practiceSuccess) {
-      const prev = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
-      return () => { document.body.style.overflow = prev; };
+      return () => { document.body.style.overflow = ''; };
     }
   }, [practiceSuccess]);
+
+  // Safety: restore body scroll on unmount
+  useEffect(() => {
+    return () => { document.body.style.overflow = ''; };
+  }, []);
 
   const { videoRef, canvasRef, camReady, camError } = useSimpleCamera({
     onResults: handlePracticeResults
@@ -2353,7 +2501,21 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignComplet
           {/* Success animation overlay — fixed fullscreen on mobile, over camera on desktop */}
           {practiceSuccess && createPortal(
             <div
-              className="success-overlay-mobile flex items-center justify-center backdrop-blur-sm transition-opacity duration-300"
+              className="flex items-center justify-center transition-opacity duration-300"
+              style={{
+                position: window.innerWidth < 640 ? 'fixed' : 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: window.innerWidth < 640 ? '100vw' : '100%',
+                height: window.innerWidth < 640 ? '100vh' : '100%',
+                zIndex: window.innerWidth < 640 ? 99999 : 50,
+                backgroundColor: window.innerWidth < 640 ? 'rgba(0, 0, 0, 0.92)' : 'rgba(0, 0, 0, 0.4)',
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)',
+                overscrollBehavior: 'none',
+              }}
             >
               <div className="flex flex-col items-center gap-3 animate-fade px-6 sm:gap-4">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20 shadow-2xl sm:h-32 sm:w-32">
@@ -2535,8 +2697,6 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
         // Synchronous guard — prevents double-trigger across frames
         if (successRef.current) return;
         successRef.current = true;
-        // Lock scroll immediately (before React re-renders)
-        document.body.style.overflow = 'hidden';
         setPracticeSuccess(true);
         setGestureState("confirmed");
 
@@ -2573,14 +2733,18 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
     setMatchScore(0);
   };
 
-  // Lock body scroll while success overlay is visible on mobile
+  // Lock body scroll while success overlay is visible
   useEffect(() => {
     if (practiceSuccess) {
-      const prev = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
-      return () => { document.body.style.overflow = prev; };
+      return () => { document.body.style.overflow = ''; };
     }
   }, [practiceSuccess]);
+
+  // Safety: restore body scroll on unmount
+  useEffect(() => {
+    return () => { document.body.style.overflow = ''; };
+  }, []);
 
   const { videoRef, canvasRef, camReady, camError } = useSimpleCamera({
     onResults: handlePracticeResults
@@ -2686,7 +2850,21 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
             {/* Success animation overlay — fixed fullscreen on mobile, over camera on desktop */}
             {practiceSuccess && createPortal(
               <div
-                className="success-overlay-mobile flex items-center justify-center backdrop-blur-sm transition-opacity duration-300"
+                className="flex items-center justify-center transition-opacity duration-300"
+                style={{
+                  position: window.innerWidth < 640 ? 'fixed' : 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  width: window.innerWidth < 640 ? '100vw' : '100%',
+                  height: window.innerWidth < 640 ? '100vh' : '100%',
+                  zIndex: window.innerWidth < 640 ? 99999 : 50,
+                  backgroundColor: window.innerWidth < 640 ? 'rgba(0, 0, 0, 0.92)' : 'rgba(0, 0, 0, 0.4)',
+                  backdropFilter: 'blur(4px)',
+                  WebkitBackdropFilter: 'blur(4px)',
+                  overscrollBehavior: 'none',
+                }}
               >
                 <div className="flex flex-col items-center gap-3 animate-fade px-6 sm:gap-4">
                   <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20 shadow-2xl sm:h-32 sm:w-32">
