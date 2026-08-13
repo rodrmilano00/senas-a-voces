@@ -2150,6 +2150,7 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignComplet
   const [matchScore, setMatchScore] = useState(0);
   const [practiceSuccess, setPracticeSuccess] = useState(false);
   const holdStartRef = useRef(null);
+  const successRef = useRef(false); // synchronous guard against double-trigger
   const HOLD_MS = 600;
 
   // Extract YouTube video ID from URL
@@ -2169,14 +2170,24 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignComplet
     }
   }, [user, sign, moduleId, viewRecorded]);
 
+  // Reset success state when sign changes (e.g. via "Continuar" or tracker navigation)
+  useEffect(() => {
+    successRef.current = false;
+    setPracticeSuccess(false);
+    holdStartRef.current = null;
+    setGestureState("waiting");
+    setMatchScore(0);
+  }, [sign]);
+
   // Simplified practice handler for lesson view
   const handlePracticeResults = useCallback(({ handRes }) => {
     const lms = handRes?.landmarks?.[0] ?? null;
     setHandDetected(!!lms);
 
-    if (!lms || practiceSuccess) {
+    // Use successRef for synchronous guard — practiceSuccess in closure may be stale
+    if (!lms || successRef.current) {
       holdStartRef.current = null;
-      if (!practiceSuccess) setGestureState("waiting");
+      if (!successRef.current) setGestureState("waiting");
       setMatchScore(0);
       return;
     }
@@ -2195,6 +2206,11 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignComplet
       setGestureState(pct >= 1 ? "match" : "partial");
 
       if (held >= HOLD_MS) {
+        // Synchronous guard — prevents double-trigger across frames
+        if (successRef.current) return;
+        successRef.current = true;
+        // Lock scroll immediately (before React re-renders)
+        document.body.style.overflow = 'hidden';
         setPracticeSuccess(true);
         setGestureState("confirmed");
 
@@ -2217,6 +2233,7 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignComplet
 
   // Handler for the "Continuar" button — advances to next sign and resets state
   const handleContinue = () => {
+    successRef.current = false;
     setPracticeSuccess(false);
     holdStartRef.current = null;
     setGestureState("waiting");
@@ -2226,11 +2243,21 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignComplet
 
   // Handler to let user keep practicing the same sign
   const handleKeepPracticing = () => {
+    successRef.current = false;
     setPracticeSuccess(false);
     holdStartRef.current = null;
     setGestureState("waiting");
     setMatchScore(0);
   };
+
+  // Lock body scroll while success overlay is visible on mobile
+  useEffect(() => {
+    if (practiceSuccess) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [practiceSuccess]);
 
   const { videoRef, canvasRef, camReady, camError } = useSimpleCamera({
     onResults: handlePracticeResults
@@ -2325,7 +2352,9 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignComplet
           )}
           {/* Success animation overlay — fixed fullscreen on mobile, over camera on desktop */}
           {practiceSuccess && createPortal(
-            <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 sm:absolute sm:z-auto sm:bg-black/40">
+            <div
+              className="success-overlay-mobile flex items-center justify-center backdrop-blur-sm transition-opacity duration-300"
+            >
               <div className="flex flex-col items-center gap-3 animate-fade px-6 sm:gap-4">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20 shadow-2xl sm:h-32 sm:w-32">
                   <Icon name="check" className="h-10 w-10 text-green-400 sm:h-16 sm:w-16" />
@@ -2388,6 +2417,7 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
   const [matchScore, setMatchScore] = useState(0);
   const [practiceSuccess, setPracticeSuccess] = useState(false);
   const holdStartRef = useRef(null);
+  const successRef = useRef(false); // synchronous guard against double-trigger
   const HOLD_MS = 600;
 
   // Extract YouTube video ID from URL
@@ -2406,6 +2436,15 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
       setViewRecorded(true);
     }
   }, [user, sign, moduleId, viewRecorded]);
+
+  // Reset success state when sign changes
+  useEffect(() => {
+    successRef.current = false;
+    setPracticeSuccess(false);
+    holdStartRef.current = null;
+    setGestureState("waiting");
+    setMatchScore(0);
+  }, [sign]);
 
   // Block body scroll when modal is open
   useEffect(() => {
@@ -2471,9 +2510,10 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
     const lms = handRes?.landmarks?.[0] ?? null;
     setHandDetected(!!lms);
 
-    if (!lms || practiceSuccess) {
+    // Use successRef for synchronous guard — practiceSuccess in closure may be stale
+    if (!lms || successRef.current) {
       holdStartRef.current = null;
-      if (!practiceSuccess) setGestureState("waiting");
+      if (!successRef.current) setGestureState("waiting");
       setMatchScore(0);
       return;
     }
@@ -2492,6 +2532,11 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
       setGestureState(pct >= 1 ? "match" : "partial");
 
       if (held >= HOLD_MS) {
+        // Synchronous guard — prevents double-trigger across frames
+        if (successRef.current) return;
+        successRef.current = true;
+        // Lock scroll immediately (before React re-renders)
+        document.body.style.overflow = 'hidden';
         setPracticeSuccess(true);
         setGestureState("confirmed");
 
@@ -2511,6 +2556,7 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
 
   // Handler for the "Continuar" button — advances to next sign and resets state
   const handleContinue = () => {
+    successRef.current = false;
     setPracticeSuccess(false);
     holdStartRef.current = null;
     setGestureState("waiting");
@@ -2520,14 +2566,24 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
 
   // Handler to let user keep practicing the same sign
   const handleKeepPracticing = () => {
+    successRef.current = false;
     setPracticeSuccess(false);
     holdStartRef.current = null;
     setGestureState("waiting");
     setMatchScore(0);
   };
 
-  const { videoRef, canvasRef, camReady, camError } = useSimpleCamera({ 
-    onResults: handlePracticeResults 
+  // Lock body scroll while success overlay is visible on mobile
+  useEffect(() => {
+    if (practiceSuccess) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [practiceSuccess]);
+
+  const { videoRef, canvasRef, camReady, camError } = useSimpleCamera({
+    onResults: handlePracticeResults
   });
 
   if (!sign || !videoId) return null;
@@ -2629,7 +2685,9 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
             )}
             {/* Success animation overlay — fixed fullscreen on mobile, over camera on desktop */}
             {practiceSuccess && createPortal(
-              <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 sm:absolute sm:z-auto sm:bg-black/40">
+              <div
+                className="success-overlay-mobile flex items-center justify-center backdrop-blur-sm transition-opacity duration-300"
+              >
                 <div className="flex flex-col items-center gap-3 animate-fade px-6 sm:gap-4">
                   <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20 shadow-2xl sm:h-32 sm:w-32">
                     <Icon name="check" className="h-10 w-10 text-green-400 sm:h-16 sm:w-16" />
