@@ -767,6 +767,34 @@ a:focus-visible {
 }
 
 /* Success Animation */
+/* Fullscreen overlay that always covers the viewport, even on mobile scroll */
+.success-overlay-mobile {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  z-index: 9999 !important;
+  overscroll-behavior: none !important;
+  -webkit-overflow-scrolling: none !important;
+  background-color: rgba(0, 0, 0, 0.92) !important;
+}
+
+/* On desktop, revert to absolute positioning over the camera */
+@media (min-width: 640px) {
+  .success-overlay-mobile {
+    position: absolute !important;
+    z-index: auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: rgba(0, 0, 0, 0.4) !important;
+  }
+}
+
 @keyframes scale-up {
   from {
     transform: scale(0);

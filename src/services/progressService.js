@@ -72,6 +72,30 @@ export async function fetchModuleProgress(userId) {
   }
 }
 
+// Fetch the set of sign names a user has practiced (for per-sign progress indicators)
+export async function fetchPracticedSigns(userId, moduleId) {
+  if (!hasSupabase()) return new Set();
+
+  try {
+    let query = supabase
+      .from('sign_practice')
+      .select('sign_name, module')
+      .eq('user_id', userId);
+
+    if (moduleId) {
+      query = query.eq('module', moduleId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+    return new Set((data || []).map((r) => r.sign_name));
+  } catch (error) {
+    console.error('Error fetching practiced signs:', error);
+    return new Set();
+  }
+}
+
 // Update user progress after completing a sign
 export async function updateSignProgress(userId, signName, module, accuracy, timeSpent) {
   if (!hasSupabase()) return { success: false, error: new Error('Supabase is not configured') };

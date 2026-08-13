@@ -8,7 +8,7 @@ import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR } from "./utils/
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AuthPage from "./components/AuthPage";
 import EmailConfirmationPage from "./components/EmailConfirmationPage";
-import { updateSignProgress, updateModuleProgress, updateStreak, recordVideoView, updateWeeklyActivity, updatePracticeDays, getRecommendations } from "./services/progressService";
+import { updateSignProgress, updateModuleProgress, updateStreak, recordVideoView, updateWeeklyActivity, updatePracticeDays, getRecommendations, fetchPracticedSigns } from "./services/progressService";
 import { Analytics } from "@vercel/analytics/react";
 import { supabase } from "./lib/supabaseClient";
 
@@ -242,6 +242,7 @@ function Icon({ name, className = "h-5 w-5" }) {
     health: <svg {...common}><path d="M9 2v6H3v8h6v6h6v-6h6V8h-6V2H9z" fill="currentColor" fillOpacity="0.85" /><path d="M9 2v6H3v8h6v6h6v-6h6V8h-6V2H9z" /></svg>,
     education: <svg {...common}><path d="M3 9l9-4 9 4-9 4-9-4z" fill="currentColor" fillOpacity="0.2" /><path d="M3 9l9-4 9 4-9 4-9-4z" /><path d="M7 11v5c0 1 2 2 5 2s5-1 5-2v-5" /><path d="M21 9v5" strokeLinecap="round" /></svg>,
     technology: <svg {...common}><rect x="2" y="4" width="20" height="13" rx="2" /><path d="M2 17h20M9 21h6M12 17v4" strokeLinecap="round" /></svg>,
+    chevron: <svg {...common}><polyline points="6 9 12 15 18 9" /></svg>,
     // Iconos específicos para señas individuales
     "number-1": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">1</text></svg>,
     "number-2": <svg {...common}><text x="12" y="17" textAnchor="middle" fontSize="16" fontWeight="bold" fill="currentColor">2</text></svg>,
@@ -1636,11 +1637,169 @@ function SkillNode({ module, index, isDark, selected, onClick }) {
   );
 }
 
+// Visual snake indicator showing per-sign progress within a module
+// Each sign is a numbered dot on a winding path: completed = teal with check badge, current = orange pulse, pending = gray
+function SignProgressSnake({ items, practicedSigns, activeSignLabel, isDark, onSelect }) {
+  if (!items || items.length === 0) return null;
+
+  const total = items.length;
+  const completedCount = items.filter((item) => practicedSigns.has(item.label || item.name)).length;
+  // For alphabet module, show the letter instead of the number
+  const isAlphabet = items.every((it) => it.glyph && it.glyph.length === 1 && /[A-ZÑ]/i.test(it.glyph));
+
+  // Zigzag positions — same pattern as the module roadmap but compact
+  const NODE_SPACING = 60; // px between nodes
+  const xPattern = [50, 78, 22, 72, 28, 75, 25, 68];
+  const positions = items.map((_, index) => ({
+    xPct: xPattern[index % xPattern.length],
+    yPx: index * NODE_SPACING,
+  }));
+
+  // Build smooth path through all dots
+  const buildPath = () => {
+    if (total === 0) return "";
+    let d = `M ${positions[0].xPct} 0`;
+    for (let i = 1; i < total; i++) {
+      const prev = positions[i - 1];
+      const curr = positions[i];
+      const midY = (prev.yPx + curr.yPx) / 2;
+      d += ` C ${prev.xPct} ${midY}, ${curr.xPct} ${midY}, ${curr.xPct} ${curr.yPx}`;
+    }
+    return d;
+  };
+
+  const pathD = buildPath();
+  const pathHeight = (total - 1) * NODE_SPACING;
+
+  // Determine the "current" sign (first not practiced)
+  const currentIndex = items.findIndex((item) => !practicedSigns.has(item.label || item.name));
+
+  return (
+    <div className={cx(
+      "mb-6 rounded-2xl border p-4",
+      isDark ? "border-brand-line/30 bg-brand-deep/30" : "border-gray-200 bg-gray-50"
+    )}>
+      <div className="mb-3 flex items-center justify-between">
+        <span className={cx("text-xs font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-gray-500")}>
+          Progreso del módulo
+        </span>
+        <span className={cx("text-xs font-bold", isDark ? "text-brand-cyan" : "text-brand-teal")}>
+          {completedCount}/{total}
+        </span>
+      </div>
+
+      <div
+        className="relative mx-auto"
+        style={{ maxWidth: '360px', minHeight: `${pathHeight + 48}px` }}
+      >
+        {/* SVG path */}
+        <svg
+          className="absolute left-0 w-full"
+          style={{ top: '19px', height: pathHeight, overflow: 'visible' }}
+          viewBox={`0 0 100 ${pathHeight}`}
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path
+            d={pathD}
+            fill="none"
+            stroke={isDark ? "#1A5C6A" : "#D4CFC0"}
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeDasharray="6 6"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+
+        {/* Dots — always show the number, with a small status badge for completed */}
+        <div className="relative" style={{ height: pathHeight + 38 }}>
+          {items.map((item, index) => {
+            const pos = positions[index];
+            const label = item.label || item.name;
+            const isCompleted = practicedSigns.has(label);
+            const isCurrent = index === currentIndex;
+            const isActive = activeSignLabel === label;
+
+            return (
+              <button
+                key={label}
+                onClick={() => onSelect(item)}
+                className="absolute flex flex-col items-center group"
+                style={{
+                  left: `${pos.xPct}%`,
+                  top: `${pos.yPx}px`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+                title={label}
+              >
+                <div className="relative">
+                  <div
+                    className={cx(
+                      "flex items-center justify-center rounded-full border-2 transition-all duration-200 group-hover:scale-110 font-bold",
+                      isAlphabet && "font-display",
+                      isCompleted
+                        ? "bg-brand-teal border-brand-teal text-white"
+                        : isCurrent
+                        ? "bg-brand-orange border-brand-orange text-white animate-pulse"
+                        : isActive
+                        ? "bg-brand-orange/30 border-brand-orange text-brand-orange"
+                        : isDark
+                          ? "bg-brand-deep border-brand-line text-brand-soft"
+                          : "bg-white border-gray-300 text-gray-400"
+                    )}
+                    style={{
+                      width: '38px',
+                      height: '38px',
+                      fontSize: isAlphabet ? '15px' : '13px',
+                    }}
+                  >
+                    {isAlphabet ? (item.glyph || label) : (index + 1)}
+                  </div>
+                  {/* Completed check badge */}
+                  {isCompleted && (
+                    <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-green-500 border-2 border-white shadow-sm">
+                      <Icon name="check" className="h-2 w-2 text-white" />
+                    </div>
+                  )}
+                  {/* Current play badge */}
+                  {isCurrent && !isCompleted && (
+                    <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-orange border-2 border-white shadow-sm">
+                      <Icon name="play" className="h-2 w-2 text-white" />
+                    </div>
+                  )}
+                </div>
+                {/* Label tooltip on hover */}
+                <span className={cx(
+                  "pointer-events-none absolute top-full mt-1 whitespace-nowrap rounded px-1.5 py-0.5 text-[9px] font-bold opacity-0 transition-opacity group-hover:opacity-100 z-20",
+                  isDark ? "bg-brand-card text-white" : "bg-white text-gray-700 shadow"
+                )}>
+                  {label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function LessonPage({ isDark, navigate }) {
-  const { userProgress, moduleProgress } = useAuth();
+  const { userProgress, moduleProgress, user } = useAuth();
   const [selected, setSelected] = useState(modules[0]);
   const [activeSign, setActiveSign] = useState(null);
   const [search, setSearch] = useState("");
+  const [practicedSigns, setPracticedSigns] = useState(new Set());
+
+  // Fetch which signs the user has practiced for the selected module
+  useEffect(() => {
+    if (!user?.id || !selected?.id) return;
+    let cancelled = false;
+    fetchPracticedSigns(user.id, selected.id).then((set) => {
+      if (!cancelled) setPracticedSigns(set);
+    });
+    return () => { cancelled = true; };
+  }, [user?.id, selected?.id]);
 
   // Auto-advance to next sign in current module
   const handleNextSign = () => {
@@ -1778,7 +1937,16 @@ function LessonPage({ isDark, navigate }) {
                       />
                     </div>
                   </div>
-                  
+
+                  {/* Sign progress snake — visual indicator of which signs are done */}
+                  <SignProgressSnake
+                    items={selected.items}
+                    practicedSigns={practicedSigns}
+                    activeSignLabel={activeSign?.label}
+                    isDark={isDark}
+                    onSelect={(item) => setActiveSign(item)}
+                  />
+
                   <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 max-h-96 overflow-y-auto pr-2">
                     {filteredItems.map((item, index) => (
                       <button
@@ -1822,6 +1990,10 @@ function LessonPage({ isDark, navigate }) {
             onClose={() => setActiveSign(null)}
             moduleId={selected.id}
             onNextSign={handleNextSign}
+            onSignCompleted={(signName) => setPracticedSigns((prev) => new Set([...prev, signName]))}
+            allItems={selected.items}
+            practicedSigns={practicedSigns}
+            onSelectSign={(item) => setActiveSign(item)}
           />
         )}
       </main>
@@ -1864,7 +2036,113 @@ function SignVideoPanel({ sign, isDark, onClose, moduleId }) {
   );
 }
 
-function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
+// Compact progress tracker shown during a lesson
+// Mobile: collapsed bar that expands into a mini-snake. Desktop: horizontal row with connectors.
+// For alphabet module, shows the letter instead of the number.
+function LessonSignTracker({ items, currentLabel, practicedSigns, isDark, onSelect }) {
+  const [expanded, setExpanded] = useState(false);
+  if (!items || items.length === 0) return null;
+
+  const total = items.length;
+  const currentIndex = items.findIndex((item) => (item.label || item.name) === currentLabel);
+  const completedCount = items.filter((item) => practicedSigns.has(item.label || item.name)).length;
+  // Show the letter/glyph for alphabet items, otherwise the number
+  const isAlphabet = items.every((it) => it.glyph && it.glyph.length === 1 && /[A-ZÑ]/i.test(it.glyph));
+  const getDisplayLabel = (item, index) => isAlphabet ? (item.glyph || item.label) : String(index + 1);
+
+  return (
+    <div className={cx(
+      "rounded-xl border p-2.5 sm:p-3",
+      isDark ? "border-brand-line/30 bg-brand-deep/30" : "border-gray-200 bg-gray-50"
+    )}>
+      {/* Header — tap to expand/collapse on mobile */}
+      <button
+        onClick={() => setExpanded((v) => !v)}
+        className="flex w-full items-center justify-between sm:cursor-default"
+      >
+        <span className={cx("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-gray-500")}>
+          {completedCount}/{total} {isAlphabet ? "letras" : "señas"}
+        </span>
+        <div className="flex items-center gap-2">
+          {/* Progress bar mini */}
+          <div className={cx("h-1.5 w-20 overflow-hidden rounded-full sm:w-32", isDark ? "bg-brand-line" : "bg-gray-300")}>
+            <div
+              className="h-full rounded-full bg-brand-teal transition-all duration-300"
+              style={{ width: `${total > 0 ? (completedCount / total) * 100 : 0}%` }}
+            />
+          </div>
+          {/* Expand icon — only on mobile */}
+          <Icon
+            name="chevron"
+            className={cx(
+              "h-4 w-4 transition-transform sm:hidden",
+              isDark ? "text-brand-soft" : "text-gray-400",
+              expanded ? "rotate-180" : ""
+            )}
+          />
+        </div>
+      </button>
+
+      {/* Desktop: always visible row. Mobile: only when expanded */}
+      <div className={cx(
+        "mt-2.5 sm:mt-3",
+        expanded ? "block" : "hidden sm:block"
+      )}>
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:flex-nowrap sm:justify-start sm:gap-1 sm:overflow-x-auto sm:pb-1">
+          {items.map((item, index) => {
+            const label = item.label || item.name;
+            const isCompleted = practicedSigns.has(label);
+            const isCurrent = index === currentIndex;
+            const canNavigate = isCompleted && onSelect && !isCurrent;
+            const displayLabel = getDisplayLabel(item, index);
+
+            return (
+              <div key={label} className="flex items-center">
+                {/* Dot — clickable if completed and not current */}
+                <button
+                  disabled={!canNavigate}
+                  onClick={() => canNavigate && onSelect(item)}
+                  className={cx(
+                    "relative flex items-center justify-center rounded-full border-2 font-bold transition-all",
+                    isAlphabet && "font-display",
+                    canNavigate && "cursor-pointer hover:scale-110 hover:ring-2 hover:ring-brand-teal/40",
+                    !canNavigate && !isCurrent && "cursor-default",
+                    isCompleted
+                      ? "bg-brand-teal border-brand-teal text-white"
+                      : isCurrent
+                      ? "bg-brand-orange border-brand-orange text-white scale-110 animate-pulse"
+                      : isDark
+                        ? "bg-brand-deep border-brand-line text-brand-soft"
+                        : "bg-white border-gray-300 text-gray-400"
+                  )}
+                  style={{ width: '34px', height: '34px', fontSize: isAlphabet ? '14px' : '12px' }}
+                  title={canNavigate ? `Repasar: ${label}` : label}
+                >
+                  {displayLabel}
+                  {/* Completed check badge — inside the dot to avoid clipping */}
+                  {isCompleted && (
+                    <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-green-500 border-2 border-white">
+                      <Icon name="check" className="h-2 w-2 text-white" />
+                    </div>
+                  )}
+                </button>
+                {/* Connector line — only on desktop (sm+) */}
+                {index < total - 1 && (
+                  <div className={cx(
+                    "hidden h-0.5 w-4 sm:block",
+                    isCompleted ? "bg-brand-teal" : isDark ? "bg-brand-line" : "bg-gray-300"
+                  )} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LessonView({ sign, isDark, onClose, moduleId, onNextSign, onSignCompleted, allItems, practicedSigns, onSelectSign }) {
   const { user } = useAuth();
   const [viewRecorded, setViewRecorded] = useState(false);
   const [handDetected, setHandDetected] = useState(false);
@@ -1872,6 +2150,7 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
   const [matchScore, setMatchScore] = useState(0);
   const [practiceSuccess, setPracticeSuccess] = useState(false);
   const holdStartRef = useRef(null);
+  const successRef = useRef(false); // synchronous guard against double-trigger
   const HOLD_MS = 600;
 
   // Extract YouTube video ID from URL
@@ -1891,14 +2170,24 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
     }
   }, [user, sign, moduleId, viewRecorded]);
 
+  // Reset success state when sign changes (e.g. via "Continuar" or tracker navigation)
+  useEffect(() => {
+    successRef.current = false;
+    setPracticeSuccess(false);
+    holdStartRef.current = null;
+    setGestureState("waiting");
+    setMatchScore(0);
+  }, [sign]);
+
   // Simplified practice handler for lesson view
   const handlePracticeResults = useCallback(({ handRes }) => {
     const lms = handRes?.landmarks?.[0] ?? null;
     setHandDetected(!!lms);
 
-    if (!lms || practiceSuccess) {
+    // Use successRef for synchronous guard — practiceSuccess in closure may be stale
+    if (!lms || successRef.current) {
       holdStartRef.current = null;
-      if (!practiceSuccess) setGestureState("waiting");
+      if (!successRef.current) setGestureState("waiting");
       setMatchScore(0);
       return;
     }
@@ -1917,32 +2206,61 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
       setGestureState(pct >= 1 ? "match" : "partial");
 
       if (held >= HOLD_MS) {
+        // Synchronous guard — prevents double-trigger across frames
+        if (successRef.current) return;
+        successRef.current = true;
+        // Lock scroll immediately (before React re-renders)
+        document.body.style.overflow = 'hidden';
         setPracticeSuccess(true);
         setGestureState("confirmed");
-        
+
         // Save progress
         if (user) {
           updateSignProgress(user.id, sign.label || sign.name, moduleId, sc, 0);
           updateStreak(user.id);
         }
-        
-        setTimeout(() => {
-          setPracticeSuccess(false);
-          holdStartRef.current = null;
-          setGestureState("waiting");
-          setMatchScore(0);
-          // Auto-advance to next sign
-          if (onNextSign) onNextSign();
-        }, 800);
+
+        // Notify parent so the snake indicator updates
+        if (onSignCompleted) onSignCompleted(sign.label || sign.name);
+
+        // Stay on the same sign — user taps "Continuar" to advance
       }
     } else {
       holdStartRef.current = null;
       setGestureState(sc > 0.45 ? "partial" : "waiting");
     }
-  }, [sign, user, moduleId, practiceSuccess]);
+  }, [sign, user, moduleId, practiceSuccess, onSignCompleted]);
 
-  const { videoRef, canvasRef, camReady, camError } = useSimpleCamera({ 
-    onResults: handlePracticeResults 
+  // Handler for the "Continuar" button — advances to next sign and resets state
+  const handleContinue = () => {
+    successRef.current = false;
+    setPracticeSuccess(false);
+    holdStartRef.current = null;
+    setGestureState("waiting");
+    setMatchScore(0);
+    if (onNextSign) onNextSign();
+  };
+
+  // Handler to let user keep practicing the same sign
+  const handleKeepPracticing = () => {
+    successRef.current = false;
+    setPracticeSuccess(false);
+    holdStartRef.current = null;
+    setGestureState("waiting");
+    setMatchScore(0);
+  };
+
+  // Lock body scroll while success overlay is visible on mobile
+  useEffect(() => {
+    if (practiceSuccess) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [practiceSuccess]);
+
+  const { videoRef, canvasRef, camReady, camError } = useSimpleCamera({
+    onResults: handlePracticeResults
   });
 
   if (!sign || !videoId) return null;
@@ -1972,32 +2290,20 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
         <div className="w-24" />
       </div>
 
-      {/* Split view: Video on left (larger), Camera on right (smaller) */}
+      {/* Compact sign progress bar — shows position in the module while practicing */}
+      {allItems && allItems.length > 0 && (
+        <LessonSignTracker
+          items={allItems}
+          currentLabel={sign.label || sign.name}
+          practicedSigns={practicedSigns || new Set()}
+          isDark={isDark}
+          onSelect={onSelectSign}
+        />
+      )}
+      {/* Split view: Camera on left (larger), Video on right (smaller) */}
       <div className="grid grid-cols-1 gap-4 rounded-2xl p-4 sm:grid-cols-3">
-        {/* YouTube Video - 2 columns wide */}
-        <div className="relative overflow-hidden rounded-2xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%" }}>
-          <iframe
-            key={videoId}
-            src={iframeSrc}
-            title={sign.label || sign.name}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute inset-0 h-full w-full border-0"
-          />
-          {/* Success animation overlay */}
-          {practiceSuccess && (
-            <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/90 animate-fade-in">
-              <div className="text-center animate-success-bounce">
-                <div className="text-7xl mb-4">✓</div>
-                <div className="text-3xl font-bold text-white">¡Excelente!</div>
-                <div className="text-base text-white/90 mt-2">Seña aprendida</div>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        {/* Camera with hand detection - 1 column wide */}
-        <div className="relative overflow-hidden rounded-2xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
+        {/* Camera with hand detection - 2 columns wide (larger) */}
+        <div className="relative overflow-hidden rounded-2xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%", position: "relative" }}>
           <video
             ref={videoRef}
             className="absolute inset-0 h-full w-full object-cover"
@@ -2024,7 +2330,7 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
               </div>
             </div>
           )}
-          {camReady && (
+          {camReady && !practiceSuccess && (
             <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2">
               <div className={cx("rounded-lg px-3 py-2 text-sm font-bold transition-all duration-300 transform",
                 gestureState === "confirmed" ? "bg-brand-teal text-white scale-110 shadow-lg shadow-brand-teal/30" :
@@ -2044,6 +2350,55 @@ function LessonView({ sign, isDark, onClose, moduleId, onNextSign }) {
               )}
             </div>
           )}
+          {/* Success animation overlay — fixed fullscreen on mobile, over camera on desktop */}
+          {practiceSuccess && createPortal(
+            <div
+              className="success-overlay-mobile flex items-center justify-center backdrop-blur-sm transition-opacity duration-300"
+            >
+              <div className="flex flex-col items-center gap-3 animate-fade px-6 sm:gap-4">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20 shadow-2xl sm:h-32 sm:w-32">
+                  <Icon name="check" className="h-10 w-10 text-green-400 sm:h-16 sm:w-16" />
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-extrabold text-white sm:text-3xl">¡Excelente!</div>
+                  <div className="mt-1 text-sm text-green-300 sm:mt-2">Seña aprendida</div>
+                </div>
+                {/* Continue / Keep practicing buttons */}
+                <div className="mt-3 flex w-full max-w-xs flex-col gap-2 sm:mt-4 sm:max-w-none sm:flex-row">
+                  <button
+                    onClick={handleKeepPracticing}
+                    className="btn-press flex-1 rounded-xl border-2 border-white/30 bg-white/10 px-4 py-2.5 text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/20"
+                  >
+                    Seguir practicando
+                  </button>
+                  <button
+                    onClick={handleContinue}
+                    className="btn-press flex-1 rounded-xl bg-brand-orange px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-brand-orange/90"
+                  >
+                    Continuar →
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
+        </div>
+
+        {/* YouTube Video - 1 column wide (smaller), cropped to fill container */}
+        <div className="relative overflow-hidden rounded-2xl bg-black" style={{ paddingBottom: "56.25%" }}>
+          <div
+            className="absolute top-1/2 left-0 w-full"
+            style={{ transform: 'translateY(-50%)', height: '177.78%' }}
+          >
+            <iframe
+              key={videoId}
+              src={iframeSrc}
+              title={sign.label || sign.name}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 h-full w-full border-0"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -2062,6 +2417,7 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
   const [matchScore, setMatchScore] = useState(0);
   const [practiceSuccess, setPracticeSuccess] = useState(false);
   const holdStartRef = useRef(null);
+  const successRef = useRef(false); // synchronous guard against double-trigger
   const HOLD_MS = 600;
 
   // Extract YouTube video ID from URL
@@ -2080,6 +2436,15 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
       setViewRecorded(true);
     }
   }, [user, sign, moduleId, viewRecorded]);
+
+  // Reset success state when sign changes
+  useEffect(() => {
+    successRef.current = false;
+    setPracticeSuccess(false);
+    holdStartRef.current = null;
+    setGestureState("waiting");
+    setMatchScore(0);
+  }, [sign]);
 
   // Block body scroll when modal is open
   useEffect(() => {
@@ -2145,9 +2510,10 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
     const lms = handRes?.landmarks?.[0] ?? null;
     setHandDetected(!!lms);
 
-    if (!lms || practiceSuccess) {
+    // Use successRef for synchronous guard — practiceSuccess in closure may be stale
+    if (!lms || successRef.current) {
       holdStartRef.current = null;
-      if (!practiceSuccess) setGestureState("waiting");
+      if (!successRef.current) setGestureState("waiting");
       setMatchScore(0);
       return;
     }
@@ -2166,23 +2532,21 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
       setGestureState(pct >= 1 ? "match" : "partial");
 
       if (held >= HOLD_MS) {
+        // Synchronous guard — prevents double-trigger across frames
+        if (successRef.current) return;
+        successRef.current = true;
+        // Lock scroll immediately (before React re-renders)
+        document.body.style.overflow = 'hidden';
         setPracticeSuccess(true);
         setGestureState("confirmed");
-        
+
         // Save progress
         if (user) {
           updateSignProgress(user.id, sign.label || sign.name, moduleId, sc, 0);
           updateStreak(user.id);
         }
-        
-        setTimeout(() => {
-          setPracticeSuccess(false);
-          holdStartRef.current = null;
-          setGestureState("waiting");
-          setMatchScore(0);
-          // Auto-advance to next sign
-          if (onNextSign) onNextSign();
-        }, 800);
+
+        // Stay on the same sign — user taps "Continuar" to advance
       }
     } else {
       holdStartRef.current = null;
@@ -2190,8 +2554,36 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
     }
   }, [sign, user, moduleId, practiceSuccess]);
 
-  const { videoRef, canvasRef, camReady, camError } = useSimpleCamera({ 
-    onResults: handlePracticeResults 
+  // Handler for the "Continuar" button — advances to next sign and resets state
+  const handleContinue = () => {
+    successRef.current = false;
+    setPracticeSuccess(false);
+    holdStartRef.current = null;
+    setGestureState("waiting");
+    setMatchScore(0);
+    if (onNextSign) onNextSign();
+  };
+
+  // Handler to let user keep practicing the same sign
+  const handleKeepPracticing = () => {
+    successRef.current = false;
+    setPracticeSuccess(false);
+    holdStartRef.current = null;
+    setGestureState("waiting");
+    setMatchScore(0);
+  };
+
+  // Lock body scroll while success overlay is visible on mobile
+  useEffect(() => {
+    if (practiceSuccess) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [practiceSuccess]);
+
+  const { videoRef, canvasRef, camReady, camError } = useSimpleCamera({
+    onResults: handlePracticeResults
   });
 
   if (!sign || !videoId) return null;
@@ -2241,32 +2633,10 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
           </button>
         </div>
         
-        {/* Split view: Video on left (larger), Camera on right */}
+        {/* Split view: Camera on left (larger), Video on right (smaller) */}
         <div className="grid grid-cols-1 gap-4 rounded-b-2xl p-4 sm:grid-cols-3">
-          {/* YouTube Video - 2 columns wide */}
-          <div className="relative overflow-hidden rounded-2xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%" }}>
-            <iframe
-              key={videoId}
-              src={iframeSrc}
-              title={sign.label || sign.name}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="absolute inset-0 h-full w-full border-0"
-            />
-            {/* Success animation overlay */}
-            {practiceSuccess && (
-              <div className="absolute inset-0 flex items-center justify-center bg-brand-teal/90 animate-fade-in">
-                <div className="text-center animate-success-bounce">
-                  <div className="text-7xl mb-4">✓</div>
-                  <div className="text-3xl font-bold text-white">¡Excelente!</div>
-                  <div className="text-base text-white/90 mt-2">Seña aprendida</div>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          {/* Camera with hand detection - 1 column */}
-          <div className="relative overflow-hidden rounded-2xl bg-black" style={{ paddingBottom: "56.25%", position: "relative" }}>
+          {/* Camera with hand detection - 2 columns wide (larger) */}
+          <div className="relative overflow-hidden rounded-2xl bg-black sm:col-span-2" style={{ paddingBottom: "56.25%", position: "relative" }}>
             <video
               ref={videoRef}
               className="absolute inset-0 h-full w-full object-cover"
@@ -2293,7 +2663,7 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
                 </div>
               </div>
             )}
-            {camReady && (
+            {camReady && !practiceSuccess && (
               <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-2">
                 <div className={cx("rounded-lg px-3 py-2 text-sm font-bold transition-all duration-300 transform",
                   gestureState === "confirmed" ? "bg-brand-teal text-white scale-110 shadow-lg shadow-brand-teal/30" :
@@ -2313,6 +2683,55 @@ function SignVideoModal({ sign, isDark, onClose, moduleId, onNextSign }) {
                 )}
               </div>
             )}
+            {/* Success animation overlay — fixed fullscreen on mobile, over camera on desktop */}
+            {practiceSuccess && createPortal(
+              <div
+                className="success-overlay-mobile flex items-center justify-center backdrop-blur-sm transition-opacity duration-300"
+              >
+                <div className="flex flex-col items-center gap-3 animate-fade px-6 sm:gap-4">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-500/20 shadow-2xl sm:h-32 sm:w-32">
+                    <Icon name="check" className="h-10 w-10 text-green-400 sm:h-16 sm:w-16" />
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-extrabold text-white sm:text-3xl">¡Excelente!</div>
+                    <div className="mt-1 text-sm text-green-300 sm:mt-2">Seña aprendida</div>
+                  </div>
+                  {/* Continue / Keep practicing buttons */}
+                  <div className="mt-3 flex w-full max-w-xs flex-col gap-2 sm:mt-4 sm:max-w-none sm:flex-row">
+                    <button
+                      onClick={handleKeepPracticing}
+                      className="btn-press flex-1 rounded-xl border-2 border-white/30 bg-white/10 px-4 py-2.5 text-sm font-bold text-white backdrop-blur-sm transition-all hover:bg-white/20"
+                    >
+                      Seguir practicando
+                    </button>
+                    <button
+                      onClick={handleContinue}
+                      className="btn-press flex-1 rounded-xl bg-brand-orange px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-brand-orange/90"
+                    >
+                      Continuar →
+                    </button>
+                  </div>
+                </div>
+              </div>,
+              document.body
+            )}
+          </div>
+
+          {/* YouTube Video - 1 column wide (smaller), cropped to fill container */}
+          <div className="relative overflow-hidden rounded-2xl bg-black" style={{ paddingBottom: "56.25%" }}>
+            <div
+              className="absolute top-1/2 left-0 w-full"
+              style={{ transform: 'translateY(-50%)', height: '177.78%' }}
+            >
+              <iframe
+                key={videoId}
+                src={iframeSrc}
+                title={sign.label || sign.name}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0 h-full w-full border-0"
+              />
+            </div>
           </div>
         </div>
       </div>
