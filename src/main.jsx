@@ -217,7 +217,7 @@ const accountMenuSections = [
     title: "Ayuda",
     items: [
       { label: "Centro de ayuda", helper: "Guías y tutoriales", icon: "help", path: "/help" },
-      { label: "Acerca de", helper: "Sobre la app", icon: "info", path: "/dashboard" },
+      { label: "Acerca de", helper: "Sobre la app", icon: "info", path: "/about" },
     ],
   },
   {
@@ -1330,6 +1330,276 @@ const LSM_FACTS = [
   { icon: "target", title: "Inclusión",             desc: "Aprender LSM rompe barreras comunicativas y fomenta una sociedad más inclusiva." },
   { icon: "trophy", title: "Cultura sorda",         desc: "La comunidad sorda tiene una cultura vibrante con tradiciones, arte y literatura propias." },
 ];
+
+function AboutPage({ isDark, navigate }) {
+  const totalSigns = modules.reduce((sum, m) => sum + m.signs, 0);
+
+  const features = [
+    { icon: "camera",   title: "Detección con cámara",   desc: "Practica señas en tiempo real con detección de manos por IA. Recibe feedback inmediato sobre tu precisión." },
+    { icon: "book",     title: "Lecciones estructuradas", desc: "Módulos progresivos desde el abecedario hasta vocabulario especializado en familia, salud, tecnología y más." },
+    { icon: "youtube",  title: "Videos de referencia",    desc: "Cada seña incluye un video de YouTube para que observes el movimiento correcto antes de practicar." },
+    { icon: "trophy",   title: "Sistema de logros",       desc: "Desbloquea insignias de bronce, plata y oro mientras superas retos de racha, precisión y constancia." },
+    { icon: "flame",    title: "Rachas diarias",          desc: "Mantén tu motivación con rachas que crecen cada día que practicas. La consistencia es clave." },
+    { icon: "chart",    title: "Estadísticas reales",     desc: "Visualiza tu progreso con mapas de calor, gráficas de actividad y métricas detalladas de tu aprendizaje." },
+  ];
+
+  const techStack = [
+    { name: "React",      desc: "Interfaz de usuario" },
+    { name: "Vite",       desc: "Build y desarrollo" },
+    { name: "Tailwind",   desc: "Estilos y diseño" },
+    { name: "Supabase",   desc: "Autenticación y datos" },
+    { name: "MediaPipe",  desc: "Detección de manos" },
+    { name: "YouTube",    desc: "Videos de referencia" },
+  ];
+
+  const values = [
+    { icon: "heart",   title: "Inclusión",       desc: "Construir puentes entre la comunidad sorda y oyente a través del aprendizaje mutuo." },
+    { icon: "shield",  title: "Accesibilidad",   desc: "Tecnología al servicio de todos, sin barreras de costo ni ubicación." },
+    { icon: "sparkles", title: "Excelencia",     desc: "Contenido pedagógico de calidad con detección precisa y feedback claro." },
+    { icon: "target",  title: "Impacto real",    desc: "Cada seña aprendida es una nueva conversación posible." },
+  ];
+
+  return (
+    <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
+        {/* Back button */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          className={cx(
+            "btn-press group flex items-center gap-2 text-sm font-medium transition-all duration-200",
+            isDark ? "text-brand-soft hover:text-white" : "text-brand-muted hover:text-brand-ink"
+          )}
+        >
+          <Icon name="arrow" className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-1" />
+          Volver al inicio
+        </button>
+
+        {/* Hero section */}
+        <div className="mb-10 mt-6 flex flex-col items-center text-center">
+          <img
+            src={LOGO_SRC}
+            alt="Señas a Voces Academy"
+            className={cx("h-auto w-48 object-contain sm:w-64", isDark && "logo-on-dark")}
+          />
+          <div className="mt-4">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">— Acerca de</span>
+          </div>
+          <h1 className={cx("mt-2 font-display text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
+            Señas a <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>Voces</span> Academy
+          </h1>
+          <p className={cx("mt-3 max-w-2xl text-sm leading-relaxed sm:text-base", isDark ? "text-brand-soft" : "text-brand-muted")}>
+            Una plataforma de aprendizaje de la Lengua de Señas Mexicana (LSM) que combina tecnología de
+            visión por computadora, contenido pedagógico estructurado y gamificación para hacer que aprender
+            señas sea accesible, divertido y efectivo.
+          </p>
+
+          {/* Stats badges */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <div className={cx(
+              "flex items-center gap-2 rounded-full border px-4 py-2",
+              isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+            )}>
+              <Icon name="book" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+              <span className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{modules.length} módulos</span>
+            </div>
+            <div className={cx(
+              "flex items-center gap-2 rounded-full border px-4 py-2",
+              isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+            )}>
+              <Icon name="sparkles" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+              <span className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{totalSigns}+ señas</span>
+            </div>
+            <div className={cx(
+              "flex items-center gap-2 rounded-full border px-4 py-2",
+              isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+            )}>
+              <Icon name="camera" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+              <span className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>Detección IA</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Mission & Vision */}
+        <div className="mb-8 grid gap-4 sm:grid-cols-2">
+          <div className={cx(
+            "rounded-3xl border p-6 backdrop-blur-xl sm:p-8",
+            isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+          )}>
+            <div className={cx(
+              "mb-3 flex h-10 w-10 items-center justify-center rounded-xl",
+              isDark ? "bg-brand-cyan/15" : "bg-brand-teal/10"
+            )}>
+              <Icon name="target" className={cx("h-5 w-5", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>Misión</h2>
+            <p className={cx("mt-2 text-sm leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>
+              Democratizar el aprendizaje de la Lengua de Señas Mexicana mediante tecnología accesible,
+              eliminando barreras comunicativas y construyendo una sociedad más inclusiva donde cada
+              persona pueda expresarse y ser entendida.
+            </p>
+          </div>
+          <div className={cx(
+            "rounded-3xl border p-6 backdrop-blur-xl sm:p-8",
+            isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+          )}>
+            <div className={cx(
+              "mb-3 flex h-10 w-10 items-center justify-center rounded-xl",
+              isDark ? "bg-brand-orange/15" : "bg-brand-orange/10"
+            )}>
+              <Icon name="sparkles" className="h-5 w-5 text-brand-orange" />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>Visión</h2>
+            <p className={cx("mt-2 text-sm leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>
+              Ser la plataforma líder en Latinoamérica para el aprendizaje de lenguas de señas, impulsada
+              por inteligencia artificial y diseño centrado en el usuario, formando una comunidad de
+              millones de personas que se comunican con las manos y el corazón.
+            </p>
+          </div>
+        </div>
+
+        {/* Features */}
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <div className={cx("flex h-8 w-8 items-center justify-center rounded-lg", isDark ? "bg-brand-card" : "bg-brand-cream")}>
+              <Icon name="sparkles" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+              Características principales
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((feat, i) => (
+              <div
+                key={i}
+                className={cx(
+                  "rounded-2xl border p-5 backdrop-blur-xl transition-all hover:scale-[1.02]",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <div className={cx(
+                  "mb-3 flex h-10 w-10 items-center justify-center rounded-xl",
+                  isDark ? "bg-brand-cyan/15" : "bg-brand-teal/10"
+                )}>
+                  <Icon name={feat.icon} className={cx("h-5 w-5", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+                </div>
+                <h3 className={cx("text-sm font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{feat.title}</h3>
+                <p className={cx("mt-1.5 text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>{feat.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Values */}
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <div className={cx("flex h-8 w-8 items-center justify-center rounded-lg", isDark ? "bg-brand-card" : "bg-brand-cream")}>
+              <Icon name="heart" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+              Nuestros valores
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {values.map((val, i) => (
+              <div
+                key={i}
+                className={cx(
+                  "rounded-2xl border p-5 text-center backdrop-blur-xl transition-all hover:scale-[1.02]",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <div className={cx(
+                  "mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl",
+                  isDark ? "bg-brand-cyan/15" : "bg-brand-teal/10"
+                )}>
+                  <Icon name={val.icon} className={cx("h-6 w-6", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+                </div>
+                <h3 className={cx("text-sm font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{val.title}</h3>
+                <p className={cx("mt-1.5 text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>{val.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Tech stack */}
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <div className={cx("flex h-8 w-8 items-center justify-center rounded-lg", isDark ? "bg-brand-card" : "bg-brand-cream")}>
+              <Icon name="settings" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+              Construido con
+            </h2>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {techStack.map((tech) => (
+              <div
+                key={tech.name}
+                className={cx(
+                  "flex items-center gap-2 rounded-xl border px-4 py-2.5",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <span className={cx("text-sm font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{tech.name}</span>
+                <span className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>{tech.desc}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Contact CTA */}
+        <div className={cx(
+          "rounded-3xl border p-6 text-center backdrop-blur-xl sm:p-8",
+          isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+        )}>
+          <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+            ¿Tienes preguntas o sugerencias?
+          </h2>
+          <p className={cx("mt-2 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>
+            Nos encantaría escucharte. Contáctanos por cualquiera de estos medios:
+          </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={`mailto:${CONTACT_INFO.email}`}
+              className={cx(
+                "btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-all",
+                isDark ? "bg-brand-cyan text-brand-deep hover:bg-brand-cyan/90" : "bg-brand-teal text-white hover:bg-brand-teal/90"
+              )}
+            >
+              <Icon name="mail" className="h-4 w-4" />
+              {CONTACT_INFO.email}
+            </a>
+            <a
+              href={CONTACT_INFO.whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-press flex items-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-green-500/90"
+            >
+              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z" /></svg>
+              WhatsApp
+            </a>
+            <a
+              href={CONTACT_INFO.instagramLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-press flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2.5 text-sm font-bold text-white transition-all hover:opacity-90"
+            >
+              <Icon name="instagram" className="h-4 w-4" />
+              {CONTACT_INFO.instagram}
+            </a>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className={cx("text-xs", isDark ? "text-brand-soft/60" : "text-brand-muted/60")}>
+            Señas a Voces Academy · v0.1.0 · Hecho con <Icon name="heart" className="inline h-3 w-3 text-brand-orange" /> para la comunidad sorda de México
+          </p>
+        </div>
+      </main>
+    </div>
+  );
+}
 
 function HelpPage({ isDark, navigate }) {
   const [openFaq, setOpenFaq] = useState(null);
@@ -4669,6 +4939,15 @@ function App() {
       <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
         <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
         <HelpPage isDark={isDark} navigate={navigate} />
+      </div>
+    );
+  }
+
+  if (path === "/about") {
+    return (
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
+        <AboutPage isDark={isDark} navigate={navigate} />
       </div>
     );
   }
