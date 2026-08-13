@@ -185,7 +185,7 @@ const accountMenuSections = [
   {
     title: "Cuenta",
     items: [
-      { label: "Mi perfil", helper: "Datos personales", icon: "user", path: "/dashboard" },
+      { label: "Mi perfil", helper: "Datos personales", icon: "user", path: "/profile" },
       { label: "Logros", helper: "Insignias y estadísticas", icon: "trophy", path: "/learn" },
     ],
   },
@@ -1233,6 +1233,241 @@ function StatTile({ icon, value, label, color, isDark }) {
       </div>
       <div className={cx("stat-tile__value", isDark ? "text-white" : "text-[#1A2E3B]")}>{value}</div>
       <div className="stat-tile__label">{label}</div>
+    </div>
+  );
+}
+
+function ProfilePage({ isDark, navigate }) {
+  const { user, profile, userProgress, moduleProgress, updateProfile } = useAuth();
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedMsg, setSavedMsg] = useState(false);
+  const [formData, setFormData] = useState({
+    full_name: profile?.full_name || "",
+    avatar_initials: profile?.avatar_initials || "",
+  });
+
+  // Sync form when profile loads/changes
+  useEffect(() => {
+    setFormData({
+      full_name: profile?.full_name || "",
+      avatar_initials: profile?.avatar_initials || "",
+    });
+  }, [profile]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const updates = {};
+    if (formData.full_name !== profile?.full_name) updates.full_name = formData.full_name;
+    if (formData.avatar_initials !== profile?.avatar_initials) {
+      // Ensure initials are max 2 chars, uppercase
+      updates.avatar_initials = formData.avatar_initials.substring(0, 2).toUpperCase();
+    }
+    if (Object.keys(updates).length === 0) {
+      setEditing(false);
+      setSaving(false);
+      return;
+    }
+    await updateProfile(updates);
+    setSaving(false);
+    setEditing(false);
+    setSavedMsg(true);
+    setTimeout(() => setSavedMsg(false), 2500);
+  };
+
+  const userInitials = formData.avatar_initials || formData.full_name?.substring(0, 2).toUpperCase() || "US";
+  const userEmail = profile?.email || user?.email || "";
+  const createdAt = profile?.created_at || user?.created_at;
+  const memberSince = createdAt ? new Date(createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'long' }) : '';
+
+  // Stats
+  const totalSigns = userProgress?.total_signs_learned || 0;
+  const streakDays = userProgress?.streak_days || 0;
+  const practiceDays = userProgress?.practice_days || 0;
+  const avgAccuracy = userProgress?.average_accuracy || 0;
+  const modulesCompleted = moduleProgress?.filter(mp => (mp.signs_completed || 0) >= (mp.total_signs || 0)).length || 0;
+
+  return (
+    <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
+        {/* Back button */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          className={cx(
+            "btn-press group flex items-center gap-2 text-sm font-medium transition-all duration-200",
+            isDark ? "text-brand-soft hover:text-white" : "text-brand-muted hover:text-brand-ink"
+          )}
+        >
+          <Icon name="arrow" className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-1" />
+          Volver al inicio
+        </button>
+
+        {/* Header */}
+        <div className="mb-8 mt-4">
+          <div className="mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">— Mi perfil</span>
+          </div>
+          <h1 className={cx("font-display text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
+            Datos <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>personales</span>
+          </h1>
+        </div>
+
+        {/* Profile card */}
+        <div className={cx(
+          "rounded-3xl border p-6 backdrop-blur-xl sm:p-8",
+          isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+        )}>
+          {/* Avatar + info */}
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+            <div className={cx(
+              "flex h-24 w-24 items-center justify-center rounded-3xl text-2xl font-extrabold shadow-lg",
+              isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white"
+            )}>
+              {userInitials}
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              {editing ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className={cx("mb-1 block text-xs font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Nombre completo</label>
+                    <input
+                      type="text"
+                      value={formData.full_name}
+                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                      className={cx(
+                        "input-focus-ring w-full rounded-xl border px-4 py-2.5 text-sm font-semibold",
+                        isDark ? "border-brand-line bg-brand-deep text-white" : "border-brand-mist bg-white text-brand-ink"
+                      )}
+                      placeholder="Tu nombre"
+                    />
+                  </div>
+                  <div>
+                    <label className={cx("mb-1 block text-xs font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Iniciales del avatar (máx. 2)</label>
+                    <input
+                      type="text"
+                      maxLength={2}
+                      value={formData.avatar_initials}
+                      onChange={(e) => setFormData({ ...formData, avatar_initials: e.target.value.toUpperCase() })}
+                      className={cx(
+                        "input-focus-ring w-20 rounded-xl border px-4 py-2.5 text-center text-sm font-bold uppercase",
+                        isDark ? "border-brand-line bg-brand-deep text-white" : "border-brand-mist bg-white text-brand-ink"
+                      )}
+                      placeholder="US"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <h2 className={cx("font-display text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+                    {profile?.full_name || "Usuario"}
+                  </h2>
+                  <p className={cx("mt-1 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>{userEmail}</p>
+                  {memberSince && (
+                    <p className={cx("mt-1 text-xs", isDark ? "text-brand-soft/60" : "text-brand-muted/60")}>
+                      Miembro desde {memberSince}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+            {/* Edit / Save buttons */}
+            <div className="flex gap-2">
+              {editing ? (
+                <>
+                  <button
+                    onClick={() => {
+                      setFormData({
+                        full_name: profile?.full_name || "",
+                        avatar_initials: profile?.avatar_initials || "",
+                      });
+                      setEditing(false);
+                    }}
+                    className={cx(
+                      "btn-press rounded-xl px-4 py-2 text-xs font-bold transition-all",
+                      isDark ? "bg-brand-card text-brand-soft hover:bg-brand-card/80" : "bg-brand-cream text-brand-muted hover:bg-brand-cream/80"
+                    )}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="btn-press rounded-xl bg-brand-orange px-4 py-2 text-xs font-bold text-white transition-all hover:bg-brand-orange/90 disabled:opacity-50"
+                  >
+                    {saving ? "Guardando..." : "Guardar"}
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setEditing(true)}
+                  className={cx(
+                    "btn-press flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition-all",
+                    isDark ? "bg-brand-card text-brand-cyan hover:bg-brand-card/80" : "bg-brand-cream text-brand-teal hover:bg-brand-cream/80"
+                  )}
+                >
+                  <Icon name="settings" className="h-3.5 w-3.5" />
+                  Editar
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Saved message */}
+          {savedMsg && (
+            <div className="mt-4 flex items-center gap-2 rounded-xl bg-green-500/15 px-4 py-2.5 text-sm font-semibold text-green-500">
+              <Icon name="check" className="h-4 w-4" />
+              Perfil actualizado correctamente
+            </div>
+          )}
+        </div>
+
+        {/* Stats grid */}
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            { label: "Señas aprendidas", value: totalSigns, icon: "book", color: "text-brand-teal" },
+            { label: "Días de racha", value: streakDays, icon: "flame", color: "text-brand-orange" },
+            { label: "Días practicados", value: practiceDays, icon: "check", color: "text-green-500" },
+            { label: "Módulos completados", value: modulesCompleted, icon: "trophy", color: "text-yellow-500" },
+          ].map((stat) => (
+            <div key={stat.label} className={cx(
+              "rounded-2xl border p-4 text-center backdrop-blur-xl",
+              isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+            )}>
+              <div className={cx("mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+                <Icon name={stat.icon} className={cx("h-5 w-5", stat.color)} />
+              </div>
+              <div className={cx("text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{stat.value}</div>
+              <div className={cx("mt-0.5 text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Account info */}
+        <div className={cx(
+          "mt-6 rounded-3xl border p-6 backdrop-blur-xl sm:p-8",
+          isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+        )}>
+          <h3 className={cx("mb-4 font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+            Información de cuenta
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between border-b border-dashed pb-3" style={{ borderColor: isDark ? 'rgba(92,196,214,0.15)' : 'rgba(13,92,111,0.12)' }}>
+              <span className={cx("text-xs font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Email</span>
+              <span className={cx("text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{userEmail}</span>
+            </div>
+            <div className="flex items-center justify-between border-b border-dashed pb-3" style={{ borderColor: isDark ? 'rgba(92,196,214,0.15)' : 'rgba(13,92,111,0.12)' }}>
+              <span className={cx("text-xs font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Precisión promedio</span>
+              <span className={cx("text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{Math.round(avgAccuracy * 100)}%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className={cx("text-xs font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Tiempo total de práctica</span>
+              <span className={cx("text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>
+                {Math.round((userProgress?.total_practice_time || 0) / 60)} min
+              </span>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
@@ -3796,6 +4031,15 @@ function App() {
   
   if (path === "/lesson") {
     return <LessonPage isDark={isDark} navigate={navigate} />;
+  }
+
+  if (path === "/profile") {
+    return (
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
+        <ProfilePage isDark={isDark} navigate={navigate} />
+      </div>
+    );
   }
 
   return (

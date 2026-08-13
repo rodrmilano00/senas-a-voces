@@ -503,11 +503,11 @@ a:focus-visible {
 }
 
 .account-menu {
-  position: fixed;
-  top: 5.25rem;
-  right: max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem));
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
   z-index: 80;
-  width: min(18rem, calc(100vw - 2rem));
+  width: min(20rem, calc(100vw - 2rem));
   overflow: hidden;
   border-radius: 16px;
   padding: 0.75rem;
@@ -628,10 +628,10 @@ a:focus-visible {
   }
   
   .account-menu {
-    top: 4.5rem;
-    right: 1rem;
+    top: calc(100% + 0.5rem);
+    right: 0;
     width: calc(100vw - 2rem);
-    max-width: none;
+    max-width: 20rem;
   }
 }
 
