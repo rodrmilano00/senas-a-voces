@@ -181,11 +181,42 @@ const dailyQuest = [
   { task: "Graba una práctica corta", done: false }
 ];
 
-const accountActions = [
-  { label: "Mi perfil", helper: "Datos y preferencias", icon: "user", path: "/dashboard" },
-  { label: "Progreso", helper: "Racha y módulos", icon: "trophy", path: "/learn" },
-  { label: "Práctica", helper: "Abrir cámara", icon: "camera", path: "/practice" },
-  { label: "Cerrar sesión", helper: "Volver al acceso", icon: "lock", path: "/" }
+const accountMenuSections = [
+  {
+    title: "Cuenta",
+    items: [
+      { label: "Mi perfil", helper: "Datos personales", icon: "user", path: "/dashboard" },
+      { label: "Logros", helper: "Insignias y estadísticas", icon: "trophy", path: "/learn" },
+    ],
+  },
+  {
+    title: "Aprendizaje",
+    items: [
+      { label: "Lecciones", helper: "Continuar aprendiendo", icon: "book", path: "/lesson" },
+      { label: "Practicar", helper: "Abrir cámara", icon: "camera", path: "/practice" },
+      { label: "Mi progreso", helper: "Racha y módulos", icon: "chart", path: "/learn" },
+    ],
+  },
+  {
+    title: "Preferencias",
+    items: [
+      { type: "theme", label: "Tema oscuro", helper: "Cambiar apariencia", icon: "moon" },
+      { type: "font", label: "Tamaño de texto", helper: "Pequeño · Mediano · Grande", icon: "palette" },
+    ],
+  },
+  {
+    title: "Ayuda",
+    items: [
+      { label: "Centro de ayuda", helper: "Guías y tutoriales", icon: "help", path: "/dashboard" },
+      { label: "Acerca de", helper: "Sobre la app", icon: "info", path: "/dashboard" },
+    ],
+  },
+  {
+    title: "Sesión",
+    items: [
+      { label: "Cerrar sesión", helper: "Volver al acceso", icon: "logout", path: "/", danger: true },
+    ],
+  },
 ];
 
 const LOGO_SRC = "/logo-senas-a-voces-crop.png";
@@ -288,7 +319,17 @@ function Icon({ name, className = "h-5 w-5" }) {
     "phone": <svg {...common}><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" /></svg>,
     "computer": <svg {...common}><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M6 17h12M12 17v4" /></svg>,
     "instagram": <svg {...common}><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="3" /><circle cx="18" cy="6" r="1" /></svg>,
-    "youtube": <svg {...common}><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" /><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" /></svg>
+    "youtube": <svg {...common}><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" /><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" /></svg>,
+    settings: <svg {...common}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>,
+    bell: <svg {...common}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>,
+    help: <svg {...common}><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
+    chart: <svg {...common}><line x1="12" y1="20" x2="12" y2="10" /><line x1="18" y1="20" x2="18" y2="4" /><line x1="6" y1="20" x2="6" y2="16" /></svg>,
+    palette: <svg {...common}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /><circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /><circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /><circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" /></svg>,
+    info: <svg {...common}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>,
+    shield: <svg {...common}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>,
+    logout: <svg {...common}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>,
+    target: <svg {...common}><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>,
+    heart: <svg {...common}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
   };
   return icons[name] || icons.play;
 }
@@ -531,15 +572,72 @@ function AppHeader({ isDark, setIsDark, navigate, path, fontScale = 'md', setFon
                           <small className={cx("block text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>{userEmail}</small>
                         </span>
                       </div>
-                      <div className="mt-2">
-                        {accountActions.map((action) => (
-                          <button key={action.label} type="button" role="menuitem" className="account-menu-item text-left" onClick={() => selectAccountAction(action.path)}>
-                            <span className={cx("account-menu-icon", isDark ? "text-brand-cyan" : "text-brand-teal")}><Icon name={action.icon} className="h-4 w-4" /></span>
-                            <span>
-                              <strong className={cx("block text-xs", isDark ? "text-white" : "text-brand-ink")}>{action.label}</strong>
-                              <small className={cx("block text-[10px]", isDark ? "text-brand-soft" : "text-brand-muted")}>{action.helper}</small>
-                            </span>
-                          </button>
+                      <div className="mt-2 max-h-[70vh] overflow-y-auto">
+                        {accountMenuSections.map((section) => (
+                          <div key={section.title} className="mb-1">
+                            <div className={cx("px-2 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft/60" : "text-brand-muted/60")}>
+                              {section.title}
+                            </div>
+                            {section.items.map((action) => {
+                              if (action.type === "theme") {
+                                return (
+                                  <button key={action.label} type="button" role="menuitem" className="account-menu-item text-left" onClick={() => setIsDark(!isDark)}>
+                                    <span className={cx("account-menu-icon", isDark ? "text-brand-cyan" : "text-brand-teal")}><Icon name={isDark ? "sun" : "moon"} className="h-4 w-4" /></span>
+                                    <span className="flex-1">
+                                      <strong className={cx("block text-xs", isDark ? "text-white" : "text-brand-ink")}>{isDark ? "Tema claro" : "Tema oscuro"}</strong>
+                                      <small className={cx("block text-[10px]", isDark ? "text-brand-soft" : "text-brand-muted")}>{isDark ? "Activar modo claro" : "Activar modo oscuro"}</small>
+                                    </span>
+                                    <span className={cx("ml-2 flex h-5 w-9 items-center rounded-full transition-colors", isDark ? "bg-brand-cyan" : "bg-brand-mist")}>
+                                      <span className={cx("h-4 w-4 rounded-full bg-white shadow transition-transform", isDark ? "translate-x-4" : "translate-x-0.5")} />
+                                    </span>
+                                  </button>
+                                );
+                              }
+                              if (action.type === "font") {
+                                return (
+                                  <div key={action.label} className="account-menu-item text-left">
+                                    <span className={cx("account-menu-icon", isDark ? "text-brand-cyan" : "text-brand-teal")}><Icon name={action.icon} className="h-4 w-4" /></span>
+                                    <span className="flex-1">
+                                      <strong className={cx("block text-xs", isDark ? "text-white" : "text-brand-ink")}>{action.label}</strong>
+                                      <div className="mt-1 flex gap-1">
+                                        {[
+                                          { key: 'sm', label: 'A' },
+                                          { key: 'md', label: 'A' },
+                                          { key: 'lg', label: 'A' },
+                                        ].map((opt, i) => (
+                                          <button
+                                            key={opt.key}
+                                            type="button"
+                                            onClick={() => setFontScale?.(opt.key)}
+                                            className={cx(
+                                              "flex h-6 w-7 items-center justify-center rounded-md text-xs font-bold transition-colors",
+                                              fontScale === opt.key
+                                                ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                                                : (isDark ? "bg-brand-deep text-brand-soft" : "bg-brand-cream text-brand-muted"),
+                                              i === 0 && "text-[10px]",
+                                              i === 1 && "text-xs",
+                                              i === 2 && "text-sm"
+                                            )}
+                                          >
+                                            {opt.label}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </span>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <button key={action.label} type="button" role="menuitem" className="account-menu-item text-left" onClick={() => selectAccountAction(action.path)}>
+                                  <span className={cx("account-menu-icon", action.danger ? "text-red-500" : isDark ? "text-brand-cyan" : "text-brand-teal")}><Icon name={action.icon} className="h-4 w-4" /></span>
+                                  <span className="flex-1">
+                                    <strong className={cx("block text-xs", action.danger ? "text-red-500" : isDark ? "text-white" : "text-brand-ink")}>{action.label}</strong>
+                                    <small className={cx("block text-[10px]", isDark ? "text-brand-soft" : "text-brand-muted")}>{action.helper}</small>
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
                         ))}
                       </div>
                     </div>
