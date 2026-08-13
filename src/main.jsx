@@ -687,6 +687,22 @@ function AppHeader({ isDark, setIsDark, navigate, path, fontScale = 'md', setFon
             </div>
 
             <div className="flex-1 overflow-y-auto px-5 py-5">
+              {/* Profile header — clickable to open profile page */}
+              <button
+                onClick={() => { navigate("/profile"); setMobileNavOpen(false); }}
+                className={cx(
+                  "mb-5 flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all hover:scale-[1.01]",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <span className={cx("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold", isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")}>{userInitials}</span>
+                <div className="min-w-0 flex-1">
+                  <p className={cx("truncate text-sm font-bold", isDark ? "text-white" : "text-[#1A2E3B]")}>{userName}</p>
+                  <p className={cx("truncate text-[11px]", isDark ? "text-brand-soft" : "text-[#607274]")}>{userEmail}</p>
+                </div>
+                <Icon name="chevron" className={cx("h-4 w-4 shrink-0 rotate-90", isDark ? "text-brand-soft" : "text-brand-muted")} />
+              </button>
+
               <span className={cx("mb-2 block text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-[#607274]")}>
                 Navegación
               </span>
@@ -709,6 +725,65 @@ function AppHeader({ isDark, setIsDark, navigate, path, fontScale = 'md', setFon
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Account section — same options as desktop profile menu */}
+              <span className={cx("mb-2 block text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-[#607274]")}>
+                Cuenta
+              </span>
+              <div className="mb-6 space-y-1">
+                {/* Mi perfil */}
+                <button
+                  onClick={() => { navigate("/profile"); setMobileNavOpen(false); }}
+                  className={cx(
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors",
+                    path === "/profile"
+                      ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                      : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-[#1A2E3B] hover:bg-[#F4EFE6]")
+                  )}
+                >
+                  <Icon name="user" className="h-4 w-4 shrink-0" />
+                  Mi perfil
+                </button>
+                {/* Logros */}
+                <button
+                  onClick={() => { navigate("/achievements"); setMobileNavOpen(false); }}
+                  className={cx(
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors",
+                    path === "/achievements"
+                      ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                      : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-[#1A2E3B] hover:bg-[#F4EFE6]")
+                  )}
+                >
+                  <Icon name="trophy" className="h-4 w-4 shrink-0" />
+                  Logros
+                </button>
+                {/* Centro de ayuda */}
+                <button
+                  onClick={() => { navigate("/help"); setMobileNavOpen(false); }}
+                  className={cx(
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors",
+                    path === "/help"
+                      ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                      : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-[#1A2E3B] hover:bg-[#F4EFE6]")
+                  )}
+                >
+                  <Icon name="help" className="h-4 w-4 shrink-0" />
+                  Centro de ayuda
+                </button>
+                {/* Acerca de */}
+                <button
+                  onClick={() => { navigate("/about"); setMobileNavOpen(false); }}
+                  className={cx(
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors",
+                    path === "/about"
+                      ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                      : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-[#1A2E3B] hover:bg-[#F4EFE6]")
+                  )}
+                >
+                  <Icon name="info" className="h-4 w-4 shrink-0" />
+                  Acerca de
+                </button>
               </div>
 
               <span className={cx("mb-2 block text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-[#607274]")}>
@@ -739,13 +814,6 @@ function AppHeader({ isDark, setIsDark, navigate, path, fontScale = 'md', setFon
             </div>
 
             <div className={cx("shrink-0 border-t px-5 py-4", isDark ? "border-brand-line" : "border-[#E8E4D8]")}>
-              <div className="mb-3 flex items-center gap-3">
-                <span className={cx("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold", isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")}>{userInitials}</span>
-                <div className="min-w-0 flex-1">
-                  <p className={cx("truncate text-xs font-bold", isDark ? "text-white" : "text-[#1A2E3B]")}>{userName}</p>
-                  <p className={cx("truncate text-[10px]", isDark ? "text-brand-soft" : "text-[#607274]")}>{userEmail}</p>
-                </div>
-              </div>
               <button
                 onClick={() => { signOut(); setMobileNavOpen(false); }}
                 className="btn-press w-full rounded-lg bg-brand-orange px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-orange/90"
