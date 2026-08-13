@@ -8,7 +8,7 @@ import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR } from "./utils/
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AuthPage from "./components/AuthPage";
 import EmailConfirmationPage from "./components/EmailConfirmationPage";
-import { updateSignProgress, updateModuleProgress, updateStreak, recordVideoView, updateWeeklyActivity, updatePracticeDays, getRecommendations, fetchPracticedSigns } from "./services/progressService";
+import { updateSignProgress, updateModuleProgress, updateStreak, recordVideoView, updateWeeklyActivity, updatePracticeDays, getRecommendations, fetchPracticedSigns, evaluateAchievements, getAchievementStats, ACHIEVEMENT_DEFS } from "./services/progressService";
 import { Analytics } from "@vercel/analytics/react";
 import { supabase } from "./lib/supabaseClient";
 
@@ -186,7 +186,7 @@ const accountMenuSections = [
     title: "Cuenta",
     items: [
       { label: "Mi perfil", helper: "Datos personales", icon: "user", path: "/profile" },
-      { label: "Logros", helper: "Insignias y estadísticas", icon: "trophy", path: "/learn" },
+      { label: "Logros", helper: "Insignias y estadísticas", icon: "trophy", path: "/achievements" },
     ],
   },
   {
@@ -1233,6 +1233,278 @@ function StatTile({ icon, value, label, color, isDark }) {
       </div>
       <div className={cx("stat-tile__value", isDark ? "text-white" : "text-[#1A2E3B]")}>{value}</div>
       <div className="stat-tile__label">{label}</div>
+    </div>
+  );
+}
+
+// Tier styling for achievement badges
+const TIER_STYLES = {
+  bronze: {
+    glow: 'shadow-[0_0_20px_rgba(205,127,50,0.4)]',
+    ring: 'ring-[#CD7F32]',
+    bg: 'bg-gradient-to-br from-[#CD7F32]/20 to-[#8B5A2B]/10',
+    text: 'text-[#CD7F32]',
+    label: 'Bronce',
+  },
+  silver: {
+    glow: 'shadow-[0_0_20px_rgba(192,192,192,0.4)]',
+    ring: 'ring-[#C0C0C0]',
+    bg: 'bg-gradient-to-br from-[#C0C0C0]/20 to-[#808080]/10',
+    text: 'text-[#A8A8A8]',
+    label: 'Plata',
+  },
+  gold: {
+    glow: 'shadow-[0_0_24px_rgba(255,215,0,0.5)]',
+    ring: 'ring-[#FFD700]',
+    bg: 'bg-gradient-to-br from-[#FFD700]/25 to-[#DAA520]/10',
+    text: 'text-[#FFD700]',
+    label: 'Oro',
+  },
+};
+
+function AchievementsPage({ isDark, navigate }) {
+  const { user, userProgress, moduleProgress } = useAuth();
+  const [achievements, setAchievements] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadAchievements = async () => {
+      if (!user?.id) return;
+      setLoading(true);
+      const totalModules = modules.length;
+      const s = await getAchievementStats(user.id, userProgress, moduleProgress, totalModules);
+      if (cancelled) return;
+      setStats(s);
+      setAchievements(evaluateAchievements(s));
+      setLoading(false);
+    };
+    loadAchievements();
+    return () => { cancelled = true; };
+  }, [user?.id, userProgress, moduleProgress]);
+
+  const unlockedCount = achievements.filter(a => a.unlocked).length;
+  const totalCount = achievements.length;
+  const progressPct = totalCount > 0 ? Math.round((unlockedCount / totalCount) * 100) : 0;
+
+  // Group achievements by category (based on icon)
+  const categories = [
+    { key: 'flame',  title: 'Rachas',         icon: 'flame',  items: achievements.filter(a => a.icon === 'flame') },
+    { key: 'book',   title: 'Vocabulario',    icon: 'book',   items: achievements.filter(a => a.icon === 'book') },
+    { key: 'trophy', title: 'Módulos',        icon: 'trophy', items: achievements.filter(a => a.icon === 'trophy') },
+    { key: 'target', title: 'Precisión',      icon: 'target', items: achievements.filter(a => a.icon === 'target') },
+    { key: 'check',  title: 'Constancia',     icon: 'check',  items: achievements.filter(a => a.icon === 'check') },
+    { key: 'chart',  title: 'Tiempo',         icon: 'chart',  items: achievements.filter(a => a.icon === 'chart') },
+  ];
+
+  return (
+    <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+        {/* Back button */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          className={cx(
+            "btn-press group flex items-center gap-2 text-sm font-medium transition-all duration-200",
+            isDark ? "text-brand-soft hover:text-white" : "text-brand-muted hover:text-brand-ink"
+          )}
+        >
+          <Icon name="arrow" className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-1" />
+          Volver al inicio
+        </button>
+
+        {/* Header */}
+        <div className="mb-8 mt-4">
+          <div className="mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">— Logros</span>
+          </div>
+          <h1 className={cx("font-display text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
+            Insignias y <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>desafíos</span>
+          </h1>
+          <p className={cx("mt-2 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>
+            Supera retos, mantén tu racha y desbloquea insignias mientras aprendes LSM.
+          </p>
+        </div>
+
+        {/* Progress summary card */}
+        <div className={cx(
+          "mb-8 rounded-3xl border p-6 backdrop-blur-xl sm:p-8",
+          isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+        )}>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-baseline gap-2">
+                <span className={cx("font-display text-4xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+                  {unlockedCount}
+                </span>
+                <span className={cx("text-lg font-bold", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                  / {totalCount}
+                </span>
+                <span className={cx("ml-2 text-sm font-semibold", isDark ? "text-brand-cyan" : "text-brand-teal")}>
+                  {progressPct}% completado
+                </span>
+              </div>
+              <p className={cx("mt-1 text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                {unlockedCount === 0 ? '¡Empieza a practicar para desbloquear tu primera insignia!' :
+                 unlockedCount < 5 ? '¡Vas por buen camino! Sigue practicando.' :
+                 unlockedCount < 10 ? '¡Excelente progreso! Cada vez más cerca del oro.' :
+                 '¡Eres un maestro del lenguaje de señas! 🏆'}
+              </p>
+            </div>
+            {/* Progress ring */}
+            <div className="relative h-20 w-20 flex-shrink-0">
+              <svg className="h-full w-full -rotate-90" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="34" fill="none" stroke={isDark ? "rgba(92,196,214,0.15)" : "rgba(13,92,111,0.12)"} strokeWidth="6" />
+                <circle
+                  cx="40" cy="40" r="34" fill="none"
+                  stroke={isDark ? "#2aabb8" : "#0d5c6f"}
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 34}
+                  strokeDashoffset={2 * Math.PI * 34 * (1 - progressPct / 100)}
+                  className="transition-all duration-700"
+                />
+              </svg>
+              <div className={cx("absolute inset-0 flex items-center justify-center text-sm font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+                {progressPct}%
+              </div>
+            </div>
+          </div>
+
+          {/* Quick stats */}
+          {stats && !loading && (
+            <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-6">
+              {[
+                { label: 'Racha', value: `${stats.streakDays}d`, icon: 'flame' },
+                { label: 'Señas', value: stats.totalSigns, icon: 'book' },
+                { label: 'Módulos', value: `${stats.modulesCompleted}/${stats.totalModules}`, icon: 'trophy' },
+                { label: 'Precisión', value: `${Math.round(stats.avgAccuracy * 100)}%`, icon: 'target' },
+                { label: 'Días', value: stats.practiceDays, icon: 'check' },
+                { label: 'Tiempo', value: `${Math.round(stats.totalPracticeTime / 60)}m`, icon: 'chart' },
+              ].map((s) => (
+                <div key={s.label} className={cx("rounded-xl p-2.5 text-center", isDark ? "bg-brand-deep/50" : "bg-brand-cream/50")}>
+                  <Icon name={s.icon} className={cx("mx-auto mb-1 h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+                  <div className={cx("text-sm font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{s.value}</div>
+                  <div className={cx("text-[9px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Achievement categories */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-teal border-t-transparent"></div>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {categories.map((cat) => cat.items.length > 0 && (
+              <section key={cat.key}>
+                {/* Category header */}
+                <div className="mb-4 flex items-center gap-2">
+                  <div className={cx(
+                    "flex h-8 w-8 items-center justify-center rounded-lg",
+                    isDark ? "bg-brand-card" : "bg-brand-cream"
+                  )}>
+                    <Icon name={cat.icon} className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+                  </div>
+                  <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+                    {cat.title}
+                  </h2>
+                  <span className={cx("text-xs font-semibold", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                    {cat.items.filter(a => a.unlocked).length}/{cat.items.length}
+                  </span>
+                </div>
+
+                {/* Badge grid */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {cat.items.map((achievement) => {
+                    const tier = TIER_STYLES[achievement.tier] || TIER_STYLES.bronze;
+                    return (
+                      <div
+                        key={achievement.id}
+                        className={cx(
+                          "relative overflow-hidden rounded-2xl border p-5 transition-all duration-300",
+                          achievement.unlocked
+                            ? cx("border-transparent ring-2", tier.ring, tier.glow, isDark ? "bg-brand-card/80" : "bg-white/80")
+                            : cx("border-dashed", isDark ? "border-brand-line/40 bg-brand-card/20" : "border-brand-mist/40 bg-white/20")
+                        )}
+                      >
+                        {/* Tier badge */}
+                        <div className={cx(
+                          "absolute right-3 top-3 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                          achievement.unlocked
+                            ? cx(tier.bg, tier.text)
+                            : (isDark ? "bg-brand-deep/50 text-brand-soft/40" : "bg-brand-cream/50 text-brand-muted/40")
+                        )}>
+                          {tier.label}
+                        </div>
+
+                        <div className="flex items-start gap-4">
+                          {/* Icon */}
+                          <div className={cx(
+                            "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl transition-all",
+                            achievement.unlocked
+                              ? cx(tier.bg, "ring-2", tier.ring)
+                              : (isDark ? "bg-brand-deep/50" : "bg-brand-cream/50")
+                          )}>
+                            <Icon
+                              name={achievement.icon}
+                              className={cx(
+                                "h-7 w-7",
+                                achievement.unlocked ? tier.text : (isDark ? "text-brand-soft/30" : "text-brand-muted/30")
+                              )}
+                            />
+                          </div>
+
+                          {/* Text */}
+                          <div className="flex-1 pt-0.5">
+                            <h3 className={cx(
+                              "text-sm font-extrabold",
+                              achievement.unlocked
+                                ? (isDark ? "text-white" : "text-brand-ink")
+                                : (isDark ? "text-brand-soft/50" : "text-brand-muted/50")
+                            )}>
+                              {achievement.title}
+                            </h3>
+                            <p className={cx(
+                              "mt-1 text-xs leading-snug",
+                              achievement.unlocked
+                                ? (isDark ? "text-brand-soft" : "text-brand-muted")
+                                : (isDark ? "text-brand-soft/40" : "text-brand-muted/40")
+                            )}>
+                              {achievement.desc}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Status footer */}
+                        <div className={cx(
+                          "mt-4 flex items-center gap-1.5 border-t pt-3 text-xs font-bold",
+                          achievement.unlocked ? "border-green-500/20 text-green-500" : (isDark ? "border-brand-line/30 text-brand-soft/40" : "border-brand-mist/30 text-brand-muted/40")
+                        )}>
+                          {achievement.unlocked ? (
+                            <>
+                              <Icon name="check" className="h-3.5 w-3.5" />
+                              Desbloqueada
+                            </>
+                          ) : (
+                            <>
+                              <Icon name="lock" className="h-3.5 w-3.5" />
+                              Bloqueada
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 }
@@ -4038,6 +4310,15 @@ function App() {
       <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
         <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
         <ProfilePage isDark={isDark} navigate={navigate} />
+      </div>
+    );
+  }
+
+  if (path === "/achievements") {
+    return (
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
+        <AchievementsPage isDark={isDark} navigate={navigate} />
       </div>
     );
   }
