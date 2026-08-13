@@ -8,7 +8,7 @@ import { fingerStates, scoreTarget, detectBestLetter, MATCH_THR } from "./utils/
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import AuthPage from "./components/AuthPage";
 import EmailConfirmationPage from "./components/EmailConfirmationPage";
-import { updateSignProgress, updateModuleProgress, updateStreak, recordVideoView, updateWeeklyActivity, updatePracticeDays, getRecommendations, fetchPracticedSigns } from "./services/progressService";
+import { updateSignProgress, updateModuleProgress, updateStreak, recordVideoView, updateWeeklyActivity, updatePracticeDays, getRecommendations, fetchPracticedSigns, evaluateAchievements, getAchievementStats, ACHIEVEMENT_DEFS } from "./services/progressService";
 import { Analytics } from "@vercel/analytics/react";
 import { supabase } from "./lib/supabaseClient";
 
@@ -19,6 +19,15 @@ const navItems = [
   { path: "/lesson", label: "Lecciones", icon: "book" },
   { path: "/practice", label: "Práctica", icon: "camera" }
 ];
+
+// ─── Contact info —  ───────────────
+const CONTACT_INFO = {
+  email: "senasavocesac@gmail.com",
+  whatsapp: "+52 645 115 9917",
+  whatsappLink: "https://wa.me/526451159917",
+  instagram: "@senasavocesac",
+  instagramLink: "https://instagram.com/senasavoceac",
+};
 
 const modules = [ALPHABET_LESSON, ...GLOSARIO_LESSONS].map((lesson, i) => ({
   id: lesson.id,
@@ -181,11 +190,42 @@ const dailyQuest = [
   { task: "Graba una práctica corta", done: false }
 ];
 
-const accountActions = [
-  { label: "Mi perfil", helper: "Datos y preferencias", icon: "user", path: "/dashboard" },
-  { label: "Progreso", helper: "Racha y módulos", icon: "trophy", path: "/learn" },
-  { label: "Práctica", helper: "Abrir cámara", icon: "camera", path: "/practice" },
-  { label: "Cerrar sesión", helper: "Volver al acceso", icon: "lock", path: "/" }
+const accountMenuSections = [
+  {
+    title: "Cuenta",
+    items: [
+      { label: "Mi perfil", helper: "Datos personales", icon: "user", path: "/profile" },
+      { label: "Logros", helper: "Insignias y estadísticas", icon: "trophy", path: "/achievements" },
+    ],
+  },
+  {
+    title: "Aprendizaje",
+    items: [
+      { label: "Lecciones", helper: "Continuar aprendiendo", icon: "book", path: "/lesson" },
+      { label: "Practicar", helper: "Abrir cámara", icon: "camera", path: "/practice" },
+      { label: "Mi progreso", helper: "Racha y módulos", icon: "chart", path: "/learn" },
+    ],
+  },
+  {
+    title: "Preferencias",
+    items: [
+      { type: "theme", label: "Tema oscuro", helper: "Cambiar apariencia", icon: "moon" },
+      { type: "font", label: "Tamaño de texto", helper: "Pequeño · Mediano · Grande", icon: "palette" },
+    ],
+  },
+  {
+    title: "Ayuda",
+    items: [
+      { label: "Centro de ayuda", helper: "Guías y tutoriales", icon: "help", path: "/help" },
+      { label: "Acerca de", helper: "Sobre la app", icon: "info", path: "/about" },
+    ],
+  },
+  {
+    title: "Sesión",
+    items: [
+      { label: "Cerrar sesión", helper: "Volver al acceso", icon: "logout", path: "/", danger: true },
+    ],
+  },
 ];
 
 const LOGO_SRC = "/logo-senas-a-voces-crop.png";
@@ -288,7 +328,17 @@ function Icon({ name, className = "h-5 w-5" }) {
     "phone": <svg {...common}><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" /></svg>,
     "computer": <svg {...common}><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M6 17h12M12 17v4" /></svg>,
     "instagram": <svg {...common}><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="3" /><circle cx="18" cy="6" r="1" /></svg>,
-    "youtube": <svg {...common}><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" /><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" /></svg>
+    "youtube": <svg {...common}><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" /><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" /></svg>,
+    settings: <svg {...common}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>,
+    bell: <svg {...common}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>,
+    help: <svg {...common}><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
+    chart: <svg {...common}><line x1="12" y1="20" x2="12" y2="10" /><line x1="18" y1="20" x2="18" y2="4" /><line x1="6" y1="20" x2="6" y2="16" /></svg>,
+    palette: <svg {...common}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /><circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /><circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /><circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" /></svg>,
+    info: <svg {...common}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>,
+    shield: <svg {...common}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>,
+    logout: <svg {...common}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>,
+    target: <svg {...common}><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>,
+    heart: <svg {...common}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
   };
   return icons[name] || icons.play;
 }
@@ -531,15 +581,72 @@ function AppHeader({ isDark, setIsDark, navigate, path, fontScale = 'md', setFon
                           <small className={cx("block text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>{userEmail}</small>
                         </span>
                       </div>
-                      <div className="mt-2">
-                        {accountActions.map((action) => (
-                          <button key={action.label} type="button" role="menuitem" className="account-menu-item text-left" onClick={() => selectAccountAction(action.path)}>
-                            <span className={cx("account-menu-icon", isDark ? "text-brand-cyan" : "text-brand-teal")}><Icon name={action.icon} className="h-4 w-4" /></span>
-                            <span>
-                              <strong className={cx("block text-xs", isDark ? "text-white" : "text-brand-ink")}>{action.label}</strong>
-                              <small className={cx("block text-[10px]", isDark ? "text-brand-soft" : "text-brand-muted")}>{action.helper}</small>
-                            </span>
-                          </button>
+                      <div className="mt-2 max-h-[70vh] overflow-y-auto">
+                        {accountMenuSections.map((section) => (
+                          <div key={section.title} className="mb-1">
+                            <div className={cx("px-2 py-1 text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft/60" : "text-brand-muted/60")}>
+                              {section.title}
+                            </div>
+                            {section.items.map((action) => {
+                              if (action.type === "theme") {
+                                return (
+                                  <button key={action.label} type="button" role="menuitem" className="account-menu-item text-left" onClick={() => setIsDark(!isDark)}>
+                                    <span className={cx("account-menu-icon", isDark ? "text-brand-cyan" : "text-brand-teal")}><Icon name={isDark ? "sun" : "moon"} className="h-4 w-4" /></span>
+                                    <span className="flex-1">
+                                      <strong className={cx("block text-xs", isDark ? "text-white" : "text-brand-ink")}>{isDark ? "Tema claro" : "Tema oscuro"}</strong>
+                                      <small className={cx("block text-[10px]", isDark ? "text-brand-soft" : "text-brand-muted")}>{isDark ? "Activar modo claro" : "Activar modo oscuro"}</small>
+                                    </span>
+                                    <span className={cx("ml-2 flex h-5 w-9 items-center rounded-full transition-colors", isDark ? "bg-brand-cyan" : "bg-brand-mist")}>
+                                      <span className={cx("h-4 w-4 rounded-full bg-white shadow transition-transform", isDark ? "translate-x-4" : "translate-x-0.5")} />
+                                    </span>
+                                  </button>
+                                );
+                              }
+                              if (action.type === "font") {
+                                return (
+                                  <div key={action.label} className="account-menu-item text-left">
+                                    <span className={cx("account-menu-icon", isDark ? "text-brand-cyan" : "text-brand-teal")}><Icon name={action.icon} className="h-4 w-4" /></span>
+                                    <span className="flex-1">
+                                      <strong className={cx("block text-xs", isDark ? "text-white" : "text-brand-ink")}>{action.label}</strong>
+                                      <div className="mt-1 flex gap-1">
+                                        {[
+                                          { key: 'sm', label: 'A' },
+                                          { key: 'md', label: 'A' },
+                                          { key: 'lg', label: 'A' },
+                                        ].map((opt, i) => (
+                                          <button
+                                            key={opt.key}
+                                            type="button"
+                                            onClick={() => setFontScale?.(opt.key)}
+                                            className={cx(
+                                              "flex h-6 w-7 items-center justify-center rounded-md text-xs font-bold transition-colors",
+                                              fontScale === opt.key
+                                                ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                                                : (isDark ? "bg-brand-deep text-brand-soft" : "bg-brand-cream text-brand-muted"),
+                                              i === 0 && "text-[10px]",
+                                              i === 1 && "text-xs",
+                                              i === 2 && "text-sm"
+                                            )}
+                                          >
+                                            {opt.label}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </span>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <button key={action.label} type="button" role="menuitem" className="account-menu-item text-left" onClick={() => selectAccountAction(action.path)}>
+                                  <span className={cx("account-menu-icon", action.danger ? "text-red-500" : isDark ? "text-brand-cyan" : "text-brand-teal")}><Icon name={action.icon} className="h-4 w-4" /></span>
+                                  <span className="flex-1">
+                                    <strong className={cx("block text-xs", action.danger ? "text-red-500" : isDark ? "text-white" : "text-brand-ink")}>{action.label}</strong>
+                                    <small className={cx("block text-[10px]", isDark ? "text-brand-soft" : "text-brand-muted")}>{action.helper}</small>
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -580,6 +687,22 @@ function AppHeader({ isDark, setIsDark, navigate, path, fontScale = 'md', setFon
             </div>
 
             <div className="flex-1 overflow-y-auto px-5 py-5">
+              {/* Profile header — clickable to open profile page */}
+              <button
+                onClick={() => { navigate("/profile"); setMobileNavOpen(false); }}
+                className={cx(
+                  "mb-5 flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all hover:scale-[1.01]",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <span className={cx("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-bold", isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")}>{userInitials}</span>
+                <div className="min-w-0 flex-1">
+                  <p className={cx("truncate text-sm font-bold", isDark ? "text-white" : "text-[#1A2E3B]")}>{userName}</p>
+                  <p className={cx("truncate text-[11px]", isDark ? "text-brand-soft" : "text-[#607274]")}>{userEmail}</p>
+                </div>
+                <Icon name="chevron" className={cx("h-4 w-4 shrink-0 rotate-90", isDark ? "text-brand-soft" : "text-brand-muted")} />
+              </button>
+
               <span className={cx("mb-2 block text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-[#607274]")}>
                 Navegación
               </span>
@@ -602,6 +725,65 @@ function AppHeader({ isDark, setIsDark, navigate, path, fontScale = 'md', setFon
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Account section — same options as desktop profile menu */}
+              <span className={cx("mb-2 block text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-[#607274]")}>
+                Cuenta
+              </span>
+              <div className="mb-6 space-y-1">
+                {/* Mi perfil */}
+                <button
+                  onClick={() => { navigate("/profile"); setMobileNavOpen(false); }}
+                  className={cx(
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors",
+                    path === "/profile"
+                      ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                      : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-[#1A2E3B] hover:bg-[#F4EFE6]")
+                  )}
+                >
+                  <Icon name="user" className="h-4 w-4 shrink-0" />
+                  Mi perfil
+                </button>
+                {/* Logros */}
+                <button
+                  onClick={() => { navigate("/achievements"); setMobileNavOpen(false); }}
+                  className={cx(
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors",
+                    path === "/achievements"
+                      ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                      : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-[#1A2E3B] hover:bg-[#F4EFE6]")
+                  )}
+                >
+                  <Icon name="trophy" className="h-4 w-4 shrink-0" />
+                  Logros
+                </button>
+                {/* Centro de ayuda */}
+                <button
+                  onClick={() => { navigate("/help"); setMobileNavOpen(false); }}
+                  className={cx(
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors",
+                    path === "/help"
+                      ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                      : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-[#1A2E3B] hover:bg-[#F4EFE6]")
+                  )}
+                >
+                  <Icon name="help" className="h-4 w-4 shrink-0" />
+                  Centro de ayuda
+                </button>
+                {/* Acerca de */}
+                <button
+                  onClick={() => { navigate("/about"); setMobileNavOpen(false); }}
+                  className={cx(
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-bold transition-colors",
+                    path === "/about"
+                      ? (isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")
+                      : (isDark ? "text-brand-soft hover:bg-brand-card" : "text-[#1A2E3B] hover:bg-[#F4EFE6]")
+                  )}
+                >
+                  <Icon name="info" className="h-4 w-4 shrink-0" />
+                  Acerca de
+                </button>
               </div>
 
               <span className={cx("mb-2 block text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-[#607274]")}>
@@ -632,13 +814,6 @@ function AppHeader({ isDark, setIsDark, navigate, path, fontScale = 'md', setFon
             </div>
 
             <div className={cx("shrink-0 border-t px-5 py-4", isDark ? "border-brand-line" : "border-[#E8E4D8]")}>
-              <div className="mb-3 flex items-center gap-3">
-                <span className={cx("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold", isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white")}>{userInitials}</span>
-                <div className="min-w-0 flex-1">
-                  <p className={cx("truncate text-xs font-bold", isDark ? "text-white" : "text-[#1A2E3B]")}>{userName}</p>
-                  <p className={cx("truncate text-[10px]", isDark ? "text-brand-soft" : "text-[#607274]")}>{userEmail}</p>
-                </div>
-              </div>
               <button
                 onClick={() => { signOut(); setMobileNavOpen(false); }}
                 className="btn-press w-full rounded-lg bg-brand-orange px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand-orange/90"
@@ -1135,6 +1310,1115 @@ function StatTile({ icon, value, label, color, isDark }) {
       </div>
       <div className={cx("stat-tile__value", isDark ? "text-white" : "text-[#1A2E3B]")}>{value}</div>
       <div className="stat-tile__label">{label}</div>
+    </div>
+  );
+}
+
+// Tier styling for achievement badges
+// FAQ data
+const FAQ_ITEMS = [
+  {
+    q: "¿Cómo empiezo a aprender?",
+    a: "Ve a la pestaña Lecciones, selecciona el primer módulo (Abecedario) y toca una seña. Mira el video de referencia, imita la seña frente a la cámara y mantén la pose hasta que se confirme. Cuando completes todas las señas de un módulo, se desbloqueará el siguiente.",
+  },
+  {
+    q: "¿Por qué no se detecta mi mano?",
+    a: "Asegúrate de estar en un lugar bien iluminado, con la mano dentro del encuadre de la cámara y fondo preferentemente uniforme. Evita ropa del mismo color que tu mano. Si el problema persiste, recarga la página y permite el acceso a la cámara nuevamente.",
+  },
+  {
+    q: "¿Cómo funciona la racha diaria?",
+    a: "Tu racha aumenta cada día que practicas al menos una seña. Si dejas de practicar un día, la racha se reinicia. Mantén tu racha para desbloquear insignias especiales.",
+  },
+  {
+    q: "¿Puedo practicar sin cámara?",
+    a: "Sí. Puedes ver los videos de referencia y estudiar las señas visualmente. Sin embargo, para registrar progreso y completar módulos necesitas practicar con la cámara.",
+  },
+  {
+    q: "¿Se guarda mi progreso automáticamente?",
+    a: "Sí. Cada vez que completas una seña, tu progreso se guarda en tu cuenta. Puedes continuar desde donde lo dejaste en cualquier dispositivo iniciando sesión.",
+  },
+  {
+    q: "¿Qué son las insignias?",
+    a: "Las insignias son reconocimientos que desbloqueas al cumplir ciertos retos: mantener rachas, aprender cierta cantidad de señas, alcanzar precisión alta, entre otros. Ve a la sección Logros para verlas todas.",
+  },
+  {
+    q: "¿Puedo cambiar el tamaño del texto?",
+    a: "Sí. Toca tu foto de perfil en la esquina superior derecha, ve a Preferencias y selecciona el tamaño de texto que prefieras: pequeño, mediano o grande.",
+  },
+  {
+    q: "¿La app funciona sin conexión?",
+    a: "Necesitas conexión a internet para cargar los videos de referencia y sincronizar tu progreso. Las señas que ya hayas practicado quedan registradas en tu cuenta.",
+  },
+];
+
+const TROUBLESHOOTING_ITEMS = [
+  {
+    title: "La cámara no se abre",
+    steps: [
+      "Verifica que permitiste el acceso a la cámara en tu navegador.",
+      "Cierra otras apps que puedan estar usando la cámara (Zoom, Meet, etc.).",
+      "Recarga la página e inténtalo de nuevo.",
+      "Si usas iOS Safari, ve a Ajustes > Safari > Cámara y selecciona 'Permitir'.",
+    ],
+  },
+  {
+    title: "El video de referencia no carga",
+    steps: [
+      "Verifica tu conexión a internet.",
+      "Espera unos segundos — YouTube puede tardar en cargar.",
+      "Si el video sigue sin cargar, puede que no esté disponible en tu región.",
+      "Reporta el problema si persiste usando el email de soporte.",
+    ],
+  },
+  {
+    title: "Mi progreso no se guarda",
+    steps: [
+      "Asegúrate de estar conectado a internet al practicar.",
+      "Cierra sesión y vuelve a entrar para forzar la sincronización.",
+      "Verifica que no estés usando modo incógnito (puede perder datos).",
+      "Si el problema continúa, contacta a soporte con tu email de cuenta.",
+    ],
+  },
+  {
+    title: "La detección es muy lenta",
+    steps: [
+      "Cierra pestañas innecesarias del navegador para liberar memoria.",
+      "Usa un dispositivo con mejor cámara si es posible.",
+      "Asegúrate de tener buena iluminación para acelerar el procesamiento.",
+      "Evita fondos con mucho movimiento o ruido visual.",
+    ],
+  },
+];
+
+const LSM_FACTS = [
+  { icon: "book",   title: "Lengua oficial",       desc: "La LSM fue reconocida como lengua oficial en México en 2005, junto con el español y las lenguas indígenas." },
+  { icon: "user",   title: "Comunidad sorda",       desc: "Más de 2 millones de personas sordas viven en México. La LSM es su lengua materna." },
+  { icon: "sparkles", title: "No es universal",    desc: "Cada país tiene su propia lengua de señas. La LSM es distinta de la ASL (americana) y la LSE (española)." },
+  { icon: "heart",  title: "Más que señas",         desc: "La LSM tiene su propia gramática, sintaxis y expresiones faciales. Es una lengua completa y rica." },
+  { icon: "target", title: "Inclusión",             desc: "Aprender LSM rompe barreras comunicativas y fomenta una sociedad más inclusiva." },
+  { icon: "trophy", title: "Cultura sorda",         desc: "La comunidad sorda tiene una cultura vibrante con tradiciones, arte y literatura propias." },
+];
+
+function AboutPage({ isDark, navigate }) {
+  const totalSigns = modules.reduce((sum, m) => sum + m.signs, 0);
+
+  const features = [
+    { icon: "camera",   title: "Detección con cámara",   desc: "Practica señas en tiempo real con detección de manos por IA. Recibe feedback inmediato sobre tu precisión." },
+    { icon: "book",     title: "Lecciones estructuradas", desc: "Módulos progresivos desde el abecedario hasta vocabulario especializado en familia, salud, tecnología y más." },
+    { icon: "youtube",  title: "Videos de referencia",    desc: "Cada seña incluye un video de YouTube para que observes el movimiento correcto antes de practicar." },
+    { icon: "trophy",   title: "Sistema de logros",       desc: "Desbloquea insignias de bronce, plata y oro mientras superas retos de racha, precisión y constancia." },
+    { icon: "flame",    title: "Rachas diarias",          desc: "Mantén tu motivación con rachas que crecen cada día que practicas. La consistencia es clave." },
+    { icon: "chart",    title: "Estadísticas reales",     desc: "Visualiza tu progreso con mapas de calor, gráficas de actividad y métricas detalladas de tu aprendizaje." },
+  ];
+
+  const techStack = [
+    { name: "React",      desc: "Interfaz de usuario" },
+    { name: "Vite",       desc: "Build y desarrollo" },
+    { name: "Tailwind",   desc: "Estilos y diseño" },
+    { name: "Supabase",   desc: "Autenticación y datos" },
+    { name: "MediaPipe",  desc: "Detección de manos" },
+    { name: "YouTube",    desc: "Videos de referencia" },
+  ];
+
+  const values = [
+    { icon: "heart",   title: "Inclusión",       desc: "Construir puentes entre la comunidad sorda y oyente a través del aprendizaje mutuo." },
+    { icon: "shield",  title: "Accesibilidad",   desc: "Tecnología al servicio de todos, sin barreras de costo ni ubicación." },
+    { icon: "sparkles", title: "Excelencia",     desc: "Contenido pedagógico de calidad con detección precisa y feedback claro." },
+    { icon: "target",  title: "Impacto real",    desc: "Cada seña aprendida es una nueva conversación posible." },
+  ];
+
+  return (
+    <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
+        {/* Back button */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          className={cx(
+            "btn-press group flex items-center gap-2 text-sm font-medium transition-all duration-200",
+            isDark ? "text-brand-soft hover:text-white" : "text-brand-muted hover:text-brand-ink"
+          )}
+        >
+          <Icon name="arrow" className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-1" />
+          Volver al inicio
+        </button>
+
+        {/* Hero section */}
+        <div className="mb-10 mt-6 flex flex-col items-center text-center">
+          <img
+            src={LOGO_SRC}
+            alt="Señas a Voces Academy"
+            className={cx("h-auto w-48 object-contain sm:w-64", isDark && "logo-on-dark")}
+          />
+          <div className="mt-4">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">— Acerca de</span>
+          </div>
+          <h1 className={cx("mt-2 font-display text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
+            Señas a <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>Voces</span> Academy
+          </h1>
+          <p className={cx("mt-3 max-w-2xl text-sm leading-relaxed sm:text-base", isDark ? "text-brand-soft" : "text-brand-muted")}>
+            Una plataforma de aprendizaje de la Lengua de Señas Mexicana (LSM) que combina tecnología de
+            visión por computadora, contenido pedagógico estructurado y gamificación para hacer que aprender
+            señas sea accesible, divertido y efectivo.
+          </p>
+
+          {/* Stats badges */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <div className={cx(
+              "flex items-center gap-2 rounded-full border px-4 py-2",
+              isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+            )}>
+              <Icon name="book" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+              <span className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{modules.length} módulos</span>
+            </div>
+            <div className={cx(
+              "flex items-center gap-2 rounded-full border px-4 py-2",
+              isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+            )}>
+              <Icon name="sparkles" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+              <span className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{totalSigns}+ señas</span>
+            </div>
+            <div className={cx(
+              "flex items-center gap-2 rounded-full border px-4 py-2",
+              isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+            )}>
+              <Icon name="camera" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+              <span className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>Detección IA</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Mission & Vision */}
+        <div className="mb-8 grid gap-4 sm:grid-cols-2">
+          <div className={cx(
+            "rounded-3xl border p-6 backdrop-blur-xl sm:p-8",
+            isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+          )}>
+            <div className={cx(
+              "mb-3 flex h-10 w-10 items-center justify-center rounded-xl",
+              isDark ? "bg-brand-cyan/15" : "bg-brand-teal/10"
+            )}>
+              <Icon name="target" className={cx("h-5 w-5", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>Misión</h2>
+            <p className={cx("mt-2 text-sm leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>
+              Democratizar el aprendizaje de la Lengua de Señas Mexicana mediante tecnología accesible,
+              eliminando barreras comunicativas y construyendo una sociedad más inclusiva donde cada
+              persona pueda expresarse y ser entendida.
+            </p>
+          </div>
+          <div className={cx(
+            "rounded-3xl border p-6 backdrop-blur-xl sm:p-8",
+            isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+          )}>
+            <div className={cx(
+              "mb-3 flex h-10 w-10 items-center justify-center rounded-xl",
+              isDark ? "bg-brand-orange/15" : "bg-brand-orange/10"
+            )}>
+              <Icon name="sparkles" className="h-5 w-5 text-brand-orange" />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>Visión</h2>
+            <p className={cx("mt-2 text-sm leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>
+              Ser la plataforma líder en Latinoamérica para el aprendizaje de lenguas de señas, impulsada
+              por inteligencia artificial y diseño centrado en el usuario, formando una comunidad de
+              millones de personas que se comunican con las manos y el corazón.
+            </p>
+          </div>
+        </div>
+
+        {/* Features */}
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <div className={cx("flex h-8 w-8 items-center justify-center rounded-lg", isDark ? "bg-brand-card" : "bg-brand-cream")}>
+              <Icon name="sparkles" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+              Características principales
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((feat, i) => (
+              <div
+                key={i}
+                className={cx(
+                  "rounded-2xl border p-5 backdrop-blur-xl transition-all hover:scale-[1.02]",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <div className={cx(
+                  "mb-3 flex h-10 w-10 items-center justify-center rounded-xl",
+                  isDark ? "bg-brand-cyan/15" : "bg-brand-teal/10"
+                )}>
+                  <Icon name={feat.icon} className={cx("h-5 w-5", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+                </div>
+                <h3 className={cx("text-sm font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{feat.title}</h3>
+                <p className={cx("mt-1.5 text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>{feat.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Values */}
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <div className={cx("flex h-8 w-8 items-center justify-center rounded-lg", isDark ? "bg-brand-card" : "bg-brand-cream")}>
+              <Icon name="heart" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+              Nuestros valores
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {values.map((val, i) => (
+              <div
+                key={i}
+                className={cx(
+                  "rounded-2xl border p-5 text-center backdrop-blur-xl transition-all hover:scale-[1.02]",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <div className={cx(
+                  "mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl",
+                  isDark ? "bg-brand-cyan/15" : "bg-brand-teal/10"
+                )}>
+                  <Icon name={val.icon} className={cx("h-6 w-6", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+                </div>
+                <h3 className={cx("text-sm font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{val.title}</h3>
+                <p className={cx("mt-1.5 text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>{val.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Tech stack */}
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <div className={cx("flex h-8 w-8 items-center justify-center rounded-lg", isDark ? "bg-brand-card" : "bg-brand-cream")}>
+              <Icon name="settings" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+              Construido con
+            </h2>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {techStack.map((tech) => (
+              <div
+                key={tech.name}
+                className={cx(
+                  "flex items-center gap-2 rounded-xl border px-4 py-2.5",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <span className={cx("text-sm font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{tech.name}</span>
+                <span className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>{tech.desc}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Contact CTA */}
+        <div className={cx(
+          "rounded-3xl border p-6 text-center backdrop-blur-xl sm:p-8",
+          isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+        )}>
+          <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+            ¿Tienes preguntas o sugerencias?
+          </h2>
+          <p className={cx("mt-2 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>
+            Nos encantaría escucharte. Contáctanos por cualquiera de estos medios:
+          </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={`mailto:${CONTACT_INFO.email}`}
+              className={cx(
+                "btn-press flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-all",
+                isDark ? "bg-brand-cyan text-brand-deep hover:bg-brand-cyan/90" : "bg-brand-teal text-white hover:bg-brand-teal/90"
+              )}
+            >
+              <Icon name="mail" className="h-4 w-4" />
+              {CONTACT_INFO.email}
+            </a>
+            <a
+              href={CONTACT_INFO.whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-press flex items-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-green-500/90"
+            >
+              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z" /></svg>
+              WhatsApp
+            </a>
+            <a
+              href={CONTACT_INFO.instagramLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-press flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2.5 text-sm font-bold text-white transition-all hover:opacity-90"
+            >
+              <Icon name="instagram" className="h-4 w-4" />
+              {CONTACT_INFO.instagram}
+            </a>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className={cx("text-xs", isDark ? "text-brand-soft/60" : "text-brand-muted/60")}>
+            Señas a Voces Academy · v0.1.0 · Hecho con <Icon name="heart" className="inline h-3 w-3 text-brand-orange" /> para la comunidad sorda de México
+          </p>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function HelpPage({ isDark, navigate }) {
+  const [openFaq, setOpenFaq] = useState(null);
+  const [openTrouble, setOpenTrouble] = useState(null);
+
+  return (
+    <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
+        {/* Back button */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          className={cx(
+            "btn-press group flex items-center gap-2 text-sm font-medium transition-all duration-200",
+            isDark ? "text-brand-soft hover:text-white" : "text-brand-muted hover:text-brand-ink"
+          )}
+        >
+          <Icon name="arrow" className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-1" />
+          Volver al inicio
+        </button>
+
+        {/* Header */}
+        <div className="mb-8 mt-4">
+          <div className="mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">— Centro de ayuda</span>
+          </div>
+          <h1 className={cx("font-display text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
+            ¿Cómo podemos <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>ayudarte?</span>
+          </h1>
+          <p className={cx("mt-2 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>
+            Encuentra respuestas, soluciona problemas y conoce más sobre la Lengua de Señas Mexicana.
+          </p>
+        </div>
+
+        {/* Quick contact card */}
+        <div className={cx(
+          "mb-8 rounded-3xl border p-6 backdrop-blur-xl sm:p-8",
+          isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+        )}>
+          <h2 className={cx("mb-4 font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+            Contacto directo
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {/* Email */}
+            <a
+              href={`mailto:${CONTACT_INFO.email}`}
+              className={cx(
+                "btn-press flex items-center gap-3 rounded-2xl border p-4 transition-all hover:scale-[1.02]",
+                isDark ? "border-brand-line/30 bg-brand-deep/50 hover:bg-brand-deep/80" : "border-brand-mist/30 bg-brand-cream/50 hover:bg-brand-cream/80"
+              )}
+            >
+              <div className={cx("flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl", isDark ? "bg-brand-cyan/20" : "bg-brand-teal/15")}>
+                <Icon name="mail" className={cx("h-5 w-5", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+              </div>
+              <div className="min-w-0">
+                <div className={cx("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Email</div>
+                <div className={cx("truncate text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{CONTACT_INFO.email}</div>
+              </div>
+            </a>
+
+            {/* WhatsApp */}
+            <a
+              href={CONTACT_INFO.whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cx(
+                "btn-press flex items-center gap-3 rounded-2xl border p-4 transition-all hover:scale-[1.02]",
+                isDark ? "border-brand-line/30 bg-brand-deep/50 hover:bg-brand-deep/80" : "border-brand-mist/30 bg-brand-cream/50 hover:bg-brand-cream/80"
+              )}
+            >
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-green-500/15">
+                <svg className="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm5.8 14.16c-.24.68-1.42 1.31-1.96 1.36-.5.05-1.13.07-1.83-.11-.42-.13-.96-.31-1.66-.61-2.92-1.26-4.83-4.19-4.97-4.38-.15-.19-1.2-1.59-1.2-3.03s.75-2.15 1.02-2.44c.27-.29.58-.36.78-.36.19 0 .39 0 .56.01.18.01.42-.07.66.5.24.58.82 2.01.89 2.16.07.15.12.32.02.51-.09.19-.14.31-.28.48-.14.17-.29.38-.42.51-.14.14-.28.29-.12.56.16.27.72 1.19 1.55 1.93 1.06.95 1.96 1.24 2.23 1.38.27.14.43.12.59-.07.16-.19.68-.79.86-1.06.18-.27.36-.22.61-.13.24.09 1.55.73 1.81.86.27.13.44.2.51.31.07.12.07.68-.17 1.36z" /></svg>
+              </div>
+              <div className="min-w-0">
+                <div className={cx("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>WhatsApp</div>
+                <div className={cx("truncate text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{CONTACT_INFO.whatsapp}</div>
+              </div>
+            </a>
+
+            {/* Instagram */}
+            <a
+              href={CONTACT_INFO.instagramLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cx(
+                "btn-press flex items-center gap-3 rounded-2xl border p-4 transition-all hover:scale-[1.02]",
+                isDark ? "border-brand-line/30 bg-brand-deep/50 hover:bg-brand-deep/80" : "border-brand-mist/30 bg-brand-cream/50 hover:bg-brand-cream/80"
+              )}
+            >
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20">
+                <Icon name="instagram" className="h-5 w-5 text-pink-500" />
+              </div>
+              <div className="min-w-0">
+                <div className={cx("text-[10px] font-bold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Instagram</div>
+                <div className={cx("truncate text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{CONTACT_INFO.instagram}</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <div className={cx("flex h-8 w-8 items-center justify-center rounded-lg", isDark ? "bg-brand-card" : "bg-brand-cream")}>
+              <Icon name="help" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+              Preguntas frecuentes
+            </h2>
+          </div>
+          <div className="space-y-2">
+            {FAQ_ITEMS.map((item, i) => (
+              <div
+                key={i}
+                className={cx(
+                  "overflow-hidden rounded-2xl border transition-all",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className={cx(
+                    "flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors",
+                    isDark ? "hover:bg-brand-deep/30" : "hover:bg-brand-cream/30"
+                  )}
+                >
+                  <span className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{item.q}</span>
+                  <Icon
+                    name="chevron"
+                    className={cx(
+                      "h-4 w-4 flex-shrink-0 transition-transform duration-200",
+                      openFaq === i && "rotate-180",
+                      isDark ? "text-brand-cyan" : "text-brand-teal"
+                    )}
+                  />
+                </button>
+                {openFaq === i && (
+                  <div className={cx("px-5 pb-4 text-sm leading-relaxed animate-fade", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                    {item.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Troubleshooting Section */}
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <div className={cx("flex h-8 w-8 items-center justify-center rounded-lg", isDark ? "bg-brand-card" : "bg-brand-cream")}>
+              <Icon name="settings" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+              Solución de problemas
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {TROUBLESHOOTING_ITEMS.map((item, i) => (
+              <div
+                key={i}
+                className={cx(
+                  "overflow-hidden rounded-2xl border transition-all",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <button
+                  onClick={() => setOpenTrouble(openTrouble === i ? null : i)}
+                  className={cx(
+                    "flex w-full items-center justify-between gap-3 px-5 py-4 text-left transition-colors",
+                    isDark ? "hover:bg-brand-deep/30" : "hover:bg-brand-cream/30"
+                  )}
+                >
+                  <span className={cx("text-sm font-bold", isDark ? "text-white" : "text-brand-ink")}>{item.title}</span>
+                  <Icon
+                    name="chevron"
+                    className={cx(
+                      "h-4 w-4 flex-shrink-0 transition-transform duration-200",
+                      openTrouble === i && "rotate-180",
+                      isDark ? "text-brand-cyan" : "text-brand-teal"
+                    )}
+                  />
+                </button>
+                {openTrouble === i && (
+                  <div className="px-5 pb-4 animate-fade">
+                    <ol className="space-y-2">
+                      {item.steps.map((step, j) => (
+                        <li key={j} className="flex gap-3 text-sm leading-relaxed">
+                          <span className={cx(
+                            "flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
+                            isDark ? "bg-brand-cyan/20 text-brand-cyan" : "bg-brand-teal/15 text-brand-teal"
+                          )}>
+                            {j + 1}
+                          </span>
+                          <span className={cx(isDark ? "text-brand-soft" : "text-brand-muted")}>{step}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* About LSM Section */}
+        <section className="mb-8">
+          <div className="mb-4 flex items-center gap-2">
+            <div className={cx("flex h-8 w-8 items-center justify-center rounded-lg", isDark ? "bg-brand-card" : "bg-brand-cream")}>
+              <Icon name="sparkles" className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+            </div>
+            <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+              Sobre la Lengua de Señas Mexicana
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {LSM_FACTS.map((fact, i) => (
+              <div
+                key={i}
+                className={cx(
+                  "rounded-2xl border p-5 backdrop-blur-xl transition-all hover:scale-[1.02]",
+                  isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+                )}
+              >
+                <div className={cx(
+                  "mb-3 flex h-10 w-10 items-center justify-center rounded-xl",
+                  isDark ? "bg-brand-cyan/15" : "bg-brand-teal/10"
+                )}>
+                  <Icon name={fact.icon} className={cx("h-5 w-5", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+                </div>
+                <h3 className={cx("text-sm font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{fact.title}</h3>
+                <p className={cx("mt-1.5 text-xs leading-relaxed", isDark ? "text-brand-soft" : "text-brand-muted")}>{fact.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Footer note */}
+        <div className={cx(
+          "rounded-2xl border p-5 text-center",
+          isDark ? "border-brand-line/20 bg-brand-card/30" : "border-brand-mist/20 bg-white/30"
+        )}>
+          <p className={cx("text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>
+            ¿No encuentras lo que buscas? Escríbenos a <a href={`mailto:${CONTACT_INFO.email}`} className="font-bold text-brand-orange hover:underline">{CONTACT_INFO.email}</a> y te responderemos a la brevedad.
+          </p>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+const TIER_STYLES = {
+  bronze: {
+    glow: 'shadow-[0_0_20px_rgba(205,127,50,0.4)]',
+    ring: 'ring-[#CD7F32]',
+    bg: 'bg-gradient-to-br from-[#CD7F32]/20 to-[#8B5A2B]/10',
+    text: 'text-[#CD7F32]',
+    label: 'Bronce',
+  },
+  silver: {
+    glow: 'shadow-[0_0_20px_rgba(192,192,192,0.4)]',
+    ring: 'ring-[#C0C0C0]',
+    bg: 'bg-gradient-to-br from-[#C0C0C0]/20 to-[#808080]/10',
+    text: 'text-[#A8A8A8]',
+    label: 'Plata',
+  },
+  gold: {
+    glow: 'shadow-[0_0_24px_rgba(255,215,0,0.5)]',
+    ring: 'ring-[#FFD700]',
+    bg: 'bg-gradient-to-br from-[#FFD700]/25 to-[#DAA520]/10',
+    text: 'text-[#FFD700]',
+    label: 'Oro',
+  },
+};
+
+function AchievementsPage({ isDark, navigate }) {
+  const { user, userProgress, moduleProgress } = useAuth();
+  const [achievements, setAchievements] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadAchievements = async () => {
+      if (!user?.id) return;
+      setLoading(true);
+      const totalModules = modules.length;
+      const s = await getAchievementStats(user.id, userProgress, moduleProgress, totalModules);
+      if (cancelled) return;
+      setStats(s);
+      setAchievements(evaluateAchievements(s));
+      setLoading(false);
+    };
+    loadAchievements();
+    return () => { cancelled = true; };
+  }, [user?.id, userProgress, moduleProgress]);
+
+  const unlockedCount = achievements.filter(a => a.unlocked).length;
+  const totalCount = achievements.length;
+  const progressPct = totalCount > 0 ? Math.round((unlockedCount / totalCount) * 100) : 0;
+
+  // Group achievements by category (based on icon)
+  const categories = [
+    { key: 'flame',  title: 'Rachas',         icon: 'flame',  items: achievements.filter(a => a.icon === 'flame') },
+    { key: 'book',   title: 'Vocabulario',    icon: 'book',   items: achievements.filter(a => a.icon === 'book') },
+    { key: 'trophy', title: 'Módulos',        icon: 'trophy', items: achievements.filter(a => a.icon === 'trophy') },
+    { key: 'target', title: 'Precisión',      icon: 'target', items: achievements.filter(a => a.icon === 'target') },
+    { key: 'check',  title: 'Constancia',     icon: 'check',  items: achievements.filter(a => a.icon === 'check') },
+    { key: 'chart',  title: 'Tiempo',         icon: 'chart',  items: achievements.filter(a => a.icon === 'chart') },
+  ];
+
+  return (
+    <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+        {/* Back button */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          className={cx(
+            "btn-press group flex items-center gap-2 text-sm font-medium transition-all duration-200",
+            isDark ? "text-brand-soft hover:text-white" : "text-brand-muted hover:text-brand-ink"
+          )}
+        >
+          <Icon name="arrow" className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-1" />
+          Volver al inicio
+        </button>
+
+        {/* Header */}
+        <div className="mb-8 mt-4">
+          <div className="mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">— Logros</span>
+          </div>
+          <h1 className={cx("font-display text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
+            Insignias y <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>desafíos</span>
+          </h1>
+          <p className={cx("mt-2 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>
+            Supera retos, mantén tu racha y desbloquea insignias mientras aprendes LSM.
+          </p>
+        </div>
+
+        {/* Progress summary card */}
+        <div className={cx(
+          "mb-8 rounded-3xl border p-6 backdrop-blur-xl sm:p-8",
+          isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+        )}>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-baseline gap-2">
+                <span className={cx("font-display text-4xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+                  {unlockedCount}
+                </span>
+                <span className={cx("text-lg font-bold", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                  / {totalCount}
+                </span>
+                <span className={cx("ml-2 text-sm font-semibold", isDark ? "text-brand-cyan" : "text-brand-teal")}>
+                  {progressPct}% completado
+                </span>
+              </div>
+              <p className={cx("mt-1 text-xs", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                {unlockedCount === 0 ? '¡Empieza a practicar para desbloquear tu primera insignia!' :
+                 unlockedCount < 5 ? '¡Vas por buen camino! Sigue practicando.' :
+                 unlockedCount < 10 ? '¡Excelente progreso! Cada vez más cerca del oro.' :
+                 '¡Eres un maestro del lenguaje de señas! 🏆'}
+              </p>
+            </div>
+            {/* Progress ring */}
+            <div className="relative h-20 w-20 flex-shrink-0">
+              <svg className="h-full w-full -rotate-90" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="34" fill="none" stroke={isDark ? "rgba(92,196,214,0.15)" : "rgba(13,92,111,0.12)"} strokeWidth="6" />
+                <circle
+                  cx="40" cy="40" r="34" fill="none"
+                  stroke={isDark ? "#2aabb8" : "#0d5c6f"}
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 34}
+                  strokeDashoffset={2 * Math.PI * 34 * (1 - progressPct / 100)}
+                  className="transition-all duration-700"
+                />
+              </svg>
+              <div className={cx("absolute inset-0 flex items-center justify-center text-sm font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+                {progressPct}%
+              </div>
+            </div>
+          </div>
+
+          {/* Quick stats */}
+          {stats && !loading && (
+            <div className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-6">
+              {[
+                { label: 'Racha', value: `${stats.streakDays}d`, icon: 'flame' },
+                { label: 'Señas', value: stats.totalSigns, icon: 'book' },
+                { label: 'Módulos', value: `${stats.modulesCompleted}/${stats.totalModules}`, icon: 'trophy' },
+                { label: 'Precisión', value: `${Math.round(stats.avgAccuracy * 100)}%`, icon: 'target' },
+                { label: 'Días', value: stats.practiceDays, icon: 'check' },
+                { label: 'Tiempo', value: `${Math.round(stats.totalPracticeTime / 60)}m`, icon: 'chart' },
+              ].map((s) => (
+                <div key={s.label} className={cx("rounded-xl p-2.5 text-center", isDark ? "bg-brand-deep/50" : "bg-brand-cream/50")}>
+                  <Icon name={s.icon} className={cx("mx-auto mb-1 h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+                  <div className={cx("text-sm font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{s.value}</div>
+                  <div className={cx("text-[9px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Achievement categories */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-teal border-t-transparent"></div>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {categories.map((cat) => cat.items.length > 0 && (
+              <section key={cat.key}>
+                {/* Category header */}
+                <div className="mb-4 flex items-center gap-2">
+                  <div className={cx(
+                    "flex h-8 w-8 items-center justify-center rounded-lg",
+                    isDark ? "bg-brand-card" : "bg-brand-cream"
+                  )}>
+                    <Icon name={cat.icon} className={cx("h-4 w-4", isDark ? "text-brand-cyan" : "text-brand-teal")} />
+                  </div>
+                  <h2 className={cx("font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+                    {cat.title}
+                  </h2>
+                  <span className={cx("text-xs font-semibold", isDark ? "text-brand-soft" : "text-brand-muted")}>
+                    {cat.items.filter(a => a.unlocked).length}/{cat.items.length}
+                  </span>
+                </div>
+
+                {/* Badge grid */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {cat.items.map((achievement) => {
+                    const tier = TIER_STYLES[achievement.tier] || TIER_STYLES.bronze;
+                    return (
+                      <div
+                        key={achievement.id}
+                        className={cx(
+                          "relative overflow-hidden rounded-2xl border p-5 transition-all duration-300",
+                          achievement.unlocked
+                            ? cx("border-transparent ring-2", tier.ring, tier.glow, isDark ? "bg-brand-card/80" : "bg-white/80")
+                            : cx("border-dashed", isDark ? "border-brand-line/40 bg-brand-card/20" : "border-brand-mist/40 bg-white/20")
+                        )}
+                      >
+                        {/* Tier badge */}
+                        <div className={cx(
+                          "absolute right-3 top-3 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                          achievement.unlocked
+                            ? cx(tier.bg, tier.text)
+                            : (isDark ? "bg-brand-deep/50 text-brand-soft/40" : "bg-brand-cream/50 text-brand-muted/40")
+                        )}>
+                          {tier.label}
+                        </div>
+
+                        <div className="flex items-start gap-4">
+                          {/* Icon */}
+                          <div className={cx(
+                            "flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl transition-all",
+                            achievement.unlocked
+                              ? cx(tier.bg, "ring-2", tier.ring)
+                              : (isDark ? "bg-brand-deep/50" : "bg-brand-cream/50")
+                          )}>
+                            <Icon
+                              name={achievement.icon}
+                              className={cx(
+                                "h-7 w-7",
+                                achievement.unlocked ? tier.text : (isDark ? "text-brand-soft/30" : "text-brand-muted/30")
+                              )}
+                            />
+                          </div>
+
+                          {/* Text */}
+                          <div className="flex-1 pt-0.5">
+                            <h3 className={cx(
+                              "text-sm font-extrabold",
+                              achievement.unlocked
+                                ? (isDark ? "text-white" : "text-brand-ink")
+                                : (isDark ? "text-brand-soft/50" : "text-brand-muted/50")
+                            )}>
+                              {achievement.title}
+                            </h3>
+                            <p className={cx(
+                              "mt-1 text-xs leading-snug",
+                              achievement.unlocked
+                                ? (isDark ? "text-brand-soft" : "text-brand-muted")
+                                : (isDark ? "text-brand-soft/40" : "text-brand-muted/40")
+                            )}>
+                              {achievement.desc}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Status footer */}
+                        <div className={cx(
+                          "mt-4 flex items-center gap-1.5 border-t pt-3 text-xs font-bold",
+                          achievement.unlocked ? "border-green-500/20 text-green-500" : (isDark ? "border-brand-line/30 text-brand-soft/40" : "border-brand-mist/30 text-brand-muted/40")
+                        )}>
+                          {achievement.unlocked ? (
+                            <>
+                              <Icon name="check" className="h-3.5 w-3.5" />
+                              Desbloqueada
+                            </>
+                          ) : (
+                            <>
+                              <Icon name="lock" className="h-3.5 w-3.5" />
+                              Bloqueada
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function ProfilePage({ isDark, navigate }) {
+  const { user, profile, userProgress, moduleProgress, updateProfile } = useAuth();
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedMsg, setSavedMsg] = useState(false);
+  const [formData, setFormData] = useState({
+    full_name: profile?.full_name || "",
+    avatar_initials: profile?.avatar_initials || "",
+  });
+
+  // Sync form when profile loads/changes
+  useEffect(() => {
+    setFormData({
+      full_name: profile?.full_name || "",
+      avatar_initials: profile?.avatar_initials || "",
+    });
+  }, [profile]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const updates = {};
+    if (formData.full_name !== profile?.full_name) updates.full_name = formData.full_name;
+    if (formData.avatar_initials !== profile?.avatar_initials) {
+      // Ensure initials are max 2 chars, uppercase
+      updates.avatar_initials = formData.avatar_initials.substring(0, 2).toUpperCase();
+    }
+    if (Object.keys(updates).length === 0) {
+      setEditing(false);
+      setSaving(false);
+      return;
+    }
+    await updateProfile(updates);
+    setSaving(false);
+    setEditing(false);
+    setSavedMsg(true);
+    setTimeout(() => setSavedMsg(false), 2500);
+  };
+
+  const userInitials = formData.avatar_initials || formData.full_name?.substring(0, 2).toUpperCase() || "US";
+  const userEmail = profile?.email || user?.email || "";
+  const createdAt = profile?.created_at || user?.created_at;
+  const memberSince = createdAt ? new Date(createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'long' }) : '';
+
+  // Stats
+  const totalSigns = userProgress?.total_signs_learned || 0;
+  const streakDays = userProgress?.streak_days || 0;
+  const practiceDays = userProgress?.practice_days || 0;
+  const avgAccuracy = userProgress?.average_accuracy || 0;
+  const modulesCompleted = moduleProgress?.filter(mp => (mp.signs_completed || 0) >= (mp.total_signs || 0)).length || 0;
+
+  return (
+    <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
+        {/* Back button */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          className={cx(
+            "btn-press group flex items-center gap-2 text-sm font-medium transition-all duration-200",
+            isDark ? "text-brand-soft hover:text-white" : "text-brand-muted hover:text-brand-ink"
+          )}
+        >
+          <Icon name="arrow" className="h-4 w-4 rotate-180 transition-transform group-hover:-translate-x-1" />
+          Volver al inicio
+        </button>
+
+        {/* Header */}
+        <div className="mb-8 mt-4">
+          <div className="mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8C4A27]">— Mi perfil</span>
+          </div>
+          <h1 className={cx("font-display text-3xl font-extrabold sm:text-4xl", isDark ? "text-white" : "text-brand-ink")}>
+            Datos <span className={isDark ? "text-brand-cyan" : "text-brand-teal"}>personales</span>
+          </h1>
+        </div>
+
+        {/* Profile card */}
+        <div className={cx(
+          "rounded-3xl border p-6 backdrop-blur-xl sm:p-8",
+          isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+        )}>
+          {/* Avatar + info */}
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+            <div className={cx(
+              "flex h-24 w-24 items-center justify-center rounded-3xl text-2xl font-extrabold shadow-lg",
+              isDark ? "bg-brand-cyan text-brand-deep" : "bg-brand-teal text-white"
+            )}>
+              {userInitials}
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              {editing ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className={cx("mb-1 block text-xs font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Nombre completo</label>
+                    <input
+                      type="text"
+                      value={formData.full_name}
+                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                      className={cx(
+                        "input-focus-ring w-full rounded-xl border px-4 py-2.5 text-sm font-semibold",
+                        isDark ? "border-brand-line bg-brand-deep text-white" : "border-brand-mist bg-white text-brand-ink"
+                      )}
+                      placeholder="Tu nombre"
+                    />
+                  </div>
+                  <div>
+                    <label className={cx("mb-1 block text-xs font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Iniciales del avatar (máx. 2)</label>
+                    <input
+                      type="text"
+                      maxLength={2}
+                      value={formData.avatar_initials}
+                      onChange={(e) => setFormData({ ...formData, avatar_initials: e.target.value.toUpperCase() })}
+                      className={cx(
+                        "input-focus-ring w-20 rounded-xl border px-4 py-2.5 text-center text-sm font-bold uppercase",
+                        isDark ? "border-brand-line bg-brand-deep text-white" : "border-brand-mist bg-white text-brand-ink"
+                      )}
+                      placeholder="US"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <h2 className={cx("font-display text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+                    {profile?.full_name || "Usuario"}
+                  </h2>
+                  <p className={cx("mt-1 text-sm", isDark ? "text-brand-soft" : "text-brand-muted")}>{userEmail}</p>
+                  {memberSince && (
+                    <p className={cx("mt-1 text-xs", isDark ? "text-brand-soft/60" : "text-brand-muted/60")}>
+                      Miembro desde {memberSince}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+            {/* Edit / Save buttons */}
+            <div className="flex gap-2">
+              {editing ? (
+                <>
+                  <button
+                    onClick={() => {
+                      setFormData({
+                        full_name: profile?.full_name || "",
+                        avatar_initials: profile?.avatar_initials || "",
+                      });
+                      setEditing(false);
+                    }}
+                    className={cx(
+                      "btn-press rounded-xl px-4 py-2 text-xs font-bold transition-all",
+                      isDark ? "bg-brand-card text-brand-soft hover:bg-brand-card/80" : "bg-brand-cream text-brand-muted hover:bg-brand-cream/80"
+                    )}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="btn-press rounded-xl bg-brand-orange px-4 py-2 text-xs font-bold text-white transition-all hover:bg-brand-orange/90 disabled:opacity-50"
+                  >
+                    {saving ? "Guardando..." : "Guardar"}
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setEditing(true)}
+                  className={cx(
+                    "btn-press flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition-all",
+                    isDark ? "bg-brand-card text-brand-cyan hover:bg-brand-card/80" : "bg-brand-cream text-brand-teal hover:bg-brand-cream/80"
+                  )}
+                >
+                  <Icon name="settings" className="h-3.5 w-3.5" />
+                  Editar
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Saved message */}
+          {savedMsg && (
+            <div className="mt-4 flex items-center gap-2 rounded-xl bg-green-500/15 px-4 py-2.5 text-sm font-semibold text-green-500">
+              <Icon name="check" className="h-4 w-4" />
+              Perfil actualizado correctamente
+            </div>
+          )}
+        </div>
+
+        {/* Stats grid */}
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            { label: "Señas aprendidas", value: totalSigns, icon: "book", color: "text-brand-teal" },
+            { label: "Días de racha", value: streakDays, icon: "flame", color: "text-brand-orange" },
+            { label: "Días practicados", value: practiceDays, icon: "check", color: "text-green-500" },
+            { label: "Módulos completados", value: modulesCompleted, icon: "trophy", color: "text-yellow-500" },
+          ].map((stat) => (
+            <div key={stat.label} className={cx(
+              "rounded-2xl border p-4 text-center backdrop-blur-xl",
+              isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+            )}>
+              <div className={cx("mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl", isDark ? "bg-brand-deep" : "bg-brand-cream")}>
+                <Icon name={stat.icon} className={cx("h-5 w-5", stat.color)} />
+              </div>
+              <div className={cx("text-2xl font-extrabold", isDark ? "text-white" : "text-brand-ink")}>{stat.value}</div>
+              <div className={cx("mt-0.5 text-[10px] font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Account info */}
+        <div className={cx(
+          "mt-6 rounded-3xl border p-6 backdrop-blur-xl sm:p-8",
+          isDark ? "border-brand-line/30 bg-brand-card/50" : "border-brand-mist/30 bg-white/50"
+        )}>
+          <h3 className={cx("mb-4 font-display text-lg font-extrabold", isDark ? "text-white" : "text-brand-ink")}>
+            Información de cuenta
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between border-b border-dashed pb-3" style={{ borderColor: isDark ? 'rgba(92,196,214,0.15)' : 'rgba(13,92,111,0.12)' }}>
+              <span className={cx("text-xs font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Email</span>
+              <span className={cx("text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{userEmail}</span>
+            </div>
+            <div className="flex items-center justify-between border-b border-dashed pb-3" style={{ borderColor: isDark ? 'rgba(92,196,214,0.15)' : 'rgba(13,92,111,0.12)' }}>
+              <span className={cx("text-xs font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Precisión promedio</span>
+              <span className={cx("text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>{Math.round(avgAccuracy * 100)}%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className={cx("text-xs font-semibold uppercase tracking-wider", isDark ? "text-brand-soft" : "text-brand-muted")}>Tiempo total de práctica</span>
+              <span className={cx("text-sm font-semibold", isDark ? "text-white" : "text-brand-ink")}>
+                {Math.round((userProgress?.total_practice_time || 0) / 60)} min
+              </span>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
@@ -3698,6 +4982,42 @@ function App() {
   
   if (path === "/lesson") {
     return <LessonPage isDark={isDark} navigate={navigate} />;
+  }
+
+  if (path === "/profile") {
+    return (
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
+        <ProfilePage isDark={isDark} navigate={navigate} />
+      </div>
+    );
+  }
+
+  if (path === "/achievements") {
+    return (
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
+        <AchievementsPage isDark={isDark} navigate={navigate} />
+      </div>
+    );
+  }
+
+  if (path === "/help") {
+    return (
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
+        <HelpPage isDark={isDark} navigate={navigate} />
+      </div>
+    );
+  }
+
+  if (path === "/about") {
+    return (
+      <div className={cx("min-h-screen transition-colors", isDark ? "bg-brand-deep" : "bg-[#F8F5EE]")}>
+        <AppHeader isDark={isDark} setIsDark={setIsDark} navigate={navigate} path={path} fontScale={fontScale} setFontScale={setFontScale} />
+        <AboutPage isDark={isDark} navigate={navigate} />
+      </div>
+    );
   }
 
   return (
